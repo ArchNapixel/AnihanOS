@@ -1,0 +1,74 @@
+.crop-mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.crop-mode-toggle button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.crop-mode-toggle button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.crop-mode-toggle button.active {
+  background: var(--color-primary);
+  color: #f5f0e2;
+}
+
+.stage-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.stage-row input:first-child {
+  flex: 2;
+}
+
+.stage-row input:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.stage-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.stage-row input,
+.stage-row select {
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.stage-row-remove {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 6px;
+}
+
+.stage-row-remove:disabled {
+  opacity: 0.3;
+  cursor: default;
+}

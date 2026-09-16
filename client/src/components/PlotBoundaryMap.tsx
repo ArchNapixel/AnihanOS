@@ -23,9 +23,16 @@ function PlotBoundaryMap({ value, onChange, readOnly = false }: PlotBoundaryMapP
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    const container = containerRef.current
+    if (!container) return
 
-    const map = L.map(containerRef.current).setView(PHILIPPINES_CENTER, DEFAULT_ZOOM)
+    // React StrictMode double-invokes effects in dev mode; guard against a
+    // leftover Leaflet instance from the first invocation still owning this node.
+    if ((container as unknown as { _leaflet_id?: number })._leaflet_id) {
+      return
+    }
+
+    const map = L.map(container).setView(PHILIPPINES_CENTER, DEFAULT_ZOOM)
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',

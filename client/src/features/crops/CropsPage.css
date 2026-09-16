@@ -1,0 +1,107 @@
+.crops-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.crops-header h1 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.crops-error {
+  color: var(--color-error);
+  margin-bottom: 16px;
+}
+
+.crops-empty {
+  color: var(--color-text-muted);
+}
+
+.crops-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.crops-filter label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.crops-filter select {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.cycle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.cycle-card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.cycle-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.cycle-card-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.cycle-status {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.cycle-status-harvested {
+  background: rgba(85, 100, 60, 0.2);
+  color: var(--color-primary);
+}
+
+.cycle-status-growing {
+  background: var(--color-alert-bg);
+  color: var(--color-alert-fg);
+}
+
+.cycle-plot-name {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.cycle-card p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.cycle-stage {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.cycle-card .btn-outline {
+  margin-top: 12px;
+}

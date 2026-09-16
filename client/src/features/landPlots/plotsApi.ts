@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
+import { getOrCreateDefaultFarm } from '../../lib/farmApi'
 
 export type Plot = {
   id: string
@@ -24,37 +25,8 @@ export type PlotInput = {
   boundary: GeoJSON.Polygon | null
 }
 
-async function getOrCreateDefaultFarm(): Promise<string> {
-  const { data: userData, error: userError } = await supabase.auth.getUser()
-  if (userError || !userData.user) {
-    throw new Error('Not authenticated')
-  }
-
-  const { data: existingFarms, error: farmsError } = await supabase
-    .from('farms')
-    .select('id')
-    .eq('owner_id', userData.user.id)
-    .limit(1)
-
-  if (farmsError) throw farmsError
-
-  if (existingFarms && existingFarms.length > 0) {
-    return existingFarms[0].id
-  }
-
-  const { data: newFarm, error: createError } = await supabase
-    .from('farms')
-    .insert({ owner_id: userData.user.id, name: 'My Farm' })
-    .select('id')
-    .single()
-
-  if (createError) throw createError
-
-  return newFarm.id
-}
-
 export async function listPlots(): Promise<Plot[]> {
-  const farmId = await getOrCreateDefaultFarm()
+  const { id: farmId } = await getOrCreateDefaultFarm()
 
   const { data, error } = await supabase
     .from('plots')
@@ -67,7 +39,7 @@ export async function listPlots(): Promise<Plot[]> {
 }
 
 export async function createPlot(input: PlotInput): Promise<Plot> {
-  const farmId = await getOrCreateDefaultFarm()
+  const { id: farmId } = await getOrCreateDefaultFarm()
 
   const { data, error } = await supabase
     .from('plots')

@@ -7,6 +7,7 @@ import AppLayout from './components/AppLayout'
 import ComingSoonPage from './components/ComingSoonPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import LandPlotsPage from './features/landPlots/LandPlotsPage'
+import CropsPage from './features/crops/CropsPage'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -40,7 +41,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/land-plots" element={<LandPlotsPage />} />
-          <Route path="/crops" element={<ComingSoonPage title="Crop Inventory & Lifecycle" />} />
+          <Route path="/crops" element={<CropsPage />} />
           <Route path="/inputs" element={<ComingSoonPage title="Fertilizer/Input Management" />} />
           <Route path="/livestock" element={<ComingSoonPage title="Livestock/Poultry Management" />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

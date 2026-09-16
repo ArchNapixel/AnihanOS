@@ -1,47 +1,47 @@
 import { NavLink } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import LeafIcon from './LeafIcon'
-import './Sidebar.css'
+import './TopNav.css'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/land-plots', label: 'Land & Plot' },
+  { to: '/land-plots', label: 'Plots' },
   { to: '/crops', label: 'Crops' },
   { to: '/inputs', label: 'Inputs' },
   { to: '/livestock', label: 'Livestock' },
 ]
 
-function Sidebar() {
+function TopNav() {
   const handleLogout = () => {
     supabase.auth.signOut()
   }
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <span className="sidebar-brand-icon">
+    <header className="top-nav">
+      <div className="top-nav-brand">
+        <span className="top-nav-brand-icon">
           <LeafIcon size={18} />
         </span>
-        <span className="sidebar-brand-name">AnihanOS</span>
+        <span className="top-nav-brand-name">AnihanOS</span>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="top-nav-links">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
-            className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+            className={({ isActive }) => `top-nav-link${isActive ? ' active' : ''}`}
           >
             {item.label}
           </NavLink>
         ))}
       </nav>
 
-      <button type="button" className="sidebar-logout" onClick={handleLogout}>
+      <button type="button" className="top-nav-logout" onClick={handleLogout}>
         Log out
       </button>
-    </aside>
+    </header>
   )
 }
 
-export default Sidebar
+export default TopNav
