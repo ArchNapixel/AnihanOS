@@ -1,0 +1,32 @@
+.modal-field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.modal-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.modal-field input,
+.modal-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.modal-field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-field-row .modal-field {
+  flex: 1;
+}

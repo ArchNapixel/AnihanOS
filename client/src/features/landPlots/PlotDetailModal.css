@@ -1,0 +1,19 @@
+.plot-detail-list {
+  margin: 20px 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.plot-detail-list dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.plot-detail-list dd {
+  margin: 0;
+  font-size: 15px;
+}

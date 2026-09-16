@@ -1,0 +1,60 @@
+.land-plots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.land-plots-header h1 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.land-plots-error {
+  color: var(--color-error);
+  margin-bottom: 16px;
+}
+
+.land-plots-empty {
+  color: var(--color-text-muted);
+}
+
+.plot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.plot-card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.plot-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.plot-card p {
+  margin: 4px 0;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.plot-card-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.plot-card-actions button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+}
