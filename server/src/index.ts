@@ -1,14 +1,12 @@
+import './env.js'
 import express from 'express'
 import cors from 'cors'
-import dotenv from 'dotenv'
 import farmsRouter from './routes/farms.js'
 import plotsRouter from './routes/plots.js'
 import cropCyclesRouter from './routes/cropCycles.js'
 import inputsRouter from './routes/inputs.js'
 import livestockRouter from './routes/livestock.js'
 import dashboardRouter from './routes/dashboard.js'
-
-dotenv.config()
 
 const app = express()
 const port = process.env.PORT ?? 4000

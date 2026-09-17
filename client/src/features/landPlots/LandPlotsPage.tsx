@@ -1,24 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import L from 'leaflet'
 import { createPlot, deletePlot, listPlots, updatePlot, type Plot, type PlotInput } from './plotsApi'
-import PlotFormModal from './PlotFormModal'
+import { fetchFarmPlotsGeoJson, type PlotFeatureCollection } from './plotsGeoJsonApi'
+import { getOrCreateDefaultFarm } from '../../lib/farmApi'
+import { polygonCentroid } from '../../lib/geo'
+import AllPlotsMap, { type AllPlotsMapHandle } from '../../components/AllPlotsMap'
+import PlotDetailsForm, { type PlotDetailsInput } from './PlotDetailsForm'
 import PlotDetailModal from './PlotDetailModal'
 import './LandPlotsPage.css'
 
+const EMPTY_COLLECTION: PlotFeatureCollection = { type: 'FeatureCollection', features: [] }
+
 function LandPlotsPage() {
+  const mapHandleRef = useRef<AllPlotsMapHandle>(null)
   const [plots, setPlots] = useState<Plot[]>([])
+  const [featureCollection, setFeatureCollection] = useState<PlotFeatureCollection>(EMPTY_COLLECTION)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [panelMode, setPanelMode] = useState<'list' | 'form'>('list')
   const [editingPlot, setEditingPlot] = useState<Plot | null>(null)
+  const [draftBoundary, setDraftBoundary] = useState<GeoJSON.Polygon | null>(null)
   const [viewingPlot, setViewingPlot] = useState<Plot | null>(null)
   const [saving, setSaving] = useState(false)
+  const [isDrawingInProgress, setIsDrawingInProgress] = useState(false)
 
-  const loadPlots = async () => {
+  const loadAll = async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await listPlots()
-      setPlots(data)
+      const farm = await getOrCreateDefaultFarm()
+      const [plotsData, geoJson] = await Promise.all([listPlots(), fetchFarmPlotsGeoJson(farm.id)])
+      setPlots(plotsData)
+      setFeatureCollection(geoJson)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load plots')
     } finally {
@@ -27,35 +41,56 @@ function LandPlotsPage() {
   }
 
   useEffect(() => {
-    loadPlots()
+    loadAll()
   }, [])
 
-  const openCreateModal = () => {
-    setEditingPlot(null)
-    setModalOpen(true)
+  const flyToPlot = (plot: Plot) => {
+    if (plot.boundary) {
+      mapHandleRef.current?.flyToBounds(L.geoJSON(plot.boundary).getBounds())
+    } else if (plot.latitude != null && plot.longitude != null) {
+      mapHandleRef.current?.flyToPoint(plot.latitude, plot.longitude)
+    }
   }
 
-  const openEditModal = (plot: Plot) => {
+  const openCreateForm = () => {
+    setEditingPlot(null)
+    setDraftBoundary(null)
+    setError(null)
+    setIsDrawingInProgress(false)
+    setPanelMode('form')
+  }
+
+  const openEditForm = (plot: Plot) => {
     setEditingPlot(plot)
-    setModalOpen(true)
+    setDraftBoundary(plot.boundary)
+    setError(null)
+    setIsDrawingInProgress(false)
+    setPanelMode('form')
+    flyToPlot(plot)
   }
 
-  const closeModal = () => {
-    setModalOpen(false)
+  const closeForm = () => {
+    setPanelMode('list')
     setEditingPlot(null)
+    setDraftBoundary(null)
+    setIsDrawingInProgress(false)
   }
 
-  const handleSave = async (input: PlotInput) => {
+  const handleSaveDetails = async (details: PlotDetailsInput) => {
     setSaving(true)
     setError(null)
     try {
-      if (editingPlot) {
-        await updatePlot(editingPlot.id, input)
-      } else {
-        await createPlot(input)
+      const centroid = draftBoundary ? polygonCentroid(draftBoundary) : null
+      const input: PlotInput = {
+        ...details,
+        boundary: draftBoundary,
+        latitude: centroid?.latitude ?? null,
+        longitude: centroid?.longitude ?? null,
       }
-      closeModal()
-      await loadPlots()
+      const saved = editingPlot ? await updatePlot(editingPlot.id, input) : await createPlot(input)
+      closeForm()
+      await loadAll()
+      flyToPlot(saved)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save plot')
     } finally {
@@ -70,55 +105,104 @@ function LandPlotsPage() {
     setError(null)
     try {
       await deletePlot(plot.id)
-      await loadPlots()
+      await loadAll()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete plot')
     }
   }
 
+  const handleMapPlotClick = (plotId: string) => {
+    if (panelMode === 'form') return
+    const match = plots.find((plot) => plot.id === plotId)
+    if (match) {
+      setViewingPlot(match)
+    }
+  }
+
   return (
-    <div className="land-plots-page">
-      <div className="land-plots-header">
-        <h1>Land & Plot Management</h1>
-        <button type="button" className="btn-primary" onClick={openCreateModal}>
-          + Add Land
-        </button>
+    <div className="plots-page">
+      <div className="plots-map-background">
+        <AllPlotsMap
+          ref={mapHandleRef}
+          featureCollection={featureCollection}
+          onPlotClick={handleMapPlotClick}
+          drawModeActive={panelMode === 'form'}
+          editingPlotId={editingPlot?.id ?? null}
+          initialBoundary={editingPlot?.boundary ?? null}
+          onBoundaryDrawn={setDraftBoundary}
+          onDrawingInProgressChange={setIsDrawingInProgress}
+        />
       </div>
 
-      {error && <p className="land-plots-error">{error}</p>}
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : plots.length === 0 ? (
-        <p className="land-plots-empty">No plots yet. Add your first one.</p>
-      ) : (
-        <div className="plot-grid">
-          {plots.map((plot) => (
-            <div className="plot-card" key={plot.id}>
-              <h2>{plot.name}</h2>
-              <p>
-                {plot.size} {plot.size_unit}
-              </p>
-              {plot.soil_type && <p>Soil: {plot.soil_type}</p>}
-              <div className="plot-card-actions">
-                <button type="button" onClick={() => setViewingPlot(plot)}>
-                  View
-                </button>
-                <button type="button" onClick={() => openEditModal(plot)}>
-                  Edit
-                </button>
-                <button type="button" onClick={() => handleDelete(plot)}>
-                  Delete
-                </button>
+      <div className="plots-panel">
+        {panelMode === 'list' ? (
+          <>
+            <div className="plots-panel-header">
+              <div>
+                <h1>Land & Plot Management</h1>
+                <p>{loading ? 'Loading...' : `${plots.length} plot${plots.length === 1 ? '' : 's'}`}</p>
               </div>
+              <Link to="/plots/schematic" className="btn-outline">
+                Schematic
+              </Link>
             </div>
-          ))}
-        </div>
-      )}
 
-      {modalOpen && (
-        <PlotFormModal initialValue={editingPlot} saving={saving} onCancel={closeModal} onSave={handleSave} />
-      )}
+            <button type="button" className="btn-primary plots-panel-add" onClick={openCreateForm}>
+              + Add Land
+            </button>
+
+            {error && <p className="plots-panel-error">{error}</p>}
+
+            <div className="plots-panel-list">
+              {loading ? (
+                <p className="plots-panel-empty">Loading...</p>
+              ) : plots.length === 0 ? (
+                <p className="plots-panel-empty">No plots yet. Add your first one.</p>
+              ) : (
+                plots.map((plot) => (
+                  <div className="plot-list-item" key={plot.id}>
+                    <button type="button" className="plot-list-button" onClick={() => flyToPlot(plot)}>
+                      <strong>{plot.name}</strong>
+                      <span>
+                        {plot.size} {plot.size_unit}
+                        {plot.municipality ? ` · ${plot.municipality}` : ''}
+                      </span>
+                    </button>
+                    <div className="plot-list-actions">
+                      <button type="button" onClick={() => setViewingPlot(plot)}>
+                        View
+                      </button>
+                      <button type="button" onClick={() => openEditForm(plot)}>
+                        Edit
+                      </button>
+                      <button type="button" onClick={() => handleDelete(plot)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="plots-panel-header">
+              <h1>{editingPlot ? 'Edit Land' : 'Add Land'}</h1>
+            </div>
+
+            {error && <p className="plots-panel-error">{error}</p>}
+
+            <PlotDetailsForm
+              initialValue={editingPlot}
+              saving={saving}
+              hasBoundary={!!draftBoundary}
+              isDrawingInProgress={isDrawingInProgress}
+              onCancel={closeForm}
+              onSave={handleSaveDetails}
+            />
+          </>
+        )}
+      </div>
 
       {viewingPlot && <PlotDetailModal plot={viewingPlot} onClose={() => setViewingPlot(null)} />}
     </div>

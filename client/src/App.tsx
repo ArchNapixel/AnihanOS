@@ -41,6 +41,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/land-plots" element={<LandPlotsPage />} />
+          <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
           <Route path="/crops" element={<CropsPage />} />
           <Route path="/inputs" element={<ComingSoonPage title="Fertilizer/Input Management" />} />
           <Route path="/livestock" element={<ComingSoonPage title="Livestock/Poultry Management" />} />

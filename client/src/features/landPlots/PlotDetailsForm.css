@@ -1,0 +1,75 @@
+.plot-details-form {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.plot-form-field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.plot-form-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.plot-form-field input,
+.plot-form-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.plot-form-field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.plot-form-field-row .plot-form-field {
+  flex: 1;
+}
+
+.plot-form-boundary-status {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 0 0 16px;
+}
+
+.plot-form-boundary-status.ready {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.plot-form-boundary-status.drawing {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.plot-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.plot-form-cancel {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}

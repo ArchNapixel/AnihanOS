@@ -10,7 +10,7 @@ function PlotDetailModal({ plot, onClose }: { plot: Plot; onClose: () => void })
         <h2>{plot.name}</h2>
 
         {plot.boundary ? (
-          <PlotBoundaryMap value={plot.boundary} readOnly />
+          <PlotBoundaryMap value={plot.boundary} />
         ) : (
           <p className="modal-hint">No boundary drawn yet — edit this land to trace its outline.</p>
         )}

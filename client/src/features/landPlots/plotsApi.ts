@@ -8,6 +8,7 @@ export type Plot = {
   size: number
   size_unit: string
   soil_type: string | null
+  municipality: string | null
   latitude: number | null
   longitude: number | null
   boundary: GeoJSON.Polygon | null
@@ -20,6 +21,7 @@ export type PlotInput = {
   size: number
   size_unit: string
   soil_type: string | null
+  municipality: string | null
   latitude: number | null
   longitude: number | null
   boundary: GeoJSON.Polygon | null

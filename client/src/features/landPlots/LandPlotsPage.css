@@ -1,60 +1,125 @@
-.land-plots-header {
+.plots-page {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.plots-map-background {
+  position: absolute;
+  inset: 0;
+  /* Explicit z-index contains Leaflet's own internal panes/controls (which
+     use z-index values well above 100) inside this stacking context, so
+     they stop leaking out and rendering above the floating panel below. */
+  z-index: 1;
+}
+
+.plots-panel {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  bottom: 24px;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  background: var(--color-bg);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.plots-panel-header {
+  display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 24px;
+  gap: 12px;
+  padding: 20px 20px 0;
 }
 
-.land-plots-header h1 {
+.plots-panel-header h1 {
   font-family: var(--font-heading);
+  font-size: 20px;
+  margin: 0 0 2px;
+}
+
+.plots-panel-header p {
   margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
 }
 
-.land-plots-error {
+.plots-panel-add {
+  margin: 16px 20px 0;
+}
+
+.plots-panel-error {
   color: var(--color-error);
-  margin-bottom: 16px;
+  margin: 12px 20px 0;
+  font-size: 13px;
 }
 
-.land-plots-empty {
+.plots-panel-empty {
   color: var(--color-text-muted);
-}
-
-.plot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.plot-card {
-  background: var(--color-surface);
-  border-radius: 16px;
-  padding: 20px;
-}
-
-.plot-card h2 {
-  margin: 0 0 8px;
-  font-size: 18px;
-}
-
-.plot-card p {
-  margin: 4px 0;
-  color: var(--color-text-muted);
+  padding: 0 20px;
   font-size: 14px;
 }
 
-.plot-card-actions {
-  margin-top: 16px;
+.plots-panel-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px 20px;
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.plot-card-actions button {
+.plot-list-item {
+  background: var(--color-surface);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.plot-list-button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  color: var(--color-text);
+}
+
+.plot-list-button strong {
+  font-size: 15px;
+}
+
+.plot-list-button span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.plot-list-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 14px;
+}
+
+.plot-list-actions button {
   background: none;
   border: none;
   color: var(--color-accent);
   font-weight: 600;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   padding: 0;
 }
