@@ -1,1 +1,1 @@
-{"root":["./src/env.ts","./src/index.ts","./src/lib/supabaseclient.ts","./src/lib/supabaseuserclient.ts","./src/routes/cropcycles.ts","./src/routes/dashboard.ts","./src/routes/farms.ts","./src/routes/inputs.ts","./src/routes/livestock.ts","./src/routes/plots.ts"],"version":"5.9.3"}
+{"root":["./src/app.ts","./src/env.ts","./src/index.ts","./src/lib/supabaseclient.ts","./src/lib/supabaseuserclient.ts","./src/routes/cropcycles.ts","./src/routes/dashboard.ts","./src/routes/farms.ts","./src/routes/inputs.ts","./src/routes/livestock.ts","./src/routes/plots.ts"],"version":"5.9.3"}

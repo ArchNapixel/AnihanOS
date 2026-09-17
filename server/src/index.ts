@@ -1,29 +1,10 @@
-import './env.js'
-import express from 'express'
-import cors from 'cors'
-import farmsRouter from './routes/farms.js'
-import plotsRouter from './routes/plots.js'
-import cropCyclesRouter from './routes/cropCycles.js'
-import inputsRouter from './routes/inputs.js'
-import livestockRouter from './routes/livestock.js'
-import dashboardRouter from './routes/dashboard.js'
+// Local dev entry point only — starts a real listening server. The
+// deployed (Vercel) entry point is server/api/[...all].ts, which imports
+// the same app.js but never calls .listen() (serverless functions don't
+// own a port; the platform invokes the app per-request instead).
+import app from './app.js'
 
-const app = express()
 const port = process.env.PORT ?? 4000
-
-app.use(cors())
-app.use(express.json())
-
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok' })
-})
-
-app.use('/api/farms', farmsRouter)
-app.use('/api/plots', plotsRouter)
-app.use('/api/crop-cycles', cropCyclesRouter)
-app.use('/api/inputs', inputsRouter)
-app.use('/api/livestock', livestockRouter)
-app.use('/api/dashboard', dashboardRouter)
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`)
