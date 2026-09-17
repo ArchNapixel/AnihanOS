@@ -48,3 +48,61 @@
   font-family: var(--font-body);
   cursor: pointer;
 }
+
+.modal-field {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.modal-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.modal-field input,
+.modal-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.modal-field-row {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-field-row .modal-field {
+  flex: 1;
+}
+
+.modal-error {
+  color: var(--color-error);
+  font-size: 13px;
+  margin: -8px 0 16px;
+}
+
+.usage-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.usage-history-table th {
+  text-align: left;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(47, 42, 31, 0.15);
+}
+
+.usage-history-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(47, 42, 31, 0.08);
+}

@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import L from 'leaflet'
 import { createPlot, deletePlot, listPlots, updatePlot, type Plot, type PlotInput } from './plotsApi'
 import { fetchFarmPlotsGeoJson, type PlotFeatureCollection } from './plotsGeoJsonApi'
 import { getOrCreateDefaultFarm } from '../../lib/farmApi'
 import { polygonCentroid } from '../../lib/geo'
+import { getCurrentStage, getProgressPercentage, type CropProgressInfo } from '../../lib/growthStage'
+import { listCropCycles } from '../crops/cropCyclesApi'
 import AllPlotsMap, { type AllPlotsMapHandle } from '../../components/AllPlotsMap'
 import PlotDetailsForm, { type PlotDetailsInput } from './PlotDetailsForm'
 import PlotDetailModal from './PlotDetailModal'
@@ -12,10 +14,40 @@ import './LandPlotsPage.css'
 
 const EMPTY_COLLECTION: PlotFeatureCollection = { type: 'FeatureCollection', features: [] }
 
+function buildCropProgressByPlotId(
+  cycles: Awaited<ReturnType<typeof listCropCycles>>,
+): Record<string, CropProgressInfo[]> {
+  const result: Record<string, CropProgressInfo[]> = {}
+
+  for (const cycle of cycles) {
+    if (cycle.status === 'harvested') continue
+
+    const stage = getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
+    const info: CropProgressInfo = {
+      cropName: cycle.crop_types.name,
+      stageName: stage.readyForHarvest ? 'Ready for harvest' : (stage.stage?.name ?? null),
+      percentage: getProgressPercentage(cycle.planting_date, cycle.expected_harvest_date),
+      plantingDate: cycle.planting_date,
+      expectedHarvestDate: cycle.expected_harvest_date,
+    }
+
+    result[cycle.plot_id] = result[cycle.plot_id] ?? []
+    result[cycle.plot_id].push(info)
+  }
+
+  for (const plotId in result) {
+    result[plotId].sort((a, b) => (a.plantingDate < b.plantingDate ? 1 : -1))
+  }
+
+  return result
+}
+
 function LandPlotsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const mapHandleRef = useRef<AllPlotsMapHandle>(null)
   const [plots, setPlots] = useState<Plot[]>([])
   const [featureCollection, setFeatureCollection] = useState<PlotFeatureCollection>(EMPTY_COLLECTION)
+  const [cropProgressByPlotId, setCropProgressByPlotId] = useState<Record<string, CropProgressInfo[]>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [panelMode, setPanelMode] = useState<'list' | 'form'>('list')
@@ -30,9 +62,14 @@ function LandPlotsPage() {
     setError(null)
     try {
       const farm = await getOrCreateDefaultFarm()
-      const [plotsData, geoJson] = await Promise.all([listPlots(), fetchFarmPlotsGeoJson(farm.id)])
+      const [plotsData, geoJson, cropCycles] = await Promise.all([
+        listPlots(),
+        fetchFarmPlotsGeoJson(farm.id),
+        listCropCycles(),
+      ])
       setPlots(plotsData)
       setFeatureCollection(geoJson)
+      setCropProgressByPlotId(buildCropProgressByPlotId(cropCycles))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load plots')
     } finally {
@@ -43,6 +80,26 @@ function LandPlotsPage() {
   useEffect(() => {
     loadAll()
   }, [])
+
+  // Deep-link support: other pages (e.g. the Dashboard) link here with
+  // ?plot=<id> to jump straight to a specific plot once it's loaded.
+  useEffect(() => {
+    const plotId = searchParams.get('plot')
+    if (!plotId || plots.length === 0) return
+
+    const match = plots.find((plot) => plot.id === plotId)
+    if (match) {
+      flyToPlot(match)
+    }
+    setSearchParams(
+      (params) => {
+        params.delete('plot')
+        return params
+      },
+      { replace: true },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plots])
 
   const flyToPlot = (plot: Plot) => {
     if (plot.boundary) {
@@ -125,6 +182,7 @@ function LandPlotsPage() {
         <AllPlotsMap
           ref={mapHandleRef}
           featureCollection={featureCollection}
+          cropProgressByPlotId={cropProgressByPlotId}
           onPlotClick={handleMapPlotClick}
           drawModeActive={panelMode === 'form'}
           editingPlotId={editingPlot?.id ?? null}

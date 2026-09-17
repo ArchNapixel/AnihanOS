@@ -84,6 +84,10 @@
   padding: 24px;
 }
 
+.plots-overview-card {
+  max-width: 420px;
+}
+
 .dashboard-card h2 {
   display: flex;
   align-items: center;
@@ -117,16 +121,25 @@
   margin: 0;
 }
 
-.mini-plot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+.mini-plot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .mini-plot-card {
+  display: block;
   background: var(--color-bg);
   border-radius: 14px;
   padding: 14px 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mini-plot-card:hover {
+  background: var(--color-surface);
 }
 
 .mini-plot-card h3 {
@@ -149,17 +162,81 @@
   gap: 10px;
 }
 
-.upcoming-harvest-list li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 13px;
+.harvest-item {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
-.upcoming-harvest-list strong {
+.harvest-item-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.harvest-item-header strong {
   font-size: 14px;
 }
 
-.upcoming-harvest-list span {
+.harvest-item-header span {
   color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.harvest-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.harvest-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+
+.harvest-progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.harvest-date {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  color: inherit;
+  font-size: 13px;
+}
+
+.alert-item strong {
+  font-size: 14px;
+}
+
+.alert-item span {
+  color: var(--color-text-muted);
+  font-size: 12px;
 }

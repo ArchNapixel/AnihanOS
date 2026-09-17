@@ -1,0 +1,67 @@
+.livestock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.livestock-header h1 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.livestock-error {
+  color: var(--color-error);
+  margin-bottom: 16px;
+}
+
+.livestock-empty {
+  color: var(--color-text-muted);
+}
+
+.livestock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.livestock-card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.livestock-card h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+}
+
+.livestock-count {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.livestock-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.livestock-card-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.livestock-card-actions button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}

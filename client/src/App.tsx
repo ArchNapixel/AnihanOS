@@ -8,6 +8,8 @@ import ComingSoonPage from './components/ComingSoonPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import LandPlotsPage from './features/landPlots/LandPlotsPage'
 import CropsPage from './features/crops/CropsPage'
+import InputsPage from './features/inputs/InputsPage'
+import LivestockPage from './features/livestock/LivestockPage'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -43,8 +45,8 @@ function App() {
           <Route path="/land-plots" element={<LandPlotsPage />} />
           <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
           <Route path="/crops" element={<CropsPage />} />
-          <Route path="/inputs" element={<ComingSoonPage title="Fertilizer/Input Management" />} />
-          <Route path="/livestock" element={<ComingSoonPage title="Livestock/Poultry Management" />} />
+          <Route path="/inputs" element={<InputsPage />} />
+          <Route path="/livestock" element={<LivestockPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

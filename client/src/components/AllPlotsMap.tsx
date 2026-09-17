@@ -6,7 +6,39 @@ import 'leaflet-draw/dist/leaflet.draw.css'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import type { PlotFeatureCollection } from '../features/landPlots/plotsGeoJsonApi'
+import type { CropProgressInfo } from '../lib/growthStage'
 import './AllPlotsMap.css'
+
+function escapeHtml(value: string): string {
+  const div = document.createElement('div')
+  div.textContent = value
+  return div.innerHTML
+}
+
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function buildCropPopupEntryHtml(info: CropProgressInfo): string {
+  const pct = info.percentage
+  const stageLabel = escapeHtml(info.stageName ?? 'Growing')
+  const cropName = escapeHtml(info.cropName)
+  const plantedLabel = formatDate(info.plantingDate)
+  const harvestLabel = info.expectedHarvestDate ? formatDate(info.expectedHarvestDate) : 'Not set'
+
+  return `
+    <div class="crop-progress-entry">
+      <strong>${cropName}</strong>
+      <div class="crop-progress-track"><div class="crop-progress-fill" style="width:${pct ?? 0}%"></div></div>
+      <div class="crop-progress-meta"><span>${stageLabel}</span><span>${pct != null ? `${pct}%` : '—'}</span></div>
+      <div class="crop-progress-dates"><span>Planted ${plantedLabel}</span><span>Est. harvest ${harvestLabel}</span></div>
+    </div>
+  `
+}
+
+function buildCropPopupHtml(infoList: CropProgressInfo[]): string {
+  return `<div class="crop-progress-popup">${infoList.map(buildCropPopupEntryHtml).join('')}</div>`
+}
 
 // Vite doesn't resolve Leaflet's default marker asset paths automatically.
 L.Marker.prototype.options.icon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow })
@@ -33,6 +65,7 @@ export type AllPlotsMapHandle = {
 
 type AllPlotsMapProps = {
   featureCollection: PlotFeatureCollection
+  cropProgressByPlotId: Record<string, CropProgressInfo[]>
   onPlotClick: (plotId: string) => void
   drawModeActive: boolean
   editingPlotId: string | null
@@ -45,6 +78,7 @@ const AllPlotsMap = forwardRef<AllPlotsMapHandle, AllPlotsMapProps>(
   (
     {
       featureCollection,
+      cropProgressByPlotId,
       onPlotClick,
       drawModeActive,
       editingPlotId,
@@ -162,14 +196,24 @@ const AllPlotsMap = forwardRef<AllPlotsMapHandle, AllPlotsMapProps>(
           fillOpacity: 0.4,
         },
         onEachFeature: (feature, layer) => {
-          const { name, area_sqm } = feature.properties as PlotFeatureCollection['features'][number]['properties']
+          const { id, name, area_sqm } = feature.properties as PlotFeatureCollection['features'][number]['properties']
           const hectares = (area_sqm / 10000).toFixed(2)
-          layer.bindTooltip(`${name} — ${hectares} ha`, {
+          layer.bindTooltip(`${escapeHtml(name)} — ${hectares} ha`, {
             permanent: true,
             direction: 'center',
             className: 'plot-map-tooltip',
           })
-          layer.on('click', () => onPlotClickRef.current(feature.properties!.id))
+          layer.on('click', () => onPlotClickRef.current(id))
+
+          const progressList = cropProgressByPlotId[id]
+          if (progressList && progressList.length > 0) {
+            layer.bindPopup(buildCropPopupHtml(progressList), {
+              className: 'crop-progress-popup-wrapper',
+              closeButton: false,
+            })
+            layer.on('mouseover', () => layer.openPopup())
+            layer.on('mouseout', () => layer.closePopup())
+          }
         },
       }).addTo(map)
 
@@ -179,7 +223,7 @@ const AllPlotsMap = forwardRef<AllPlotsMapHandle, AllPlotsMapProps>(
         map.fitBounds(geoJsonLayer.getBounds(), { padding: [32, 32] })
         hasFitBoundsRef.current = true
       }
-    }, [featureCollection, editingPlotId])
+    }, [featureCollection, editingPlotId, cropProgressByPlotId])
 
     // Draw mode: activates the polygon tool immediately (no toolbar hunting)
     // as soon as editing starts, and keeps re-arming it after each completed

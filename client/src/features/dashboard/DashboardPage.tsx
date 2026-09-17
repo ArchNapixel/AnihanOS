@@ -4,6 +4,10 @@ import { AlertTriangle, Clock, Map, Package, Sprout, Users } from 'lucide-react'
 import { getOrCreateDefaultFarm, type Farm } from '../../lib/farmApi'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
+import { getCurrentStage, getProgressPercentage } from '../../lib/growthStage'
+import { listInputStock, type InputStock } from '../inputs/inputStockApi'
+import { listLivestockGroups, type LivestockGroup } from '../livestock/livestockGroupsApi'
+import { listRecentRecordsForFarm, type LivestockRecord } from '../livestock/livestockRecordsApi'
 import './DashboardPage.css'
 
 const today = new Date().toLocaleDateString(undefined, {
@@ -13,10 +17,17 @@ const today = new Date().toLocaleDateString(undefined, {
   day: 'numeric',
 })
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 function DashboardPage() {
   const [farm, setFarm] = useState<Farm | null>(null)
   const [plots, setPlots] = useState<Plot[]>([])
   const [cycles, setCycles] = useState<CropCycle[]>([])
+  const [inputStock, setInputStock] = useState<InputStock[]>([])
+  const [livestockGroups, setLivestockGroups] = useState<LivestockGroup[]>([])
+  const [recentRecords, setRecentRecords] = useState<LivestockRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,14 +36,19 @@ function DashboardPage() {
       setLoading(true)
       setError(null)
       try {
-        const [farmData, plotsData, cyclesData] = await Promise.all([
+        const [farmData, plotsData, cyclesData, inputStockData, livestockGroupsData] = await Promise.all([
           getOrCreateDefaultFarm(),
           listPlots(),
           listCropCycles(),
+          listInputStock(),
+          listLivestockGroups(),
         ])
         setFarm(farmData)
         setPlots(plotsData)
         setCycles(cyclesData)
+        setInputStock(inputStockData)
+        setLivestockGroups(livestockGroupsData)
+        setRecentRecords(await listRecentRecordsForFarm(livestockGroupsData.map((g) => g.id)))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard')
       } finally {
@@ -48,6 +64,10 @@ function DashboardPage() {
     .filter((c) => c.expected_harvest_date)
     .sort((a, b) => (a.expected_harvest_date! < b.expected_harvest_date! ? -1 : 1))
     .slice(0, 3)
+
+  const lowStockItems = inputStock.filter((item) => item.current_quantity <= item.low_stock_threshold)
+  const recentHealthRecords = recentRecords.filter((r) => r.record_type === 'health').slice(0, 3)
+  const groupNameById = Object.fromEntries(livestockGroups.map((g) => [g.id, g.animal_type]))
 
   return (
     <div className="dashboard-page">
@@ -84,7 +104,7 @@ function DashboardPage() {
             <AlertTriangle size={20} />
           </span>
           <div>
-            <div className="stat-number">0</div>
+            <div className="stat-number">{loading ? '—' : lowStockItems.length}</div>
             <div className="stat-label">Low-Stock Items</div>
           </div>
         </div>
@@ -94,7 +114,7 @@ function DashboardPage() {
             <Users size={20} />
           </span>
           <div>
-            <div className="stat-number">0</div>
+            <div className="stat-number">{loading ? '—' : livestockGroups.length}</div>
             <div className="stat-label">Livestock Groups</div>
           </div>
         </div>
@@ -113,7 +133,7 @@ function DashboardPage() {
       </div>
 
       <div className="dashboard-columns">
-        <div className="dashboard-card">
+        <div className="dashboard-card plots-overview-card">
           <div className="dashboard-card-header">
             <h2>
               <Map size={18} /> Plots Overview
@@ -128,12 +148,12 @@ function DashboardPage() {
           ) : plots.length === 0 ? (
             <p className="dashboard-empty">No plots yet — add your first one in Plots.</p>
           ) : (
-            <div className="mini-plot-grid">
-              {plots.slice(0, 4).map((plot) => (
-                <div className="mini-plot-card" key={plot.id}>
+            <div className="mini-plot-list">
+              {plots.map((plot) => (
+                <Link to={`/land-plots?plot=${plot.id}`} className="mini-plot-card" key={plot.id}>
                   <h3>{plot.name}</h3>
                   <p>{plot.soil_type ?? `${plot.size} ${plot.size_unit}`}</p>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -150,13 +170,30 @@ function DashboardPage() {
               <p className="dashboard-empty">No upcoming harvests.</p>
             ) : (
               <ul className="upcoming-harvest-list">
-                {upcomingHarvests.map((cycle) => (
-                  <li key={cycle.id}>
-                    <strong>{cycle.crop_types.name}</strong>
-                    <span>{cycle.plots.name}</span>
-                    <span>{cycle.expected_harvest_date}</span>
-                  </li>
-                ))}
+                {upcomingHarvests.map((cycle) => {
+                  const stage = getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
+                  const stageName = stage.readyForHarvest ? 'Ready for harvest' : (stage.stage?.name ?? 'Growing')
+                  const percentage = getProgressPercentage(cycle.planting_date, cycle.expected_harvest_date)
+
+                  return (
+                    <li key={cycle.id}>
+                      <Link to={`/land-plots?plot=${cycle.plot_id}`} className="harvest-item">
+                        <div className="harvest-item-header">
+                          <strong>{cycle.crop_types.name}</strong>
+                          <span>{cycle.plots.name}</span>
+                        </div>
+                        <div className="harvest-progress-track">
+                          <div className="harvest-progress-fill" style={{ width: `${percentage ?? 0}%` }} />
+                        </div>
+                        <div className="harvest-progress-meta">
+                          <span>{stageName}</span>
+                          <span>{percentage != null ? `${percentage}%` : '—'}</span>
+                        </div>
+                        <span className="harvest-date">Est. harvest {formatDate(cycle.expected_harvest_date!)}</span>
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             )}
           </div>
@@ -165,14 +202,47 @@ function DashboardPage() {
             <h2>
               <AlertTriangle size={18} /> Low Stock Alerts
             </h2>
-            <p className="dashboard-empty">Input stock tracking isn't set up yet.</p>
+            {loading ? (
+              <p className="dashboard-empty">Loading...</p>
+            ) : lowStockItems.length === 0 ? (
+              <p className="dashboard-empty">All input stock is above threshold.</p>
+            ) : (
+              <ul className="alert-list">
+                {lowStockItems.map((item) => (
+                  <li key={item.id}>
+                    <Link to="/inputs" className="alert-item">
+                      <strong>{item.name}</strong>
+                      <span>
+                        {item.current_quantity} {item.unit} left (threshold {item.low_stock_threshold})
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
           <div className="dashboard-card">
             <h2>
               <Users size={18} /> Livestock Flags
             </h2>
-            <p className="dashboard-empty">Livestock tracking isn't set up yet.</p>
+            {loading ? (
+              <p className="dashboard-empty">Loading...</p>
+            ) : recentHealthRecords.length === 0 ? (
+              <p className="dashboard-empty">No recent health records.</p>
+            ) : (
+              <ul className="alert-list">
+                {recentHealthRecords.map((record) => (
+                  <li key={record.id}>
+                    <Link to="/livestock" className="alert-item">
+                      <strong>{groupNameById[record.livestock_group_id] ?? 'Unknown group'}</strong>
+                      <span>{(record.details as { description: string }).description}</span>
+                      <span>{formatDate(record.date)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>

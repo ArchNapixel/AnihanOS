@@ -39,3 +39,21 @@ export function getCurrentStage(
 
   return { stage: current, dayNumber: elapsedDays, readyForHarvest: false }
 }
+
+export function getProgressPercentage(plantingDate: string, expectedHarvestDate: string | null): number | null {
+  if (!expectedHarvestDate) return null
+  const totalDays = Math.floor(
+    (new Date(expectedHarvestDate).getTime() - new Date(plantingDate).getTime()) / 86_400_000,
+  )
+  if (totalDays <= 0) return null
+  const elapsedDays = Math.floor((Date.now() - new Date(plantingDate).getTime()) / 86_400_000)
+  return Math.max(0, Math.min(100, Math.round((elapsedDays / totalDays) * 100)))
+}
+
+export type CropProgressInfo = {
+  cropName: string
+  stageName: string | null
+  percentage: number | null
+  plantingDate: string
+  expectedHarvestDate: string | null
+}

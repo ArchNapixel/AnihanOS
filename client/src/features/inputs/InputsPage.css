@@ -1,0 +1,95 @@
+.inputs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.inputs-header h1 {
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.inputs-error {
+  color: var(--color-error);
+  margin-bottom: 16px;
+}
+
+.inputs-empty {
+  color: var(--color-text-muted);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.input-card {
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.input-card-low {
+  background: var(--color-alert-bg);
+}
+
+.input-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.input-card-header h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.input-type-badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.input-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.input-quantity {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text) !important;
+}
+
+.input-low-flag {
+  color: var(--color-alert-fg);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.input-card-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.input-card-actions button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
