@@ -23,6 +23,7 @@ function CropCycleCard({
   onLogActivity,
   onEdit,
   onDelete,
+  onForecast,
 }: {
   cycle: CropCycle
   financials: CropCycleFinancials | undefined
@@ -30,9 +31,11 @@ function CropCycleCard({
   onLogActivity: () => void
   onEdit: () => void
   onDelete: () => void
+  onForecast?: () => void
 }) {
   const stage = getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
   const percentage = getProgressPercentage(cycle.planting_date, cycle.expected_harvest_date)
+  const isSugarcane = cycle.crop_types.name.trim().toLowerCase() === 'sugarcane'
 
   const inputCost = financials?.inputCost ?? 0
   const profit = financials?.profit ?? null
@@ -77,6 +80,11 @@ function CropCycleCard({
         </div>
 
         <div className="cycle-card-actions">
+          {isSugarcane && onForecast && (
+            <button type="button" className="btn-outline" onClick={onForecast}>
+              Weather Forecast
+            </button>
+          )}
           <button type="button" className="btn-outline" onClick={onHarvest}>
             Mark as Harvested
           </button>

@@ -13,7 +13,7 @@ import { listCropCycleFinancials, type CropCycleFinancials } from '../financials
 import { listActivitiesForFarm, type FieldActivity } from '../crops/fieldActivitiesApi'
 import { computeWeedRisk } from '../../lib/weedRisk'
 import { formatDateShort } from '../../lib/dateUtils'
-import { listWeatherForFarm, type WeatherDaily } from './weatherApi'
+import { listWeatherForFarm, type WeatherDaily } from '../../lib/weatherApi'
 import WeatherWidget from './WeatherWidget'
 import './DashboardPage.css'
 

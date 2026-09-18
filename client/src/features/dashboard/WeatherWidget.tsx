@@ -1,7 +1,33 @@
+import { useEffect, useState } from 'react'
 import { CloudRain, CloudSun } from 'lucide-react'
-import type { WeatherDaily } from './weatherApi'
+import type { WeatherDaily } from '../../lib/weatherApi'
 import { todayIso } from '../../lib/dateUtils'
 import './WeatherWidget.css'
+
+// The sync cron runs daily at 22:00 UTC (see server/vercel.json) — anchored
+// to UTC rather than the viewer's own local time, so this stays correct
+// regardless of what timezone the dashboard is being viewed from.
+const SYNC_HOUR_UTC = 22
+
+function getNextSyncTime(): Date {
+  const now = new Date()
+  const next = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), SYNC_HOUR_UTC, 0, 0, 0),
+  )
+  if (next <= now) {
+    next.setUTCDate(next.getUTCDate() + 1)
+  }
+  return next
+}
+
+function formatCountdown(target: Date): string {
+  const diffMs = target.getTime() - Date.now()
+  if (diffMs <= 0) return 'due any moment'
+  const totalMinutes = Math.floor(diffMs / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  return hours === 0 ? `${minutes}m` : `${hours}h ${minutes}m`
+}
 
 function dayLabel(dateStr: string, today: string): string {
   if (dateStr === today) return 'Today'
@@ -10,12 +36,26 @@ function dayLabel(dateStr: string, today: string): string {
 
 function WeatherWidget({ days }: { days: WeatherDaily[] }) {
   const today = todayIso()
+  const [nextSync, setNextSync] = useState(getNextSyncTime)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNextSync((current) => (current.getTime() <= Date.now() ? getNextSyncTime() : current))
+    }, 60_000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="dashboard-card weather-card">
-      <h2>
-        <CloudSun size={18} /> Weather
-      </h2>
+      <div className="weather-card-header">
+        <h2>
+          <CloudSun size={18} /> Weather
+        </h2>
+        <span className="weather-next-sync">
+          Next update in {formatCountdown(nextSync)} (
+          {nextSync.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })})
+        </span>
+      </div>
 
       {days.length === 0 ? (
         <p className="dashboard-empty">

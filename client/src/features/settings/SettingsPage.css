@@ -11,6 +11,19 @@
 .settings-section {
   background: var(--color-bg);
   max-width: 480px;
+  margin-bottom: 32px;
+}
+
+.settings-province-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
 }
 
 .settings-section h2 {

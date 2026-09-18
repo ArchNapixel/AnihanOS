@@ -17,6 +17,7 @@ function CropPlotGroup({
   onLogActivity,
   onEdit,
   onDelete,
+  onForecast,
 }: {
   plot: Plot
   cycles: CropCycle[]
@@ -28,6 +29,7 @@ function CropPlotGroup({
   onLogActivity: (cycle: CropCycle) => void
   onEdit: (cycle: CropCycle) => void
   onDelete: (cycle: CropCycle) => void
+  onForecast?: (cycle: CropCycle) => void
 }) {
   const activeCycles = cycles.filter((cycle) => cycle.status !== 'harvested')
   const harvestedCycles = cycles.filter((cycle) => cycle.status === 'harvested')
@@ -91,6 +93,7 @@ function CropPlotGroup({
               onLogActivity={() => onLogActivity(cycle)}
               onEdit={() => onEdit(cycle)}
               onDelete={() => onDelete(cycle)}
+              onForecast={onForecast ? () => onForecast(cycle) : undefined}
             />
           ))}
         </div>

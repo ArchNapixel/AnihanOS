@@ -1,0 +1,112 @@
+.forecast-modal {
+  max-width: 720px;
+  padding: 40px;
+}
+
+.forecast-modal h2 {
+  font-size: 24px;
+}
+
+.forecast-subtitle {
+  color: var(--color-text-muted);
+  font-size: 15px;
+  margin-bottom: 28px;
+}
+
+.forecast-section {
+  margin-bottom: 24px;
+}
+
+.forecast-section-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.forecast-section > strong {
+  font-size: 20px;
+}
+
+.forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.forecast-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--color-surface);
+}
+
+.forecast-stat span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.forecast-stat strong {
+  font-size: 20px;
+}
+
+.forecast-outlook {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 16px;
+}
+
+.forecast-outlook-on_track {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.forecast-outlook-favorable {
+  background: #e3f5e6;
+  color: #1e7a34;
+}
+
+.forecast-outlook-possible_delay {
+  background: #fdecec;
+  color: #b4232c;
+}
+
+.forecast-outlook-insufficient_data {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
+.forecast-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  margin-top: 10px;
+}
+
+.forecast-risk-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .forecast-modal {
+    padding: 24px;
+  }
+
+  .forecast-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -15,11 +15,13 @@ import {
 } from './cropCyclesApi'
 import { createFieldActivity, type FieldActivityInput } from './fieldActivitiesApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
+import { listWeatherForFarm, type WeatherDaily } from '../../lib/weatherApi'
 import { useFarm } from '../../lib/FarmContext'
 import CropPlotGroup from './CropPlotGroup'
 import CropCycleFormModal, { type CropTypeAction } from './CropCycleFormModal'
 import HarvestModal from './HarvestModal'
 import FieldActivityModal from './FieldActivityModal'
+import SugarcaneForecastModal from './SugarcaneForecastModal'
 import PlotCycleHistoryModal from '../../components/PlotCycleHistoryModal'
 import './CropsPage.css'
 
@@ -29,6 +31,7 @@ function CropsPage() {
   const [cropTypes, setCropTypes] = useState<CropType[]>([])
   const [cycles, setCycles] = useState<CropCycle[]>([])
   const [financials, setFinancials] = useState<CropCycleFinancials[]>([])
+  const [weatherDays, setWeatherDays] = useState<WeatherDaily[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [plotFilter, setPlotFilter] = useState<string>('all')
@@ -38,6 +41,7 @@ function CropsPage() {
   const [harvestingCycle, setHarvestingCycle] = useState<CropCycle | null>(null)
   const [loggingActivityFor, setLoggingActivityFor] = useState<CropCycle | null>(null)
   const [historyForPlotId, setHistoryForPlotId] = useState<string | null>(null)
+  const [forecastCycle, setForecastCycle] = useState<CropCycle | null>(null)
   const [saving, setSaving] = useState(false)
 
   const loadAll = async () => {
@@ -64,6 +68,13 @@ function CropsPage() {
   useEffect(() => {
     loadAll()
   }, [])
+
+  useEffect(() => {
+    if (!farm) return
+    listWeatherForFarm(farm.id)
+      .then(setWeatherDays)
+      .catch(() => setWeatherDays([]))
+  }, [farm])
 
   const financialsByCycleId = useMemo(
     () => Object.fromEntries(financials.map((f) => [f.cycle.id, f])),
@@ -239,6 +250,7 @@ function CropsPage() {
                   onLogActivity={(cycle) => setLoggingActivityFor(cycle)}
                   onEdit={(cycle) => openEditForm(cycle)}
                   onDelete={(cycle) => handleDeleteCycle(cycle)}
+                  onForecast={(cycle) => setForecastCycle(cycle)}
                 />
               ))}
             </div>
@@ -288,6 +300,15 @@ function CropsPage() {
             />
           )
         })()}
+
+      {forecastCycle && (
+        <SugarcaneForecastModal
+          cycle={forecastCycle}
+          plot={plots.find((p) => p.id === forecastCycle.plot_id)}
+          weatherDays={weatherDays}
+          onClose={() => setForecastCycle(null)}
+        />
+      )}
     </div>
   )
 }
