@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import type { CropCycle } from './cropCyclesApi'
 import type { ActivityType, FieldActivityInput } from './fieldActivitiesApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 
 const ACTIVITY_TYPES: ActivityType[] = ['weeding', 'plowing', 'cultivation']
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function FieldActivityModal({
   cycle,

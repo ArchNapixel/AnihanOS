@@ -1,17 +1,8 @@
+import { toDateStr } from './dateUtils'
+
 export type WeekRange = { start: string; end: string; label: string }
 
 const formatFull = (d: Date) => d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
-
-// Builds a YYYY-MM-DD string from a Date's local calendar fields. Using
-// toISOString() here would convert through UTC and shift the date back a
-// day for anyone in a positive UTC offset (e.g. UTC+8) whenever the local
-// time is before the UTC offset catches up (midnight-8am for UTC+8).
-function toDateStr(d: Date): string {
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
 
 // Weeks run Monday–Sunday.
 export function getWeekRange(dateStr: string): WeekRange {

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from './financialsApi'
+import { recordCropCycleSale, type CropCycle, type SaleInput } from '../crops/cropCyclesApi'
+import RecordSaleModal from '../crops/RecordSaleModal'
 import {
   listWageEntries,
   createWageEntry,
@@ -102,6 +104,9 @@ function FinancialsPage() {
   const [sortKey, setSortKey] = useState<SortKey>('planting_date')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [csvPreviewOpen, setCsvPreviewOpen] = useState(false)
+  const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
+  const [sellingSaving, setSellingSaving] = useState(false)
+  const [sellingError, setSellingError] = useState<string | null>(null)
 
   const [wagePlotFilter, setWagePlotFilter] = useState('all')
   const [wageJobFilter, setWageJobFilter] = useState('all')
@@ -280,6 +285,21 @@ function FinancialsPage() {
 
   const viewingWeek = sortedWeeklySummaries.find((w) => w.weekStart === viewingWeekStart) ?? null
 
+  const handleRecordSale = async (input: SaleInput) => {
+    if (!sellingCycle) return
+    setSellingSaving(true)
+    setSellingError(null)
+    try {
+      await recordCropCycleSale(sellingCycle.id, input)
+      setSellingCycle(null)
+      await loadAll()
+    } catch (err) {
+      setSellingError(err instanceof Error ? err.message : 'Failed to record sale')
+    } finally {
+      setSellingSaving(false)
+    }
+  }
+
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
       setSortDir((dir) => (dir === 'asc' ? 'desc' : 'asc'))
@@ -376,6 +396,7 @@ function FinancialsPage() {
       </div>
 
       {error && <p className="financials-error">{error}</p>}
+      {sellingError && <p className="financials-error">{sellingError}</p>}
 
       <div className="financials-filters">
         <div>
@@ -428,6 +449,7 @@ function FinancialsPage() {
                     {sortKey === col.key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                   </th>
                 ))}
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -448,6 +470,13 @@ function FinancialsPage() {
                     {formatNumber(row.profit)}
                   </td>
                   <td>{row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—'}</td>
+                  <td className="financials-row-actions">
+                    {row.cycle.status === 'harvested' && (
+                      <button type="button" onClick={() => setSellingCycle(row.cycle)}>
+                        {row.cycle.selling_price_per_unit != null ? 'Edit Sale' : 'Record Sale'}
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -458,6 +487,7 @@ function FinancialsPage() {
                 <td>{formatNumber(totals.inputCost)}</td>
                 <td>{formatNumber(totals.otherCosts)}</td>
                 <td>{formatNumber(totals.profit)}</td>
+                <td></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -596,6 +626,18 @@ function FinancialsPage() {
           onEdit={openEditWageForm}
           onDelete={handleDeleteWage}
           onClose={() => setViewingWeekStart(null)}
+        />
+      )}
+
+      {sellingCycle && (
+        <RecordSaleModal
+          cycle={sellingCycle}
+          saving={sellingSaving}
+          onCancel={() => {
+            setSellingCycle(null)
+            setSellingError(null)
+          }}
+          onSave={handleRecordSale}
         />
       )}
     </div>

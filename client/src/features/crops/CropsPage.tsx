@@ -9,11 +9,9 @@ import {
   updateCropCycle,
   deleteCropCycle,
   markCropCycleHarvested,
-  recordCropCycleSale,
   type CropCycle,
   type CropCycleInput,
   type HarvestInput,
-  type SaleInput,
 } from './cropCyclesApi'
 import { createFieldActivity, type FieldActivityInput } from './fieldActivitiesApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
@@ -21,7 +19,6 @@ import { useFarm } from '../../lib/FarmContext'
 import CropPlotGroup from './CropPlotGroup'
 import CropCycleFormModal, { type CropTypeAction } from './CropCycleFormModal'
 import HarvestModal from './HarvestModal'
-import RecordSaleModal from './RecordSaleModal'
 import FieldActivityModal from './FieldActivityModal'
 import PlotCycleHistoryModal from '../../components/PlotCycleHistoryModal'
 import './CropsPage.css'
@@ -39,7 +36,6 @@ function CropsPage() {
   const [editingCycle, setEditingCycle] = useState<CropCycle | null>(null)
   const [createForPlotId, setCreateForPlotId] = useState<string | undefined>(undefined)
   const [harvestingCycle, setHarvestingCycle] = useState<CropCycle | null>(null)
-  const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
   const [loggingActivityFor, setLoggingActivityFor] = useState<CropCycle | null>(null)
   const [historyForPlotId, setHistoryForPlotId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -184,21 +180,6 @@ function CropsPage() {
     }
   }
 
-  const handleRecordSale = async (input: SaleInput) => {
-    if (!sellingCycle) return
-    setSaving(true)
-    setError(null)
-    try {
-      await recordCropCycleSale(sellingCycle.id, input)
-      setSellingCycle(null)
-      await loadAll()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to record sale')
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const handleLogActivity = async (input: FieldActivityInput) => {
     setSaving(true)
     setError(null)
@@ -255,7 +236,6 @@ function CropsPage() {
                   onAddCycle={() => openCreateForm(plot.id)}
                   onViewHistory={() => setHistoryForPlotId(plot.id)}
                   onHarvest={(cycle) => setHarvestingCycle(cycle)}
-                  onRecordSale={(cycle) => setSellingCycle(cycle)}
                   onLogActivity={(cycle) => setLoggingActivityFor(cycle)}
                   onEdit={(cycle) => openEditForm(cycle)}
                   onDelete={(cycle) => handleDeleteCycle(cycle)}
@@ -284,15 +264,6 @@ function CropsPage() {
           saving={saving}
           onCancel={() => setHarvestingCycle(null)}
           onSave={handleHarvest}
-        />
-      )}
-
-      {sellingCycle && (
-        <RecordSaleModal
-          cycle={sellingCycle}
-          saving={saving}
-          onCancel={() => setSellingCycle(null)}
-          onSave={handleRecordSale}
         />
       )}
 

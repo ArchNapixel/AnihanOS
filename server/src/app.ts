@@ -7,6 +7,7 @@ import cropCyclesRouter from './routes/cropCycles.js'
 import inputsRouter from './routes/inputs.js'
 import livestockRouter from './routes/livestock.js'
 import dashboardRouter from './routes/dashboard.js'
+import weatherRouter from './routes/weather.js'
 
 const app = express()
 
@@ -23,5 +24,6 @@ app.use('/api/crop-cycles', cropCyclesRouter)
 app.use('/api/inputs', inputsRouter)
 app.use('/api/livestock', livestockRouter)
 app.use('/api/dashboard', dashboardRouter)
+app.use('/api/weather', weatherRouter)
 
 export default app

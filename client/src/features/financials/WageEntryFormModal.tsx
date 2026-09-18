@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import type { Plot } from '../landPlots/plotsApi'
 import type { WageEntry, WageEntryInput } from './wageEntriesApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
-
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function WageEntryFormModal({
   initialValue,

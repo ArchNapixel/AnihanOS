@@ -12,6 +12,9 @@ import { listRecentRecordsForFarm, type LivestockRecord } from '../livestock/liv
 import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
 import { listActivitiesForFarm, type FieldActivity } from '../crops/fieldActivitiesApi'
 import { computeWeedRisk } from '../../lib/weedRisk'
+import { formatDateShort } from '../../lib/dateUtils'
+import { listWeatherForFarm, type WeatherDaily } from './weatherApi'
+import WeatherWidget from './WeatherWidget'
 import './DashboardPage.css'
 
 const today = new Date().toLocaleDateString(undefined, {
@@ -20,10 +23,6 @@ const today = new Date().toLocaleDateString(undefined, {
   month: 'long',
   day: 'numeric',
 })
-
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
 
 function DashboardPage() {
   const { enabledModules } = useFarm()
@@ -37,6 +36,7 @@ function DashboardPage() {
   const [recentRecords, setRecentRecords] = useState<LivestockRecord[]>([])
   const [financials, setFinancials] = useState<CropCycleFinancials[]>([])
   const [fieldActivities, setFieldActivities] = useState<FieldActivity[]>([])
+  const [weather, setWeather] = useState<WeatherDaily[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -62,6 +62,7 @@ function DashboardPage() {
         setFinancials(financialsData)
         setRecentRecords(await listRecentRecordsForFarm(livestockGroupsData.map((g) => g.id)))
         setFieldActivities(await listActivitiesForFarm(plotsData.map((p) => p.id)))
+        setWeather(await listWeatherForFarm(farmData.id))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard')
       } finally {
@@ -137,6 +138,8 @@ function DashboardPage() {
       </div>
 
       {error && <p className="dashboard-error">{error}</p>}
+
+      {!loading && <WeatherWidget days={weather} />}
 
       <div className="stat-grid">
         <div className="stat-card">
@@ -262,7 +265,7 @@ function DashboardPage() {
                             <span>{stageName}</span>
                             <span>{percentage != null ? `${percentage}%` : '—'}</span>
                           </div>
-                          <span className="harvest-date">Est. harvest {formatDate(cycle.expected_harvest_date!)}</span>
+                          <span className="harvest-date">Est. harvest {formatDateShort(cycle.expected_harvest_date!)}</span>
                         </Link>
                       </li>
                     )
@@ -314,7 +317,7 @@ function DashboardPage() {
                       <Link to="/livestock" className="alert-item">
                         <strong>{groupNameById[record.livestock_group_id] ?? 'Unknown group'}</strong>
                         <span>{(record.details as { description: string }).description}</span>
-                        <span>{formatDate(record.date)}</span>
+                        <span>{formatDateShort(record.date)}</span>
                       </Link>
                     </li>
                   ))}

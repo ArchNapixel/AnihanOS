@@ -7,6 +7,7 @@ import type {
   WaterQualityDetails,
 } from './aquacultureRecordsApi'
 import type { AquacultureStock } from './aquacultureStockApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 
 const RECORD_TYPES: { value: AquaRecordType; label: string }[] = [
@@ -14,7 +15,6 @@ const RECORD_TYPES: { value: AquaRecordType; label: string }[] = [
   { value: 'water_quality', label: 'Water quality' },
   { value: 'harvest', label: 'Harvest' },
 ]
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function AquacultureRecordFormModal({
   stock,

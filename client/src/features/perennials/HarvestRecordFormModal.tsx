@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import type { HarvestRecordInput } from './harvestRecordsApi'
 import type { PerennialPlanting } from './perennialPlantingsApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
-
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function HarvestRecordFormModal({
   planting,

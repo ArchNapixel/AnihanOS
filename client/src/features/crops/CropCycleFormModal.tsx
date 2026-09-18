@@ -5,13 +5,13 @@ import type { CropCycle, CropCycleInput } from './cropCyclesApi'
 import { computeExpectedHarvestDate, type GrowthStage } from '../../lib/growthStage'
 import { emptyFertilizingRow, fertilizingStagesToRows, parseFertilizingStages, type FertilizingStageRow } from './fertilizingSchedule'
 import FertilizingScheduleEditor from './FertilizingScheduleEditor'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 import './CropCycleFormModal.css'
 
 type StageUnit = 'days' | 'months'
 type StageRow = { name: string; amount: string; unit: StageUnit }
 
-const todayIso = () => new Date().toISOString().slice(0, 10)
 const emptyStageRow = (): StageRow => ({ name: '', amount: '', unit: 'days' })
 
 function parseStages(rows: StageRow[]): GrowthStage[] {

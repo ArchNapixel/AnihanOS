@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import type { Plot } from '../landPlots/plotsApi'
 import type { AquacultureStock, AquacultureStockInput, ProductionSystem } from './aquacultureStockApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 
 const PRODUCTION_SYSTEMS: ProductionSystem[] = ['pond', 'cage', 'pen', 'tank_ras']
@@ -17,7 +18,6 @@ const SPECIES_SUGGESTIONS = [
   'Oyster (Talaba)',
   'Mussel (Tahong)',
 ]
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function AquacultureStockFormModal({
   initialValue,

@@ -4,10 +4,9 @@ import type { InputUsageInput } from './inputUsageApi'
 import type { Plot } from '../landPlots/plotsApi'
 import type { CropCycle } from '../crops/cropCyclesApi'
 import PlotCycleHistoryModal from '../../components/PlotCycleHistoryModal'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 import './QuickLogUsageModal.css'
-
-const todayIso = () => new Date().toISOString().slice(0, 10)
 const TYPE_LABELS: Record<InputType, string> = { fertilizer: 'Fertilizer', pesticide: 'Pesticide', seed: 'Seed' }
 
 function QuickLogUsageModal({

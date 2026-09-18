@@ -5,6 +5,7 @@ import type {
   PerennialPlantingInput,
   PerennialPlantingStatus,
 } from './perennialPlantingsApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 
 const STATUSES: { value: PerennialPlantingStatus; label: string }[] = [
@@ -26,7 +27,6 @@ const CROP_SUGGESTIONS = [
   'Jackfruit (Langka)',
   'Avocado',
 ]
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function PerennialPlantingFormModal({
   initialValue,

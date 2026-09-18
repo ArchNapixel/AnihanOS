@@ -1,3 +1,5 @@
+import { toDateStr } from './dateUtils'
+
 export type GrowthStage = {
   name: string
   offset_days: number
@@ -12,7 +14,7 @@ export function computeExpectedHarvestDate(plantingDate: string, stages: GrowthS
   if (!plantingDate || stages.length === 0) return null
   const date = new Date(plantingDate)
   date.setDate(date.getDate() + totalDurationDays(stages))
-  return date.toISOString().slice(0, 10)
+  return toDateStr(date)
 }
 
 export function getCurrentStage(

@@ -143,16 +143,6 @@
   color: var(--color-alert-fg);
 }
 
-.cycle-card p {
-  margin: 4px 0;
-  font-size: 14px;
-}
-
-.cycle-stage {
-  color: var(--color-accent);
-  font-weight: 600;
-}
-
 .cycle-hint {
   color: var(--color-text-muted);
   font-style: italic;

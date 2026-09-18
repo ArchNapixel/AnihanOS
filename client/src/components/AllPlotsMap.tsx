@@ -7,6 +7,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
 import type { PlotFeatureCollection } from '../features/landPlots/plotsGeoJsonApi'
 import type { CropProgressInfo } from '../lib/growthStage'
+import { formatDateShort } from '../lib/dateUtils'
 import './AllPlotsMap.css'
 
 function escapeHtml(value: string): string {
@@ -15,16 +16,12 @@ function escapeHtml(value: string): string {
   return div.innerHTML
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
 function buildCropPopupEntryHtml(info: CropProgressInfo): string {
   const pct = info.percentage
   const stageLabel = escapeHtml(info.stageName ?? 'Growing')
   const cropName = escapeHtml(info.cropName)
-  const plantedLabel = formatDate(info.plantingDate)
-  const harvestLabel = info.expectedHarvestDate ? formatDate(info.expectedHarvestDate) : 'Not set'
+  const plantedLabel = formatDateShort(info.plantingDate)
+  const harvestLabel = info.expectedHarvestDate ? formatDateShort(info.expectedHarvestDate) : 'Not set'
 
   return `
     <div class="crop-progress-entry">

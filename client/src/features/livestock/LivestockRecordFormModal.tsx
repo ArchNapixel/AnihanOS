@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import type { LivestockGroup } from './livestockGroupsApi'
 import type { LivestockRecordInput, RecordDetails, RecordType } from './livestockRecordsApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 
-const todayIso = () => new Date().toISOString().slice(0, 10)
 const RECORD_TYPES: RecordType[] = ['feed', 'health', 'production']
 
 function LivestockRecordFormModal({

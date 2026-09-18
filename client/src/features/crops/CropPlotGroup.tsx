@@ -14,7 +14,6 @@ function CropPlotGroup({
   onAddCycle,
   onViewHistory,
   onHarvest,
-  onRecordSale,
   onLogActivity,
   onEdit,
   onDelete,
@@ -26,7 +25,6 @@ function CropPlotGroup({
   onAddCycle: () => void
   onViewHistory: () => void
   onHarvest: (cycle: CropCycle) => void
-  onRecordSale: (cycle: CropCycle) => void
   onLogActivity: (cycle: CropCycle) => void
   onEdit: (cycle: CropCycle) => void
   onDelete: (cycle: CropCycle) => void
@@ -90,7 +88,6 @@ function CropPlotGroup({
               cycle={cycle}
               financials={financialsByCycleId[cycle.id]}
               onHarvest={() => onHarvest(cycle)}
-              onRecordSale={() => onRecordSale(cycle)}
               onLogActivity={() => onLogActivity(cycle)}
               onEdit={() => onEdit(cycle)}
               onDelete={() => onDelete(cycle)}

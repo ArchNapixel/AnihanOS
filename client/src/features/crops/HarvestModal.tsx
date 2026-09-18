@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import type { CropCycle } from './cropCyclesApi'
 import type { HarvestInput } from './cropCyclesApi'
+import { todayIso } from '../../lib/dateUtils'
 import '../../styles/modal.css'
-
-const todayIso = () => new Date().toISOString().slice(0, 10)
 
 function HarvestModal({
   cycle,
