@@ -1,4 +1,4 @@
-import type { FertilizingStage } from './cropTypesApi'
+import type { FertilizingStage } from '../features/crops/cropTypesApi'
 
 export type FertilizingStageRow = {
   name: string

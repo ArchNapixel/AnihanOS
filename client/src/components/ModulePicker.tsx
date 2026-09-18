@@ -1,4 +1,4 @@
-import type { FarmModule } from '../lib/farmApi'
+import type { FarmModule } from '../api/farmApi'
 import { MODULE_DEFINITIONS } from '../lib/farmModules'
 import './ModulePicker.css'
 

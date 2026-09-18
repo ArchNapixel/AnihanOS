@@ -4,7 +4,7 @@ import PlotBoundaryMap from '../../components/PlotBoundaryMap'
 import type { Plot } from './plotsApi'
 import { listCropCycles } from '../crops/cropCyclesApi'
 import { listActivitiesForPlot } from '../crops/fieldActivitiesApi'
-import { computeWeedRisk, type WeedRiskLevel } from '../../lib/weedRisk'
+import { computeWeedRisk, type WeedRiskLevel } from '../../domain/weedRisk'
 import '../../styles/modal.css'
 import './PlotDetailModal.css'
 

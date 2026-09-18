@@ -1,6 +1,6 @@
 import type { CropCycle } from './cropCyclesApi'
 import type { CropCycleFinancials } from '../financials/financialsApi'
-import { getCurrentStage, getProgressPercentage } from '../../lib/growthStage'
+import { getCurrentStage, getProgressPercentage } from '../../domain/growthStage'
 import { formatDateShort } from '../../lib/dateUtils'
 import './CropCycleCard.css'
 

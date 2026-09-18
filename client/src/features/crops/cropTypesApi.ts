@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabaseClient'
-import { getOrCreateDefaultFarm } from '../../lib/farmApi'
-import type { GrowthStage } from '../../lib/growthStage'
+import { getOrCreateDefaultFarm } from '../../api/farmApi'
+import type { GrowthStage } from '../../domain/growthStage'
 
 export type FertilizingStage = {
   name: string

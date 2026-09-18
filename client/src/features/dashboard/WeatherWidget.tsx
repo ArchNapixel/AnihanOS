@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CloudRain, CloudSun } from 'lucide-react'
-import type { WeatherDaily } from '../../lib/weatherApi'
+import type { WeatherDaily } from '../../api/weatherApi'
 import { todayIso } from '../../lib/dateUtils'
 import './WeatherWidget.css'
 

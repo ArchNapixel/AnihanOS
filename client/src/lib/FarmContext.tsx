@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { getOrCreateDefaultFarm, type Farm, type FarmModule } from './farmApi'
+import { getOrCreateDefaultFarm, type Farm, type FarmModule } from '../api/farmApi'
 
 type FarmContextValue = {
   farm: Farm | null

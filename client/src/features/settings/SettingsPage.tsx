@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import ModulePicker from '../../components/ModulePicker'
 import { useFarm } from '../../lib/FarmContext'
-import { updateFarmModules, updateFarmLocation, type FarmModule } from '../../lib/farmApi'
+import { updateFarmModules, updateFarmLocation, type FarmModule } from '../../api/farmApi'
 import { PH_PROVINCES } from '../../lib/phProvinces'
 import './SettingsPage.css'
 

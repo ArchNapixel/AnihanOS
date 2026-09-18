@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
-import { getOrCreateDefaultFarm } from '../../lib/farmApi'
+import { getOrCreateDefaultFarm } from '../../api/farmApi'
 
 export type InputType = 'fertilizer' | 'pesticide' | 'seed'
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import LeafIcon from '../../components/LeafIcon'
 import ModulePicker from '../../components/ModulePicker'
 import { useFarm } from '../../lib/FarmContext'
-import { updateFarmModules, type FarmModule } from '../../lib/farmApi'
+import { updateFarmModules, type FarmModule } from '../../api/farmApi'
 import './ModuleSelectionPage.css'
 
 function ModuleSelectionPage() {

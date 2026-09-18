@@ -1,4 +1,4 @@
-import type { FarmModule } from './farmApi'
+import type { FarmModule } from '../api/farmApi'
 
 export const MODULE_DEFINITIONS: { value: FarmModule; label: string; description: string }[] = [
   {

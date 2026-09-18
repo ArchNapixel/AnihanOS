@@ -1,4 +1,4 @@
-import { toDateStr } from './dateUtils'
+import { toDateStr } from '../lib/dateUtils'
 
 export type GrowthStage = {
   name: string

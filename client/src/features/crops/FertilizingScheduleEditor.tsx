@@ -1,4 +1,4 @@
-import { emptyFertilizingRow, type FertilizingStageRow } from './fertilizingSchedule'
+import { emptyFertilizingRow, type FertilizingStageRow } from '../../domain/fertilizingSchedule'
 import './FertilizingScheduleEditor.css'
 
 function FertilizingScheduleEditor({

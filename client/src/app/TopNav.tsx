@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { useFarm } from '../lib/FarmContext'
-import type { FarmModule } from '../lib/farmApi'
-import LeafIcon from './LeafIcon'
+import type { FarmModule } from '../api/farmApi'
+import LeafIcon from '../components/LeafIcon'
 import './TopNav.css'
 
 const navItems: { to: string; label: string; module?: FarmModule }[] = [

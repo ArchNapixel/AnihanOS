@@ -15,7 +15,7 @@ import {
 } from './cropCyclesApi'
 import { createFieldActivity, type FieldActivityInput } from './fieldActivitiesApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
-import { listWeatherForFarm, type WeatherDaily } from '../../lib/weatherApi'
+import { listWeatherForFarm, type WeatherDaily } from '../../api/weatherApi'
 import { useFarm } from '../../lib/FarmContext'
 import CropPlotGroup from './CropPlotGroup'
 import CropCycleFormModal, { type CropTypeAction } from './CropCycleFormModal'

@@ -1,4 +1,4 @@
-import type { WeatherDaily } from './weatherApi'
+import type { WeatherDaily } from '../api/weatherApi'
 
 // Derived from the "Sugarcane Weather Impact & Yield Forecasting Guide"
 // (Philippines context) provided by the user. Stage boundaries use the
