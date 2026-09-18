@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AlertTriangle, Clock, DollarSign, Map, Package, Sprout, Users } from 'lucide-react'
 import { getOrCreateDefaultFarm, type Farm } from '../../lib/farmApi'
+import { useFarm } from '../../lib/FarmContext'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
 import { getCurrentStage, getProgressPercentage } from '../../lib/growthStage'
@@ -25,6 +26,9 @@ function formatDate(dateStr: string): string {
 }
 
 function DashboardPage() {
+  const { enabledModules } = useFarm()
+  const hasCrops = enabledModules.includes('crops')
+  const hasLivestock = enabledModules.includes('livestock')
   const [farm, setFarm] = useState<Farm | null>(null)
   const [plots, setPlots] = useState<Plot[]>([])
   const [cycles, setCycles] = useState<CropCycle[]>([])
@@ -145,47 +149,59 @@ function DashboardPage() {
           </div>
         </div>
 
-        <div className="stat-card">
-          <span className="stat-icon">
-            <Sprout size={20} />
-          </span>
-          <div>
-            <div className="stat-number">{loading ? '—' : activeCycles.length}</div>
-            <div className="stat-label">Active Crop Cycles</div>
+        {hasCrops && (
+          <div className="stat-card">
+            <span className="stat-icon">
+              <Sprout size={20} />
+            </span>
+            <div>
+              <div className="stat-number">{loading ? '—' : activeCycles.length}</div>
+              <div className="stat-label">Active Crop Cycles</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="stat-card stat-card-alert">
-          <span className="stat-icon stat-icon-alert">
-            <AlertTriangle size={20} />
-          </span>
-          <div>
-            <div className="stat-number">{loading ? '—' : lowStockItems.length}</div>
-            <div className="stat-label">Low-Stock Items</div>
+        {hasCrops && (
+          <div className="stat-card stat-card-alert">
+            <span className="stat-icon stat-icon-alert">
+              <AlertTriangle size={20} />
+            </span>
+            <div>
+              <div className="stat-number">{loading ? '—' : lowStockItems.length}</div>
+              <div className="stat-label">Low-Stock Items</div>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="stat-card">
-          <span className="stat-icon">
-            <Users size={20} />
-          </span>
-          <div>
-            <div className="stat-number">{loading ? '—' : livestockGroups.length}</div>
-            <div className="stat-label">Livestock Groups</div>
+        {hasLivestock && (
+          <div className="stat-card">
+            <span className="stat-icon">
+              <Users size={20} />
+            </span>
+            <div>
+              <div className="stat-number">{loading ? '—' : livestockGroups.length}</div>
+              <div className="stat-label">Livestock Groups</div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="quick-actions">
-        <Link to="/inputs" className="btn-outline">
-          <Package size={16} /> Log Input Usage
-        </Link>
-        <Link to="/crops" className="btn-outline">
-          <Sprout size={16} /> Add Crop Cycle
-        </Link>
-        <Link to="/livestock" className="btn-outline">
-          <Users size={16} /> Add Livestock Record
-        </Link>
+        {hasCrops && (
+          <Link to="/inputs" className="btn-outline">
+            <Package size={16} /> Log Input Usage
+          </Link>
+        )}
+        {hasCrops && (
+          <Link to="/crops" className="btn-outline">
+            <Sprout size={16} /> Add Crop Cycle
+          </Link>
+        )}
+        {hasLivestock && (
+          <Link to="/livestock" className="btn-outline">
+            <Users size={16} /> Add Livestock Record
+          </Link>
+        )}
       </div>
 
       <div className="dashboard-columns">
@@ -216,157 +232,165 @@ function DashboardPage() {
         </div>
 
         <div className="dashboard-side">
-          <div className="dashboard-card">
-            <h2>
-              <Clock size={18} /> Upcoming Harvests
-            </h2>
-            {loading ? (
-              <p className="dashboard-empty">Loading...</p>
-            ) : upcomingHarvests.length === 0 ? (
-              <p className="dashboard-empty">No upcoming harvests.</p>
-            ) : (
-              <ul className="upcoming-harvest-list">
-                {upcomingHarvests.map((cycle) => {
-                  const stage = getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
-                  const stageName = stage.readyForHarvest ? 'Ready for harvest' : (stage.stage?.name ?? 'Growing')
-                  const percentage = getProgressPercentage(cycle.planting_date, cycle.expected_harvest_date)
+          {hasCrops && (
+            <div className="dashboard-card">
+              <h2>
+                <Clock size={18} /> Upcoming Harvests
+              </h2>
+              {loading ? (
+                <p className="dashboard-empty">Loading...</p>
+              ) : upcomingHarvests.length === 0 ? (
+                <p className="dashboard-empty">No upcoming harvests.</p>
+              ) : (
+                <ul className="upcoming-harvest-list">
+                  {upcomingHarvests.map((cycle) => {
+                    const stage = getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
+                    const stageName = stage.readyForHarvest ? 'Ready for harvest' : (stage.stage?.name ?? 'Growing')
+                    const percentage = getProgressPercentage(cycle.planting_date, cycle.expected_harvest_date)
 
-                  return (
-                    <li key={cycle.id}>
-                      <Link to={`/land-plots?plot=${cycle.plot_id}`} className="harvest-item">
-                        <div className="harvest-item-header">
-                          <strong>{cycle.crop_types.name}</strong>
-                          <span>{cycle.plots.name}</span>
-                        </div>
-                        <div className="harvest-progress-track">
-                          <div className="harvest-progress-fill" style={{ width: `${percentage ?? 0}%` }} />
-                        </div>
-                        <div className="harvest-progress-meta">
-                          <span>{stageName}</span>
-                          <span>{percentage != null ? `${percentage}%` : '—'}</span>
-                        </div>
-                        <span className="harvest-date">Est. harvest {formatDate(cycle.expected_harvest_date!)}</span>
+                    return (
+                      <li key={cycle.id}>
+                        <Link to={`/land-plots?plot=${cycle.plot_id}`} className="harvest-item">
+                          <div className="harvest-item-header">
+                            <strong>{cycle.crop_types.name}</strong>
+                            <span>{cycle.plots.name}</span>
+                          </div>
+                          <div className="harvest-progress-track">
+                            <div className="harvest-progress-fill" style={{ width: `${percentage ?? 0}%` }} />
+                          </div>
+                          <div className="harvest-progress-meta">
+                            <span>{stageName}</span>
+                            <span>{percentage != null ? `${percentage}%` : '—'}</span>
+                          </div>
+                          <span className="harvest-date">Est. harvest {formatDate(cycle.expected_harvest_date!)}</span>
+                        </Link>
+                      </li>
+                    )
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {hasCrops && (
+            <div className="dashboard-card">
+              <h2>
+                <AlertTriangle size={18} /> Low Stock Alerts
+              </h2>
+              {loading ? (
+                <p className="dashboard-empty">Loading...</p>
+              ) : lowStockItems.length === 0 ? (
+                <p className="dashboard-empty">All input stock is above threshold.</p>
+              ) : (
+                <ul className="alert-list">
+                  {lowStockItems.map((item) => (
+                    <li key={item.id}>
+                      <Link to="/inputs" className="alert-item">
+                        <strong>{item.name}</strong>
+                        <span>
+                          {item.current_quantity} {item.unit} left (threshold {item.low_stock_threshold})
+                        </span>
                       </Link>
                     </li>
-                  )
-                })}
-              </ul>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {hasLivestock && (
+            <div className="dashboard-card">
+              <h2>
+                <Users size={18} /> Livestock Flags
+              </h2>
+              {loading ? (
+                <p className="dashboard-empty">Loading...</p>
+              ) : recentHealthRecords.length === 0 ? (
+                <p className="dashboard-empty">No recent health records.</p>
+              ) : (
+                <ul className="alert-list">
+                  {recentHealthRecords.map((record) => (
+                    <li key={record.id}>
+                      <Link to="/livestock" className="alert-item">
+                        <strong>{groupNameById[record.livestock_group_id] ?? 'Unknown group'}</strong>
+                        <span>{(record.details as { description: string }).description}</span>
+                        <span>{formatDate(record.date)}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {hasCrops && (
+        <div className="dashboard-columns dashboard-columns-secondary">
+          <div className="dashboard-card">
+            <div className="dashboard-card-header">
+              <h2>
+                <DollarSign size={18} /> Harvest Profit Summary
+              </h2>
+              <Link to="/financials" className="dashboard-card-link">
+                View ledger
+              </Link>
+            </div>
+
+            {loading ? (
+              <p className="dashboard-empty">Loading...</p>
+            ) : soldHarvests.length === 0 ? (
+              <p className="dashboard-empty">No recorded sales yet — record a sale in Crops to see totals here.</p>
+            ) : (
+              <>
+                <div className="financial-summary-stats">
+                  <div>
+                    <span>Total Revenue</span>
+                    <strong>{financialTotals.revenue.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Total Cost</span>
+                    <strong>{financialTotals.cost.toFixed(2)}</strong>
+                  </div>
+                  <div>
+                    <span>Total Profit</span>
+                    <strong className={financialTotals.profit < 0 ? 'financials-negative' : ''}>
+                      {financialTotals.profit.toFixed(2)}
+                    </strong>
+                  </div>
+                </div>
+
+                <ProfitTrendChart data={profitTrend} />
+              </>
             )}
           </div>
 
           <div className="dashboard-card">
             <h2>
-              <AlertTriangle size={18} /> Low Stock Alerts
+              <AlertTriangle size={18} /> Weed Risk Alerts
             </h2>
+            <p className="dashboard-hint">
+              Estimated risk based on typical growth patterns, not a guarantee — inspect your field directly.
+            </p>
             {loading ? (
               <p className="dashboard-empty">Loading...</p>
-            ) : lowStockItems.length === 0 ? (
-              <p className="dashboard-empty">All input stock is above threshold.</p>
+            ) : weedRiskPlots.length === 0 ? (
+              <p className="dashboard-empty">No plots currently at high weed risk.</p>
             ) : (
               <ul className="alert-list">
-                {lowStockItems.map((item) => (
-                  <li key={item.id}>
-                    <Link to="/inputs" className="alert-item">
-                      <strong>{item.name}</strong>
-                      <span>
-                        {item.current_quantity} {item.unit} left (threshold {item.low_stock_threshold})
-                      </span>
+                {weedRiskPlots.map((entry) => (
+                  <li key={entry.plotId}>
+                    <Link to={`/land-plots?plot=${entry.plotId}`} className="alert-item">
+                      <strong>{entry.plotName}</strong>
+                      <span className="weed-risk-badge weed-risk-high">High risk</span>
                     </Link>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-
-          <div className="dashboard-card">
-            <h2>
-              <Users size={18} /> Livestock Flags
-            </h2>
-            {loading ? (
-              <p className="dashboard-empty">Loading...</p>
-            ) : recentHealthRecords.length === 0 ? (
-              <p className="dashboard-empty">No recent health records.</p>
-            ) : (
-              <ul className="alert-list">
-                {recentHealthRecords.map((record) => (
-                  <li key={record.id}>
-                    <Link to="/livestock" className="alert-item">
-                      <strong>{groupNameById[record.livestock_group_id] ?? 'Unknown group'}</strong>
-                      <span>{(record.details as { description: string }).description}</span>
-                      <span>{formatDate(record.date)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
-      </div>
-
-      <div className="dashboard-columns dashboard-columns-secondary">
-        <div className="dashboard-card">
-          <div className="dashboard-card-header">
-            <h2>
-              <DollarSign size={18} /> Harvest Profit Summary
-            </h2>
-            <Link to="/financials" className="dashboard-card-link">
-              View ledger
-            </Link>
-          </div>
-
-          {loading ? (
-            <p className="dashboard-empty">Loading...</p>
-          ) : soldHarvests.length === 0 ? (
-            <p className="dashboard-empty">No recorded sales yet — record a sale in Crops to see totals here.</p>
-          ) : (
-            <>
-              <div className="financial-summary-stats">
-                <div>
-                  <span>Total Revenue</span>
-                  <strong>{financialTotals.revenue.toFixed(2)}</strong>
-                </div>
-                <div>
-                  <span>Total Cost</span>
-                  <strong>{financialTotals.cost.toFixed(2)}</strong>
-                </div>
-                <div>
-                  <span>Total Profit</span>
-                  <strong className={financialTotals.profit < 0 ? 'financials-negative' : ''}>
-                    {financialTotals.profit.toFixed(2)}
-                  </strong>
-                </div>
-              </div>
-
-              <ProfitTrendChart data={profitTrend} />
-            </>
-          )}
-        </div>
-
-        <div className="dashboard-card">
-          <h2>
-            <AlertTriangle size={18} /> Weed Risk Alerts
-          </h2>
-          <p className="dashboard-hint">
-            Estimated risk based on typical growth patterns, not a guarantee — inspect your field directly.
-          </p>
-          {loading ? (
-            <p className="dashboard-empty">Loading...</p>
-          ) : weedRiskPlots.length === 0 ? (
-            <p className="dashboard-empty">No plots currently at high weed risk.</p>
-          ) : (
-            <ul className="alert-list">
-              {weedRiskPlots.map((entry) => (
-                <li key={entry.plotId}>
-                  <Link to={`/land-plots?plot=${entry.plotId}`} className="alert-item">
-                    <strong>{entry.plotName}</strong>
-                    <span className="weed-risk-badge weed-risk-high">High risk</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   )
 }

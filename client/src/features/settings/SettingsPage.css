@@ -1,0 +1,41 @@
+.settings-header {
+  margin-bottom: 20px;
+}
+
+.settings-header h1 {
+  font-family: var(--font-heading);
+  margin: 0;
+  font-size: 26px;
+}
+
+.settings-section {
+  background: var(--color-bg);
+  max-width: 480px;
+}
+
+.settings-section h2 {
+  font-size: 17px;
+  margin: 0 0 6px;
+}
+
+.settings-hint {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+
+.settings-error {
+  color: var(--color-error);
+  font-size: 14px;
+  margin: 16px 0 0;
+}
+
+.settings-saved {
+  color: var(--color-primary);
+  font-size: 14px;
+  margin: 16px 0 0;
+}
+
+.settings-save {
+  margin-top: 20px;
+}

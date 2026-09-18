@@ -2,22 +2,28 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
+import { useFarm } from '../lib/FarmContext'
+import type { FarmModule } from '../lib/farmApi'
 import LeafIcon from './LeafIcon'
 import './TopNav.css'
 
-const navItems = [
+const navItems: { to: string; label: string; module?: FarmModule }[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/land-plots', label: 'Plots' },
-  { to: '/crops', label: 'Crops' },
-  { to: '/inputs', label: 'Inputs' },
-  { to: '/livestock', label: 'Livestock' },
-  { to: '/aquaculture', label: 'Aquaculture' },
-  { to: '/perennials', label: 'Perennials' },
+  { to: '/crops', label: 'Crops', module: 'crops' },
+  { to: '/inputs', label: 'Inputs', module: 'crops' },
+  { to: '/livestock', label: 'Livestock', module: 'livestock' },
+  { to: '/aquaculture', label: 'Aquaculture', module: 'aquaculture' },
+  { to: '/perennials', label: 'Perennials', module: 'perennials' },
   { to: '/financials', label: 'Financials' },
+  { to: '/settings', label: 'Settings' },
 ]
 
 function TopNav() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { enabledModules } = useFarm()
+
+  const visibleNavItems = navItems.filter((item) => !item.module || enabledModules.includes(item.module))
 
   const handleLogout = () => {
     supabase.auth.signOut()
@@ -43,7 +49,7 @@ function TopNav() {
       </button>
 
       <nav className={menuOpen ? 'top-nav-links open' : 'top-nav-links'}>
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabaseClient'
+import { FarmProvider, useFarm } from './lib/FarmContext'
 import LoginPage from './features/auth/LoginPage'
 import AppLayout from './components/AppLayout'
 import ComingSoonPage from './components/ComingSoonPage'
+import RequireModule from './components/RequireModule'
+import ModuleSelectionPage from './features/onboarding/ModuleSelectionPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import LandPlotsPage from './features/landPlots/LandPlotsPage'
 import CropsPage from './features/crops/CropsPage'
@@ -13,6 +16,79 @@ import LivestockPage from './features/livestock/LivestockPage'
 import AquaculturePage from './features/aquaculture/AquaculturePage'
 import PerennialsPage from './features/perennials/PerennialsPage'
 import FinancialsPage from './features/financials/FinancialsPage'
+import SettingsPage from './features/settings/SettingsPage'
+
+function AppShell() {
+  const { farm, loading, error } = useFarm()
+
+  if (loading) {
+    return null
+  }
+
+  if (error) {
+    return <p style={{ padding: 24 }}>{error}</p>
+  }
+
+  if (farm && farm.enabled_modules === null) {
+    return <ModuleSelectionPage />
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/land-plots" element={<LandPlotsPage />} />
+          <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
+          <Route
+            path="/crops"
+            element={
+              <RequireModule module="crops">
+                <CropsPage />
+              </RequireModule>
+            }
+          />
+          <Route
+            path="/inputs"
+            element={
+              <RequireModule module="crops">
+                <InputsPage />
+              </RequireModule>
+            }
+          />
+          <Route
+            path="/livestock"
+            element={
+              <RequireModule module="livestock">
+                <LivestockPage />
+              </RequireModule>
+            }
+          />
+          <Route
+            path="/aquaculture"
+            element={
+              <RequireModule module="aquaculture">
+                <AquaculturePage />
+              </RequireModule>
+            }
+          />
+          <Route
+            path="/perennials"
+            element={
+              <RequireModule module="perennials">
+                <PerennialsPage />
+              </RequireModule>
+            }
+          />
+          <Route path="/financials" element={<FinancialsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -40,23 +116,9 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/land-plots" element={<LandPlotsPage />} />
-          <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
-          <Route path="/crops" element={<CropsPage />} />
-          <Route path="/inputs" element={<InputsPage />} />
-          <Route path="/livestock" element={<LivestockPage />} />
-          <Route path="/aquaculture" element={<AquaculturePage />} />
-          <Route path="/perennials" element={<PerennialsPage />} />
-          <Route path="/financials" element={<FinancialsPage />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <FarmProvider>
+      <AppShell />
+    </FarmProvider>
   )
 }
 
