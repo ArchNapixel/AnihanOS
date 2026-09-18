@@ -56,6 +56,10 @@ function LandPlotsPage() {
   const [viewingPlot, setViewingPlot] = useState<Plot | null>(null)
   const [saving, setSaving] = useState(false)
   const [isDrawingInProgress, setIsDrawingInProgress] = useState(false)
+  // Mobile-only: the map+floating-panel layout doesn't fit a phone screen,
+  // so below a breakpoint the two become full-screen tabs instead (see CSS).
+  // Ignored entirely on desktop.
+  const [mobileView, setMobileView] = useState<'map' | 'list'>('list')
 
   const loadAll = async () => {
     setLoading(true)
@@ -109,6 +113,11 @@ function LandPlotsPage() {
     }
   }
 
+  const flyToPlotAndShowMap = (plot: Plot) => {
+    flyToPlot(plot)
+    setMobileView('map')
+  }
+
   const openCreateForm = () => {
     setEditingPlot(null)
     setDraftBoundary(null)
@@ -147,7 +156,7 @@ function LandPlotsPage() {
       const saved = editingPlot ? await updatePlot(editingPlot.id, input) : await createPlot(input)
       closeForm()
       await loadAll()
-      flyToPlot(saved)
+      flyToPlotAndShowMap(saved)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save plot')
     } finally {
@@ -192,7 +201,16 @@ function LandPlotsPage() {
         />
       </div>
 
-      <div className="plots-panel">
+      <div className="plots-mobile-toggle">
+        <button type="button" className={mobileView === 'map' ? 'active' : ''} onClick={() => setMobileView('map')}>
+          Map
+        </button>
+        <button type="button" className={mobileView === 'list' ? 'active' : ''} onClick={() => setMobileView('list')}>
+          List
+        </button>
+      </div>
+
+      <div className={mobileView === 'list' ? 'plots-panel mobile-visible' : 'plots-panel'}>
         {panelMode === 'list' ? (
           <>
             <div className="plots-panel-header">
@@ -219,8 +237,11 @@ function LandPlotsPage() {
               ) : (
                 plots.map((plot) => (
                   <div className="plot-list-item" key={plot.id}>
-                    <button type="button" className="plot-list-button" onClick={() => flyToPlot(plot)}>
-                      <strong>{plot.name}</strong>
+                    <button type="button" className="plot-list-button" onClick={() => flyToPlotAndShowMap(plot)}>
+                      <strong>
+                        {plot.name}
+                        {plot.type === 'water' && <span className="plot-type-badge">Water</span>}
+                      </strong>
                       <span>
                         {plot.size} {plot.size_unit}
                         {plot.municipality ? ` · ${plot.municipality}` : ''}

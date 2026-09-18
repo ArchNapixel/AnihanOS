@@ -10,6 +10,9 @@ import LandPlotsPage from './features/landPlots/LandPlotsPage'
 import CropsPage from './features/crops/CropsPage'
 import InputsPage from './features/inputs/InputsPage'
 import LivestockPage from './features/livestock/LivestockPage'
+import AquaculturePage from './features/aquaculture/AquaculturePage'
+import PerennialsPage from './features/perennials/PerennialsPage'
+import FinancialsPage from './features/financials/FinancialsPage'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -47,6 +50,9 @@ function App() {
           <Route path="/crops" element={<CropsPage />} />
           <Route path="/inputs" element={<InputsPage />} />
           <Route path="/livestock" element={<LivestockPage />} />
+          <Route path="/aquaculture" element={<AquaculturePage />} />
+          <Route path="/perennials" element={<PerennialsPage />} />
+          <Route path="/financials" element={<FinancialsPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

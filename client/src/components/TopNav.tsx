@@ -11,6 +11,9 @@ const navItems = [
   { to: '/crops', label: 'Crops' },
   { to: '/inputs', label: 'Inputs' },
   { to: '/livestock', label: 'Livestock' },
+  { to: '/aquaculture', label: 'Aquaculture' },
+  { to: '/perennials', label: 'Perennials' },
+  { to: '/financials', label: 'Financials' },
 ]
 
 function TopNav() {

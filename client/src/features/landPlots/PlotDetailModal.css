@@ -1,3 +1,40 @@
+.plot-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.plot-detail-header h2 {
+  margin: 0;
+}
+
+.weed-risk-badge {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.weed-risk-low {
+  background: rgba(85, 100, 60, 0.2);
+  color: var(--color-primary);
+}
+
+.weed-risk-medium {
+  background: var(--color-alert-bg);
+  color: var(--color-alert-fg);
+}
+
+.weed-risk-high {
+  background: rgba(179, 65, 58, 0.15);
+  color: var(--color-error);
+}
+
 .plot-detail-list {
   margin: 20px 0 0;
   display: grid;

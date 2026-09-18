@@ -1,10 +1,13 @@
 import { supabase } from '../../lib/supabaseClient'
 import { getOrCreateDefaultFarm } from '../../lib/farmApi'
 
+export type PlotType = 'land' | 'water'
+
 export type Plot = {
   id: string
   farm_id: string
   name: string
+  type: PlotType
   size: number
   size_unit: string
   soil_type: string | null
@@ -18,6 +21,7 @@ export type Plot = {
 
 export type PlotInput = {
   name: string
+  type: PlotType
   size: number
   size_unit: string
   soil_type: string | null

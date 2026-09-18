@@ -7,6 +7,10 @@ export type CropType = {
   farm_id: string
   name: string
   growth_stages: GrowthStage[]
+  // Days after planting when this crop's canopy closes and starts
+  // shading out weeds on its own. Null means we don't know yet, in which
+  // case the weed-risk heuristic can't make a confident call.
+  canopy_closure_days: number | null
   created_at: string
   updated_at: string
 }
@@ -14,6 +18,7 @@ export type CropType = {
 export type CropTypeInput = {
   name: string
   growth_stages: GrowthStage[]
+  canopy_closure_days: number | null
 }
 
 export async function listCropTypes(): Promise<CropType[]> {

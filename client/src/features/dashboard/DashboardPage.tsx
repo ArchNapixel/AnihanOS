@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, Clock, Map, Package, Sprout, Users } from 'lucide-react'
+import { AlertTriangle, Clock, DollarSign, Map, Package, Sprout, Users } from 'lucide-react'
 import { getOrCreateDefaultFarm, type Farm } from '../../lib/farmApi'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
@@ -8,6 +8,9 @@ import { getCurrentStage, getProgressPercentage } from '../../lib/growthStage'
 import { listInputStock, type InputStock } from '../inputs/inputStockApi'
 import { listLivestockGroups, type LivestockGroup } from '../livestock/livestockGroupsApi'
 import { listRecentRecordsForFarm, type LivestockRecord } from '../livestock/livestockRecordsApi'
+import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
+import { listActivitiesForFarm, type FieldActivity } from '../crops/fieldActivitiesApi'
+import { computeWeedRisk } from '../../lib/weedRisk'
 import './DashboardPage.css'
 
 const today = new Date().toLocaleDateString(undefined, {
@@ -28,6 +31,8 @@ function DashboardPage() {
   const [inputStock, setInputStock] = useState<InputStock[]>([])
   const [livestockGroups, setLivestockGroups] = useState<LivestockGroup[]>([])
   const [recentRecords, setRecentRecords] = useState<LivestockRecord[]>([])
+  const [financials, setFinancials] = useState<CropCycleFinancials[]>([])
+  const [fieldActivities, setFieldActivities] = useState<FieldActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,19 +41,23 @@ function DashboardPage() {
       setLoading(true)
       setError(null)
       try {
-        const [farmData, plotsData, cyclesData, inputStockData, livestockGroupsData] = await Promise.all([
-          getOrCreateDefaultFarm(),
-          listPlots(),
-          listCropCycles(),
-          listInputStock(),
-          listLivestockGroups(),
-        ])
+        const [farmData, plotsData, cyclesData, inputStockData, livestockGroupsData, financialsData] =
+          await Promise.all([
+            getOrCreateDefaultFarm(),
+            listPlots(),
+            listCropCycles(),
+            listInputStock(),
+            listLivestockGroups(),
+            listCropCycleFinancials(),
+          ])
         setFarm(farmData)
         setPlots(plotsData)
         setCycles(cyclesData)
         setInputStock(inputStockData)
         setLivestockGroups(livestockGroupsData)
+        setFinancials(financialsData)
         setRecentRecords(await listRecentRecordsForFarm(livestockGroupsData.map((g) => g.id)))
+        setFieldActivities(await listActivitiesForFarm(plotsData.map((p) => p.id)))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard')
       } finally {
@@ -68,6 +77,53 @@ function DashboardPage() {
   const lowStockItems = inputStock.filter((item) => item.current_quantity <= item.low_stock_threshold)
   const recentHealthRecords = recentRecords.filter((r) => r.record_type === 'health').slice(0, 3)
   const groupNameById = Object.fromEntries(livestockGroups.map((g) => [g.id, g.animal_type]))
+
+  const soldHarvests = financials.filter((f) => f.revenue != null)
+  const financialTotals = soldHarvests.reduce(
+    (acc, f) => ({
+      revenue: acc.revenue + (f.revenue ?? 0),
+      cost: acc.cost + f.inputCost + (f.cycle.other_costs ?? 0),
+      profit: acc.profit + (f.profit ?? 0),
+    }),
+    { revenue: 0, cost: 0, profit: 0 },
+  )
+  const profitTrend = [...soldHarvests]
+    .sort((a, b) => (a.cycle.actual_harvest_date! < b.cycle.actual_harvest_date! ? -1 : 1))
+    .slice(-6)
+    .map((f) => ({ label: f.cycle.crop_types.name, profit: f.profit ?? 0 }))
+
+  const weedRiskPlots = useMemo(() => {
+    const lastWeedingByPlot = new globalThis.Map<string, string>()
+    for (const activity of fieldActivities) {
+      if (activity.activity_type !== 'weeding') continue
+      const existing = lastWeedingByPlot.get(activity.plot_id)
+      if (!existing || activity.date > existing) {
+        lastWeedingByPlot.set(activity.plot_id, activity.date)
+      }
+    }
+
+    const activeCycleByPlot = new globalThis.Map<string, CropCycle>()
+    for (const cycle of cycles) {
+      if (cycle.status === 'harvested') continue
+      const existing = activeCycleByPlot.get(cycle.plot_id)
+      if (!existing || existing.planting_date < cycle.planting_date) {
+        activeCycleByPlot.set(cycle.plot_id, cycle)
+      }
+    }
+
+    const results: { plotId: string; plotName: string }[] = []
+    for (const [plotId, cycle] of activeCycleByPlot) {
+      const risk = computeWeedRisk(
+        cycle.planting_date,
+        cycle.crop_types.canopy_closure_days,
+        lastWeedingByPlot.get(plotId) ?? null,
+      )
+      if (risk === 'high') {
+        results.push({ plotId, plotName: cycle.plots.name })
+      }
+    }
+    return results
+  }, [cycles, fieldActivities])
 
   return (
     <div className="dashboard-page">
@@ -246,7 +302,107 @@ function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <div className="dashboard-columns dashboard-columns-secondary">
+        <div className="dashboard-card">
+          <div className="dashboard-card-header">
+            <h2>
+              <DollarSign size={18} /> Harvest Profit Summary
+            </h2>
+            <Link to="/financials" className="dashboard-card-link">
+              View ledger
+            </Link>
+          </div>
+
+          {loading ? (
+            <p className="dashboard-empty">Loading...</p>
+          ) : soldHarvests.length === 0 ? (
+            <p className="dashboard-empty">No recorded sales yet — record a sale in Crops to see totals here.</p>
+          ) : (
+            <>
+              <div className="financial-summary-stats">
+                <div>
+                  <span>Total Revenue</span>
+                  <strong>{financialTotals.revenue.toFixed(2)}</strong>
+                </div>
+                <div>
+                  <span>Total Cost</span>
+                  <strong>{financialTotals.cost.toFixed(2)}</strong>
+                </div>
+                <div>
+                  <span>Total Profit</span>
+                  <strong className={financialTotals.profit < 0 ? 'financials-negative' : ''}>
+                    {financialTotals.profit.toFixed(2)}
+                  </strong>
+                </div>
+              </div>
+
+              <ProfitTrendChart data={profitTrend} />
+            </>
+          )}
+        </div>
+
+        <div className="dashboard-card">
+          <h2>
+            <AlertTriangle size={18} /> Weed Risk Alerts
+          </h2>
+          <p className="dashboard-hint">
+            Estimated risk based on typical growth patterns, not a guarantee — inspect your field directly.
+          </p>
+          {loading ? (
+            <p className="dashboard-empty">Loading...</p>
+          ) : weedRiskPlots.length === 0 ? (
+            <p className="dashboard-empty">No plots currently at high weed risk.</p>
+          ) : (
+            <ul className="alert-list">
+              {weedRiskPlots.map((entry) => (
+                <li key={entry.plotId}>
+                  <Link to={`/land-plots?plot=${entry.plotId}`} className="alert-item">
+                    <strong>{entry.plotName}</strong>
+                    <span className="weed-risk-badge weed-risk-high">High risk</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
+  )
+}
+
+function ProfitTrendChart({ data }: { data: { label: string; profit: number }[] }) {
+  if (data.length === 0) {
+    return <p className="dashboard-empty">Not enough sold harvests yet for a trend.</p>
+  }
+
+  const maxAbs = Math.max(1, ...data.map((d) => Math.abs(d.profit)))
+  const barWidth = 100 / data.length
+
+  return (
+    <svg viewBox="0 0 100 50" className="profit-trend-chart" preserveAspectRatio="none">
+      <line x1="0" y1="25" x2="100" y2="25" className="profit-trend-baseline" />
+      {data.map((d, i) => {
+        const barHeight = (Math.abs(d.profit) / maxAbs) * 22
+        const x = i * barWidth + barWidth * 0.2
+        const width = barWidth * 0.6
+        const y = d.profit >= 0 ? 25 - barHeight : 25
+        return (
+          <rect
+            key={i}
+            x={x}
+            y={y}
+            width={width}
+            height={Math.max(barHeight, 1)}
+            className={d.profit >= 0 ? 'profit-bar-positive' : 'profit-bar-negative'}
+          >
+            <title>
+              {d.label}: {d.profit.toFixed(2)}
+            </title>
+          </rect>
+        )
+      })}
+    </svg>
   )
 }
 

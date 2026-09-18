@@ -5,13 +5,18 @@ import {
   listCropCycles,
   createCropCycle,
   markCropCycleHarvested,
+  recordCropCycleSale,
   type CropCycle,
   type CropCycleInput,
   type HarvestInput,
+  type SaleInput,
 } from './cropCyclesApi'
+import { createFieldActivity, type FieldActivityInput } from './fieldActivitiesApi'
 import { getCurrentStage, type GrowthStage } from '../../lib/growthStage'
 import CropCycleFormModal from './CropCycleFormModal'
 import HarvestModal from './HarvestModal'
+import RecordSaleModal from './RecordSaleModal'
+import FieldActivityModal from './FieldActivityModal'
 import './CropsPage.css'
 
 function CropsPage() {
@@ -23,6 +28,8 @@ function CropsPage() {
   const [plotFilter, setPlotFilter] = useState<string>('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [harvestingCycle, setHarvestingCycle] = useState<CropCycle | null>(null)
+  const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
+  const [loggingActivityFor, setLoggingActivityFor] = useState<CropCycle | null>(null)
   const [saving, setSaving] = useState(false)
 
   const loadAll = async () => {
@@ -50,7 +57,7 @@ function CropsPage() {
 
   const handleSaveCycle = async (
     input: CropCycleInput,
-    newCropType: { name: string; growth_stages: GrowthStage[] } | null,
+    newCropType: { name: string; growth_stages: GrowthStage[]; canopy_closure_days: number | null } | null,
   ) => {
     setSaving(true)
     setError(null)
@@ -80,6 +87,34 @@ function CropsPage() {
       await loadAll()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to record harvest')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleRecordSale = async (input: SaleInput) => {
+    if (!sellingCycle) return
+    setSaving(true)
+    setError(null)
+    try {
+      await recordCropCycleSale(sellingCycle.id, input)
+      setSellingCycle(null)
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to record sale')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleLogActivity = async (input: FieldActivityInput) => {
+    setSaving(true)
+    setError(null)
+    try {
+      await createFieldActivity(input)
+      setLoggingActivityFor(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to log field activity')
     } finally {
       setSaving(false)
     }
@@ -128,6 +163,11 @@ function CropsPage() {
                 ? getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
                 : null
 
+            const revenue =
+              cycle.yield_amount != null && cycle.selling_price_per_unit != null
+                ? cycle.yield_amount * cycle.selling_price_per_unit
+                : null
+
             return (
               <div className="cycle-card" key={cycle.id}>
                 <div className="cycle-card-header">
@@ -145,6 +185,14 @@ function CropsPage() {
                         Yield: {cycle.yield_amount} {cycle.yield_unit}
                       </p>
                     )}
+                    {revenue != null ? (
+                      <p>Revenue: {revenue.toFixed(2)}</p>
+                    ) : (
+                      <p className="cycle-hint">Sale not recorded yet</p>
+                    )}
+                    <button type="button" className="btn-outline" onClick={() => setSellingCycle(cycle)}>
+                      {revenue != null ? 'Edit Sale' : 'Record Sale'}
+                    </button>
                   </>
                 ) : (
                   <>
@@ -155,9 +203,14 @@ function CropsPage() {
                         {stage.dayNumber})
                       </p>
                     )}
-                    <button type="button" className="btn-outline" onClick={() => setHarvestingCycle(cycle)}>
-                      Mark as Harvested
-                    </button>
+                    <div className="cycle-card-actions">
+                      <button type="button" className="btn-outline" onClick={() => setHarvestingCycle(cycle)}>
+                        Mark as Harvested
+                      </button>
+                      <button type="button" className="btn-outline" onClick={() => setLoggingActivityFor(cycle)}>
+                        Log Activity
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
@@ -182,6 +235,24 @@ function CropsPage() {
           saving={saving}
           onCancel={() => setHarvestingCycle(null)}
           onSave={handleHarvest}
+        />
+      )}
+
+      {sellingCycle && (
+        <RecordSaleModal
+          cycle={sellingCycle}
+          saving={saving}
+          onCancel={() => setSellingCycle(null)}
+          onSave={handleRecordSale}
+        />
+      )}
+
+      {loggingActivityFor && (
+        <FieldActivityModal
+          cycle={loggingActivityFor}
+          saving={saving}
+          onCancel={() => setLoggingActivityFor(null)}
+          onSave={handleLogActivity}
         />
       )}
     </div>

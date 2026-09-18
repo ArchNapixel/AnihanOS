@@ -264,3 +264,73 @@
   color: var(--color-text-muted);
   font-size: 12px;
 }
+
+.dashboard-columns-secondary {
+  margin-top: 20px;
+}
+
+.dashboard-hint {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin: -8px 0 16px;
+}
+
+.financials-negative {
+  color: var(--color-error);
+}
+
+.financial-summary-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.financial-summary-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.financial-summary-stats span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.financial-summary-stats strong {
+  font-family: var(--font-heading);
+  font-size: 18px;
+}
+
+.profit-trend-chart {
+  width: 100%;
+  height: 90px;
+}
+
+.profit-trend-baseline {
+  stroke: var(--color-text-muted);
+  stroke-width: 0.5;
+}
+
+.profit-bar-positive {
+  fill: var(--color-primary);
+}
+
+.profit-bar-negative {
+  fill: var(--color-error);
+}
+
+.weed-risk-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.weed-risk-high {
+  background: rgba(179, 65, 58, 0.15);
+  color: var(--color-error);
+}

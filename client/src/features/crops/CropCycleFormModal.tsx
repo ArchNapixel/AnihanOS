@@ -32,13 +32,18 @@ function CropCycleFormModal({
   cropTypes: CropType[]
   saving: boolean
   onCancel: () => void
-  onSave: (input: CropCycleInput, newCropType: { name: string; growth_stages: GrowthStage[] } | null) => void
+  onSave: (
+    input: CropCycleInput,
+    newCropType: { name: string; growth_stages: GrowthStage[]; canopy_closure_days: number | null } | null,
+  ) => void
 }) {
   const [plotId, setPlotId] = useState(plots[0]?.id ?? '')
   const [cropMode, setCropMode] = useState<'existing' | 'new'>(cropTypes.length > 0 ? 'existing' : 'new')
   const [selectedCropTypeId, setSelectedCropTypeId] = useState(cropTypes[0]?.id ?? '')
   const [newCropName, setNewCropName] = useState('')
   const [stageRows, setStageRows] = useState<StageRow[]>([{ name: '', amount: '', unit: 'months' }])
+  const [canopyAmount, setCanopyAmount] = useState('')
+  const [canopyUnit, setCanopyUnit] = useState<StageUnit>('months')
   const [plantingDate, setPlantingDate] = useState(todayIso())
   const [expectedHarvestDate, setExpectedHarvestDate] = useState('')
   const [autoExpectedHarvestDate, setAutoExpectedHarvestDate] = useState('')
@@ -68,6 +73,9 @@ function CropCycleFormModal({
 
     if (cropMode === 'new') {
       const growth_stages = parseStages(stageRows)
+      const canopy_closure_days = canopyAmount
+        ? Math.round(Number(canopyAmount) * (canopyUnit === 'months' ? 30 : 1))
+        : null
       onSave(
         {
           plot_id: plotId,
@@ -75,7 +83,7 @@ function CropCycleFormModal({
           planting_date: plantingDate,
           expected_harvest_date: expectedHarvestDate || null,
         },
-        { name: newCropName.trim(), growth_stages },
+        { name: newCropName.trim(), growth_stages, canopy_closure_days },
       )
     } else {
       onSave(
@@ -195,6 +203,29 @@ function CropCycleFormModal({
                 <button type="button" className="modal-cancel" onClick={addStageRow}>
                   + Add stage
                 </button>
+              </div>
+
+              <div className="modal-field">
+                <label htmlFor="canopy-amount">Weeding needed until (optional)</label>
+                <p className="modal-hint">
+                  How long after planting this crop still needs weeding, before its own leaves grow enough to shade
+                  weeds out on their own. Used to estimate weed risk later — leave blank if unsure.
+                </p>
+                <div className="stage-row">
+                  <input
+                    id="canopy-amount"
+                    type="number"
+                    min="0.1"
+                    step="0.1"
+                    value={canopyAmount}
+                    onChange={(e) => setCanopyAmount(e.target.value)}
+                    placeholder="Amount"
+                  />
+                  <select value={canopyUnit} onChange={(e) => setCanopyUnit(e.target.value as StageUnit)}>
+                    <option value="days">Days</option>
+                    <option value="months">Months</option>
+                  </select>
+                </div>
               </div>
             </>
           )}

@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react'
-import type { Plot } from './plotsApi'
+import type { Plot, PlotType } from './plotsApi'
 import './PlotDetailsForm.css'
 
 export type PlotDetailsInput = {
   name: string
+  type: PlotType
   size: number
   size_unit: string
   soil_type: string | null
@@ -28,6 +29,7 @@ function PlotDetailsForm({
   onSave: (input: PlotDetailsInput) => void
 }) {
   const [name, setName] = useState(initialValue?.name ?? '')
+  const [type, setType] = useState<PlotType>(initialValue?.type ?? 'land')
   const [size, setSize] = useState(initialValue ? String(initialValue.size) : '')
   const [sizeUnit, setSizeUnit] = useState(initialValue?.size_unit ?? 'hectares')
   const [soilType, setSoilType] = useState(initialValue?.soil_type ?? '')
@@ -37,9 +39,10 @@ function PlotDetailsForm({
     e.preventDefault()
     onSave({
       name: name.trim(),
+      type,
       size: Number(size),
       size_unit: sizeUnit,
-      soil_type: soilType.trim() || null,
+      soil_type: type === 'land' ? soilType.trim() || null : null,
       municipality: municipality.trim() || null,
     })
   }
@@ -47,12 +50,24 @@ function PlotDetailsForm({
   return (
     <form className="plot-details-form" onSubmit={handleSubmit}>
       <div className="plot-form-field">
-        <label htmlFor="plot-name">Land / plot name</label>
+        <label>Type</label>
+        <div className="plot-type-toggle">
+          <button type="button" className={type === 'land' ? 'active' : ''} onClick={() => setType('land')}>
+            Land
+          </button>
+          <button type="button" className={type === 'water' ? 'active' : ''} onClick={() => setType('water')}>
+            Water (pond/cage/pen)
+          </button>
+        </div>
+      </div>
+
+      <div className="plot-form-field">
+        <label htmlFor="plot-name">{type === 'water' ? 'Pond/Cage name' : 'Land / plot name'}</label>
         <input
           id="plot-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. North Field"
+          placeholder={type === 'water' ? 'e.g. Pond 1' : 'e.g. North Field'}
           required
         />
       </div>
@@ -82,15 +97,17 @@ function PlotDetailsForm({
         </div>
       </div>
 
-      <div className="plot-form-field">
-        <label htmlFor="plot-soil">Soil type</label>
-        <input
-          id="plot-soil"
-          value={soilType}
-          onChange={(e) => setSoilType(e.target.value)}
-          placeholder="e.g. clay loam (optional)"
-        />
-      </div>
+      {type === 'land' && (
+        <div className="plot-form-field">
+          <label htmlFor="plot-soil">Soil type</label>
+          <input
+            id="plot-soil"
+            value={soilType}
+            onChange={(e) => setSoilType(e.target.value)}
+            placeholder="e.g. clay loam (optional)"
+          />
+        </div>
+      )}
 
       <div className="plot-form-field">
         <label htmlFor="plot-municipality">Municipality/Town</label>
@@ -115,7 +132,7 @@ function PlotDetailsForm({
           ? '✏️ Finish this shape first — double-click the last corner (or click the first point again) to close it.'
           : hasBoundary
             ? '✓ Boundary drawn on the map.'
-            : 'Now draw this plot’s outline directly on the map behind this panel — click each corner once, then double-click the last one to finish.'}
+            : 'Now draw this plot’s outline on the map — click each corner once, then double-click the last one to finish. On a phone, switch to the Map tab to draw, then back to List to save.'}
       </p>
 
       <div className="plot-form-actions">

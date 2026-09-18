@@ -13,6 +13,8 @@ export type CropCycle = {
   yield_amount: number | null
   yield_unit: string | null
   status: CropCycleStatus
+  selling_price_per_unit: number | null
+  other_costs: number | null
   created_at: string
   updated_at: string
   crop_types: CropType
@@ -30,6 +32,11 @@ export type HarvestInput = {
   actual_harvest_date: string
   yield_amount: number
   yield_unit: string
+}
+
+export type SaleInput = {
+  selling_price_per_unit: number
+  other_costs: number
 }
 
 const SELECT_WITH_RELATIONS = '*, crop_types(*), plots(name)'
@@ -59,6 +66,18 @@ export async function markCropCycleHarvested(id: string, input: HarvestInput): P
   const { data, error } = await supabase
     .from('crop_cycles')
     .update({ ...input, status: 'harvested' })
+    .eq('id', id)
+    .select(SELECT_WITH_RELATIONS)
+    .single()
+
+  if (error) throw error
+  return data as unknown as CropCycle
+}
+
+export async function recordCropCycleSale(id: string, input: SaleInput): Promise<CropCycle> {
+  const { data, error } = await supabase
+    .from('crop_cycles')
+    .update(input)
     .eq('id', id)
     .select(SELECT_WITH_RELATIONS)
     .single()

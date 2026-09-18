@@ -100,6 +100,20 @@
 
 .plot-list-button strong {
   font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plot-type-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(59, 130, 168, 0.18);
+  color: #2f6f8f;
 }
 
 .plot-list-button span {
@@ -124,11 +138,58 @@
   padding: 0;
 }
 
-@media (max-width: 480px) {
-  .plots-panel {
+.plots-mobile-toggle {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  /* Below this width there isn't room for both a floating panel and a
+     usable map at once — they become full-screen tabs instead. */
+  .plots-mobile-toggle {
+    display: flex;
+    gap: 4px;
+    position: absolute;
     top: 12px;
     right: 12px;
-    bottom: 12px;
-    width: calc(100vw - 24px);
+    background: var(--color-surface);
+    border-radius: 999px;
+    padding: 4px;
+    z-index: 6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .plots-mobile-toggle button {
+    border: none;
+    background: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+  }
+
+  .plots-mobile-toggle button.active {
+    background: var(--color-primary);
+    color: #f5f0e2;
+  }
+
+  .plots-panel {
+    display: none;
+  }
+
+  .plots-panel.mobile-visible {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    width: auto;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .plots-panel-header {
+    padding-top: 60px;
   }
 }
