@@ -106,3 +106,24 @@
   padding: 8px;
   border-bottom: 1px solid rgba(47, 42, 31, 0.08);
 }
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-card {
+    padding: 20px;
+  }
+
+  .modal-field-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .usage-history-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

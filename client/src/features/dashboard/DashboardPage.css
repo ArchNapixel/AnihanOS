@@ -72,6 +72,30 @@
   align-items: start;
 }
 
+@media (max-width: 900px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .plots-overview-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card {
+    padding: 14px 16px;
+  }
+}
+
 .dashboard-side {
   display: flex;
   flex-direction: column;

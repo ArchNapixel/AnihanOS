@@ -73,3 +73,10 @@
   font-family: var(--font-body);
   cursor: pointer;
 }
+
+@media (max-width: 480px) {
+  .plot-form-field-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

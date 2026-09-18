@@ -72,3 +72,13 @@
   opacity: 0.3;
   cursor: default;
 }
+
+@media (max-width: 480px) {
+  .stage-row {
+    flex-wrap: wrap;
+  }
+
+  .stage-row input:first-child {
+    flex: 1 1 100%;
+  }
+}

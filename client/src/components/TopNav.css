@@ -72,3 +72,57 @@
 .top-nav-logout:hover {
   background: var(--color-surface);
 }
+
+.top-nav-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .top-nav {
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .top-nav-brand-name {
+    font-size: 16px;
+  }
+
+  .top-nav-menu-toggle {
+    display: flex;
+  }
+
+  .top-nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex: none;
+    flex-direction: column;
+    gap: 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid rgba(47, 42, 31, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    padding: 8px 0;
+  }
+
+  .top-nav-links.open {
+    display: flex;
+  }
+
+  .top-nav-link {
+    padding: 14px 20px;
+  }
+
+  .top-nav-logout {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
