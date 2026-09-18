@@ -1,3 +1,7 @@
+.crop-cycle-modal {
+  max-width: 760px;
+}
+
 .crop-mode-toggle {
   display: flex;
   gap: 8px;

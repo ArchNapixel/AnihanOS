@@ -44,6 +44,54 @@
   font-size: 14px;
 }
 
+.crop-plot-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.crop-plot-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.crop-plot-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crop-plot-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--color-text-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.crop-plot-drag-handle:active {
+  cursor: grabbing;
+}
+
+.crop-plot-group-header h2 {
+  margin: 0 0 2px;
+  font-size: 18px;
+  font-family: var(--font-heading);
+}
+
+.crop-plot-group-meta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
 .cycle-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -89,12 +137,6 @@
   color: var(--color-alert-fg);
 }
 
-.cycle-plot-name {
-  color: var(--color-text-muted);
-  font-size: 13px;
-  margin: 0 0 8px;
-}
-
 .cycle-card p {
   margin: 4px 0;
   font-size: 14px;
@@ -123,4 +165,15 @@
 
 .cycle-card-actions .btn-outline {
   margin-top: 0;
+}
+
+.cycle-card-actions button:not(.btn-outline) {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
 }

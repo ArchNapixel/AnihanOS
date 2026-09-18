@@ -2,6 +2,16 @@ import { supabase } from '../../lib/supabaseClient'
 import { getOrCreateDefaultFarm } from '../../lib/farmApi'
 import type { GrowthStage } from '../../lib/growthStage'
 
+export type FertilizingStage = {
+  name: string
+  // Days after planting. offset_days_end null means a single point in time
+  // or an open-ended stage (e.g. "90 days to 7+ months").
+  offset_days_start: number
+  offset_days_end: number | null
+  nutrients: string
+  purpose: string
+}
+
 export type CropType = {
   id: string
   farm_id: string
@@ -11,6 +21,9 @@ export type CropType = {
   // shading out weeds on its own. Null means we don't know yet, in which
   // case the weed-risk heuristic can't make a confident call.
   canopy_closure_days: number | null
+  description: string | null
+  harvest_estimate_note: string | null
+  fertilizing_schedule: FertilizingStage[]
   created_at: string
   updated_at: string
 }
@@ -19,6 +32,9 @@ export type CropTypeInput = {
   name: string
   growth_stages: GrowthStage[]
   canopy_closure_days: number | null
+  description: string | null
+  harvest_estimate_note: string | null
+  fertilizing_schedule: FertilizingStage[]
 }
 
 export async function listCropTypes(): Promise<CropType[]> {
@@ -42,6 +58,13 @@ export async function createCropType(input: CropTypeInput): Promise<CropType> {
     .insert({ farm_id: farmId, ...input })
     .select('*')
     .single()
+
+  if (error) throw error
+  return data as CropType
+}
+
+export async function updateCropType(id: string, input: CropTypeInput): Promise<CropType> {
+  const { data, error } = await supabase.from('crop_types').update(input).eq('id', id).select('*').single()
 
   if (error) throw error
   return data as CropType

@@ -1,0 +1,50 @@
+.plot-usage-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.plot-usage-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.plot-usage-group-header h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.plot-usage-group-header span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+.plot-usage-type-cell {
+  text-transform: capitalize;
+}
+
+.plot-usage-recommended {
+  margin-bottom: 10px;
+}
+
+.plot-usage-recommended-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin: 0 0 4px;
+}
+
+.plot-usage-group-total {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin: 4px 0 0;
+}

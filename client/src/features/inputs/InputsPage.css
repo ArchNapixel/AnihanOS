@@ -96,3 +96,40 @@
   cursor: pointer;
   padding: 0;
 }
+
+.inputs-plot-section {
+  margin-top: 36px;
+}
+
+.inputs-plot-section h2 {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+
+.inputs-plot-hint {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 0 0 16px;
+}
+
+.inputs-plot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputs-plot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--color-surface);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+
+.inputs-plot-row span {
+  font-size: 14px;
+  font-weight: 600;
+}

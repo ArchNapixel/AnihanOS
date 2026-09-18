@@ -15,6 +15,8 @@
   padding: 32px;
   width: 100%;
   max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
@@ -61,7 +63,8 @@
 }
 
 .modal-field input,
-.modal-field select {
+.modal-field select,
+.modal-field textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 10px 14px;
@@ -71,6 +74,10 @@
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: 14px;
+}
+
+.modal-field textarea {
+  resize: vertical;
 }
 
 .modal-field-row {
@@ -114,6 +121,7 @@
 
   .modal-card {
     padding: 20px;
+    max-height: 90vh;
   }
 
   .modal-field-row {

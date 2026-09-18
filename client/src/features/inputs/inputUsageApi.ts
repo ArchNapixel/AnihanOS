@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient'
-import type { InputStock } from './inputStockApi'
+import type { InputStock, InputType } from './inputStockApi'
 
 export type InputUsageLog = {
   id: string
@@ -48,4 +48,28 @@ export async function listUsageForStock(stockId: string): Promise<InputUsageLog[
 
   if (error) throw error
   return data as unknown as InputUsageLog[]
+}
+
+export type PlotInputUsageLog = {
+  id: string
+  input_stock_id: string
+  crop_cycle_id: string | null
+  quantity_used: number
+  date_used: string
+  cost: number | null
+  input_stock: { name: string; type: InputType; unit: string }
+  crop_cycles: { planting_date: string; crop_types: { name: string } } | null
+}
+
+export async function listUsageForPlot(plotId: string): Promise<PlotInputUsageLog[]> {
+  const { data, error } = await supabase
+    .from('input_usage_logs')
+    .select(
+      'id, input_stock_id, crop_cycle_id, quantity_used, date_used, cost, input_stock(name, type, unit), crop_cycles(planting_date, crop_types(name))',
+    )
+    .eq('plot_id', plotId)
+    .order('date_used', { ascending: true })
+
+  if (error) throw error
+  return data as unknown as PlotInputUsageLog[]
 }

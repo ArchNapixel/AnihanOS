@@ -15,6 +15,7 @@ export type Plot = {
   latitude: number | null
   longitude: number | null
   boundary: GeoJSON.Polygon | null
+  sort_order: number
   created_at: string
   updated_at: string
 }
@@ -38,7 +39,7 @@ export async function listPlots(): Promise<Plot[]> {
     .from('plots')
     .select('*')
     .eq('farm_id', farmId)
-    .order('created_at', { ascending: false })
+    .order('sort_order', { ascending: true })
 
   if (error) throw error
   return data as Plot[]
@@ -47,14 +48,33 @@ export async function listPlots(): Promise<Plot[]> {
 export async function createPlot(input: PlotInput): Promise<Plot> {
   const { id: farmId } = await getOrCreateDefaultFarm()
 
+  const { data: lastPlot, error: lastPlotError } = await supabase
+    .from('plots')
+    .select('sort_order')
+    .eq('farm_id', farmId)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (lastPlotError) throw lastPlotError
+  const nextSortOrder = (lastPlot?.sort_order ?? -1) + 1
+
   const { data, error } = await supabase
     .from('plots')
-    .insert({ farm_id: farmId, ...input })
+    .insert({ farm_id: farmId, ...input, sort_order: nextSortOrder })
     .select('*')
     .single()
 
   if (error) throw error
   return data as Plot
+}
+
+export async function reorderPlots(farmId: string, orderedIds: string[]): Promise<void> {
+  const results = await Promise.all(
+    orderedIds.map((id, index) => supabase.from('plots').update({ sort_order: index }).eq('id', id).eq('farm_id', farmId)),
+  )
+  const failed = results.find((r) => r.error)
+  if (failed?.error) throw failed.error
 }
 
 export async function updatePlot(id: string, input: PlotInput): Promise<Plot> {

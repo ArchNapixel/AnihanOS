@@ -62,6 +62,23 @@ export async function createCropCycle(input: CropCycleInput): Promise<CropCycle>
   return data as unknown as CropCycle
 }
 
+export async function updateCropCycle(id: string, input: CropCycleInput): Promise<CropCycle> {
+  const { data, error } = await supabase
+    .from('crop_cycles')
+    .update(input)
+    .eq('id', id)
+    .select(SELECT_WITH_RELATIONS)
+    .single()
+
+  if (error) throw error
+  return data as unknown as CropCycle
+}
+
+export async function deleteCropCycle(id: string): Promise<void> {
+  const { error } = await supabase.from('crop_cycles').delete().eq('id', id)
+  if (error) throw error
+}
+
 export async function markCropCycleHarvested(id: string, input: HarvestInput): Promise<CropCycle> {
   const { data, error } = await supabase
     .from('crop_cycles')

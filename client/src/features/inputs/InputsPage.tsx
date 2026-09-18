@@ -13,6 +13,7 @@ import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
 import InputStockFormModal from './InputStockFormModal'
 import LogUsageModal from './LogUsageModal'
 import UsageHistoryModal from './UsageHistoryModal'
+import PlotInputHistoryModal from './PlotInputHistoryModal'
 import './InputsPage.css'
 
 function InputsPage() {
@@ -25,6 +26,7 @@ function InputsPage() {
   const [editingStock, setEditingStock] = useState<InputStock | null>(null)
   const [loggingUsageFor, setLoggingUsageFor] = useState<InputStock | null>(null)
   const [historyFor, setHistoryFor] = useState<InputStock | null>(null)
+  const [plotHistoryFor, setPlotHistoryFor] = useState<Plot | null>(null)
   const [saving, setSaving] = useState(false)
   const [usageError, setUsageError] = useState<string | null>(null)
 
@@ -160,6 +162,26 @@ function InputsPage() {
         </div>
       )}
 
+      {plots.length > 0 && (
+        <div className="inputs-plot-section">
+          <h2>Usage by Plot</h2>
+          <p className="inputs-plot-hint">
+            See every fertilizer, pesticide, and other input applied to a plot, in order, from planting through
+            harvest.
+          </p>
+          <div className="inputs-plot-list">
+            {plots.map((plot) => (
+              <div className="inputs-plot-row" key={plot.id}>
+                <span>{plot.name}</span>
+                <button type="button" className="btn-outline" onClick={() => setPlotHistoryFor(plot)}>
+                  View Breakdown
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {formOpen && (
         <InputStockFormModal initialValue={editingStock} saving={saving} onCancel={closeForm} onSave={handleSave} />
       )}
@@ -180,6 +202,14 @@ function InputsPage() {
       )}
 
       {historyFor && <UsageHistoryModal stock={historyFor} onClose={() => setHistoryFor(null)} />}
+
+      {plotHistoryFor && (
+        <PlotInputHistoryModal
+          plot={plotHistoryFor}
+          cropCycles={cropCycles}
+          onClose={() => setPlotHistoryFor(null)}
+        />
+      )}
     </div>
   )
 }

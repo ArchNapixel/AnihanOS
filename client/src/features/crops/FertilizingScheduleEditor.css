@@ -1,0 +1,88 @@
+.fertilizing-stage-row {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fertilizing-stage-row-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fertilizing-stage-row-top input {
+  flex: 1;
+  min-width: 0;
+}
+
+.fertilizing-stage-timing {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.fertilizing-range-toggle {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.fertilizing-range-toggle button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.fertilizing-range-toggle button.active {
+  background: var(--color-primary);
+  color: #f5f0e2;
+}
+
+.fertilizing-stage-days {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.fertilizing-stage-days input {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.fertilizing-stage-days span {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.fertilizing-stage-row input {
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+@media (max-width: 480px) {
+  .fertilizing-stage-timing {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

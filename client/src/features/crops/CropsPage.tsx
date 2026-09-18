@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react'
-import { listPlots, type Plot } from '../landPlots/plotsApi'
-import { listCropTypes, createCropType, type CropType } from './cropTypesApi'
+import { useEffect, useMemo, useState } from 'react'
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { listPlots, reorderPlots, type Plot } from '../landPlots/plotsApi'
+import { listCropTypes, createCropType, updateCropType, type CropType } from './cropTypesApi'
 import {
   listCropCycles,
   createCropCycle,
+  updateCropCycle,
+  deleteCropCycle,
   markCropCycleHarvested,
   recordCropCycleSale,
   type CropCycle,
@@ -12,21 +16,27 @@ import {
   type SaleInput,
 } from './cropCyclesApi'
 import { createFieldActivity, type FieldActivityInput } from './fieldActivitiesApi'
-import { getCurrentStage, type GrowthStage } from '../../lib/growthStage'
-import CropCycleFormModal from './CropCycleFormModal'
+import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
+import { useFarm } from '../../lib/FarmContext'
+import CropPlotGroup from './CropPlotGroup'
+import CropCycleFormModal, { type CropTypeAction } from './CropCycleFormModal'
 import HarvestModal from './HarvestModal'
 import RecordSaleModal from './RecordSaleModal'
 import FieldActivityModal from './FieldActivityModal'
 import './CropsPage.css'
 
 function CropsPage() {
+  const { farm } = useFarm()
   const [plots, setPlots] = useState<Plot[]>([])
   const [cropTypes, setCropTypes] = useState<CropType[]>([])
   const [cycles, setCycles] = useState<CropCycle[]>([])
+  const [financials, setFinancials] = useState<CropCycleFinancials[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [plotFilter, setPlotFilter] = useState<string>('all')
   const [modalOpen, setModalOpen] = useState(false)
+  const [editingCycle, setEditingCycle] = useState<CropCycle | null>(null)
+  const [createForPlotId, setCreateForPlotId] = useState<string | undefined>(undefined)
   const [harvestingCycle, setHarvestingCycle] = useState<CropCycle | null>(null)
   const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
   const [loggingActivityFor, setLoggingActivityFor] = useState<CropCycle | null>(null)
@@ -36,14 +46,16 @@ function CropsPage() {
     setLoading(true)
     setError(null)
     try {
-      const [plotsData, cropTypesData, cyclesData] = await Promise.all([
+      const [plotsData, cropTypesData, cyclesData, financialsData] = await Promise.all([
         listPlots(),
         listCropTypes(),
         listCropCycles(),
+        listCropCycleFinancials(),
       ])
       setPlots(plotsData)
       setCropTypes(cropTypesData)
       setCycles(cyclesData)
+      setFinancials(financialsData)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load crop cycles')
     } finally {
@@ -55,25 +67,103 @@ function CropsPage() {
     loadAll()
   }, [])
 
-  const handleSaveCycle = async (
-    input: CropCycleInput,
-    newCropType: { name: string; growth_stages: GrowthStage[]; canopy_closure_days: number | null } | null,
-  ) => {
+  const financialsByCycleId = useMemo(
+    () => Object.fromEntries(financials.map((f) => [f.cycle.id, f])),
+    [financials],
+  )
+
+  const groupedByPlot = useMemo(() => {
+    const cyclesByPlotId = new Map<string, CropCycle[]>()
+    for (const cycle of cycles) {
+      const list = cyclesByPlotId.get(cycle.plot_id) ?? []
+      list.push(cycle)
+      cyclesByPlotId.set(cycle.plot_id, list)
+    }
+    return plots
+      .filter((plot) => plotFilter === 'all' || plot.id === plotFilter)
+      .map((plot) => ({ plot, cycles: cyclesByPlotId.get(plot.id) ?? [] }))
+  }, [plots, cycles, plotFilter])
+
+  const dragEnabled = plotFilter === 'all' && groupedByPlot.length > 1
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    setPlots((current) => {
+      const oldIndex = current.findIndex((p) => p.id === active.id)
+      const newIndex = current.findIndex((p) => p.id === over.id)
+      const reordered = arrayMove(current, oldIndex, newIndex)
+      if (farm) {
+        reorderPlots(
+          farm.id,
+          reordered.map((p) => p.id),
+        ).catch((err) => {
+          setError(err instanceof Error ? err.message : 'Failed to save plot order')
+        })
+      }
+      return reordered
+    })
+  }
+
+  const openCreateForm = (plotId?: string) => {
+    setEditingCycle(null)
+    setCreateForPlotId(plotId)
+    setModalOpen(true)
+  }
+
+  const openEditForm = (cycle: CropCycle) => {
+    setEditingCycle(cycle)
+    setCreateForPlotId(undefined)
+    setModalOpen(true)
+  }
+
+  const closeForm = () => {
+    setModalOpen(false)
+    setEditingCycle(null)
+    setCreateForPlotId(undefined)
+  }
+
+  const handleSaveCycle = async (input: CropCycleInput, cropTypeAction: CropTypeAction) => {
     setSaving(true)
     setError(null)
     try {
       let cropTypeId = input.crop_type_id
-      if (newCropType) {
-        const created = await createCropType(newCropType)
+      if (cropTypeAction.kind === 'create') {
+        const created = await createCropType(cropTypeAction.input)
         cropTypeId = created.id
+      } else {
+        const updated = await updateCropType(cropTypeAction.id, cropTypeAction.input)
+        cropTypeId = updated.id
+        setCropTypes((current) => current.map((c) => (c.id === updated.id ? updated : c)))
       }
-      await createCropCycle({ ...input, crop_type_id: cropTypeId })
-      setModalOpen(false)
+      if (editingCycle) {
+        await updateCropCycle(editingCycle.id, { ...input, crop_type_id: cropTypeId })
+      } else {
+        await createCropCycle({ ...input, crop_type_id: cropTypeId })
+      }
+      closeForm()
       await loadAll()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save crop cycle')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteCycle = async (cycle: CropCycle) => {
+    const confirmed = window.confirm(
+      `Delete this ${cycle.crop_types.name} cycle on ${cycle.plots.name}? This cannot be undone.`,
+    )
+    if (!confirmed) return
+
+    setError(null)
+    try {
+      await deleteCropCycle(cycle.id)
+      await loadAll()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete crop cycle')
     }
   }
 
@@ -120,20 +210,13 @@ function CropsPage() {
     }
   }
 
-  const visibleCycles = plotFilter === 'all' ? cycles : cycles.filter((c) => c.plot_id === plotFilter)
-
   return (
     <div className="crops-page">
       <div className="crops-header">
         <h1>Crop Inventory & Lifecycle</h1>
-        <button type="button" className="btn-primary" onClick={() => setModalOpen(true)} disabled={plots.length === 0}>
-          + Add Crop Cycle
-        </button>
       </div>
 
-      {plots.length === 0 && (
-        <p className="crops-empty">Add a plot in Plots before creating a crop cycle.</p>
-      )}
+      {plots.length === 0 && <p className="crops-empty">Add a plot in Plots before creating a crop cycle.</p>}
 
       {error && <p className="crops-error">{error}</p>}
 
@@ -153,78 +236,41 @@ function CropsPage() {
 
       {loading ? (
         <p className="crops-empty">Loading...</p>
-      ) : visibleCycles.length === 0 ? (
-        <p className="crops-empty">No crop cycles yet.</p>
       ) : (
-        <div className="cycle-grid">
-          {visibleCycles.map((cycle) => {
-            const stage =
-              cycle.status !== 'harvested'
-                ? getCurrentStage(cycle.planting_date, cycle.crop_types.growth_stages)
-                : null
-
-            const revenue =
-              cycle.yield_amount != null && cycle.selling_price_per_unit != null
-                ? cycle.yield_amount * cycle.selling_price_per_unit
-                : null
-
-            return (
-              <div className="cycle-card" key={cycle.id}>
-                <div className="cycle-card-header">
-                  <h2>{cycle.crop_types.name}</h2>
-                  <span className={`cycle-status cycle-status-${cycle.status}`}>{cycle.status}</span>
-                </div>
-                <p className="cycle-plot-name">{cycle.plots.name}</p>
-                <p>Planted: {cycle.planting_date}</p>
-
-                {cycle.status === 'harvested' ? (
-                  <>
-                    <p>Harvested: {cycle.actual_harvest_date}</p>
-                    {cycle.yield_amount != null && (
-                      <p>
-                        Yield: {cycle.yield_amount} {cycle.yield_unit}
-                      </p>
-                    )}
-                    {revenue != null ? (
-                      <p>Revenue: {revenue.toFixed(2)}</p>
-                    ) : (
-                      <p className="cycle-hint">Sale not recorded yet</p>
-                    )}
-                    <button type="button" className="btn-outline" onClick={() => setSellingCycle(cycle)}>
-                      {revenue != null ? 'Edit Sale' : 'Record Sale'}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {cycle.expected_harvest_date && <p>Expected harvest: {cycle.expected_harvest_date}</p>}
-                    {stage?.stage && (
-                      <p className="cycle-stage">
-                        {stage.readyForHarvest ? 'Ready for harvest' : `Stage: ${stage.stage.name}`} (day{' '}
-                        {stage.dayNumber})
-                      </p>
-                    )}
-                    <div className="cycle-card-actions">
-                      <button type="button" className="btn-outline" onClick={() => setHarvestingCycle(cycle)}>
-                        Mark as Harvested
-                      </button>
-                      <button type="button" className="btn-outline" onClick={() => setLoggingActivityFor(cycle)}>
-                        Log Activity
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={groupedByPlot.map(({ plot }) => plot.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="crop-plot-groups">
+              {groupedByPlot.map(({ plot, cycles: plotCycles }) => (
+                <CropPlotGroup
+                  key={plot.id}
+                  plot={plot}
+                  cycles={plotCycles}
+                  financialsByCycleId={financialsByCycleId}
+                  dragEnabled={dragEnabled}
+                  onAddCycle={() => openCreateForm(plot.id)}
+                  onHarvest={(cycle) => setHarvestingCycle(cycle)}
+                  onRecordSale={(cycle) => setSellingCycle(cycle)}
+                  onLogActivity={(cycle) => setLoggingActivityFor(cycle)}
+                  onEdit={(cycle) => openEditForm(cycle)}
+                  onDelete={(cycle) => handleDeleteCycle(cycle)}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {modalOpen && (
         <CropCycleFormModal
+          initialValue={editingCycle}
+          initialPlotId={createForPlotId}
           plots={plots}
           cropTypes={cropTypes}
           saving={saving}
-          onCancel={() => setModalOpen(false)}
+          onCancel={closeForm}
           onSave={handleSaveCycle}
         />
       )}
