@@ -13,6 +13,12 @@
   font-size: 26px;
 }
 
+.inputs-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .inputs-error {
   color: var(--color-error);
   margin-bottom: 16px;
@@ -22,32 +28,34 @@
   color: var(--color-text-muted);
 }
 
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.input-card {
+.input-table-wrap {
+  overflow-x: auto;
   background: var(--color-surface);
   border-radius: 16px;
-  padding: 20px;
+  padding: 8px;
 }
 
-.input-card-low {
-  background: var(--color-alert-bg);
+.input-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
-.input-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
+.input-table th {
+  text-align: left;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  padding: 10px 14px;
 }
 
-.input-card-header h2 {
-  margin: 0;
-  font-size: 17px;
+.input-table td {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(47, 42, 31, 0.08);
+}
+
+.input-row-low td:nth-child(3) {
+  color: var(--color-alert-fg);
 }
 
 .input-type-badge {
@@ -61,32 +69,17 @@
   color: var(--color-text-muted);
 }
 
-.input-card p {
-  margin: 4px 0;
-  font-size: 14px;
-  color: var(--color-text-muted);
-}
-
-.input-quantity {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--color-text) !important;
-}
-
 .input-low-flag {
   color: var(--color-alert-fg);
   font-weight: 600;
-  font-size: 13px;
 }
 
-.input-card-actions {
-  margin-top: 12px;
+.input-row-actions {
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
 }
 
-.input-card-actions button {
+.input-row-actions button {
   background: none;
   border: none;
   color: var(--color-accent);
@@ -123,6 +116,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   background: var(--color-surface);
   border-radius: 14px;
@@ -132,4 +126,22 @@
 .inputs-plot-row span {
   font-size: 14px;
   font-weight: 600;
+}
+
+.inputs-plot-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.inputs-plot-row-actions button:not(.btn-outline) {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
 }

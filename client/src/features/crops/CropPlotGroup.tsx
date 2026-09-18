@@ -12,6 +12,7 @@ function CropPlotGroup({
   financialsByCycleId,
   dragEnabled,
   onAddCycle,
+  onViewHistory,
   onHarvest,
   onRecordSale,
   onLogActivity,
@@ -23,12 +24,15 @@ function CropPlotGroup({
   financialsByCycleId: Record<string, CropCycleFinancials>
   dragEnabled: boolean
   onAddCycle: () => void
+  onViewHistory: () => void
   onHarvest: (cycle: CropCycle) => void
   onRecordSale: (cycle: CropCycle) => void
   onLogActivity: (cycle: CropCycle) => void
   onEdit: (cycle: CropCycle) => void
   onDelete: (cycle: CropCycle) => void
 }) {
+  const activeCycles = cycles.filter((cycle) => cycle.status !== 'harvested')
+  const harvestedCycles = cycles.filter((cycle) => cycle.status === 'harvested')
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: plot.id,
     disabled: !dragEnabled,
@@ -59,21 +63,28 @@ function CropPlotGroup({
             <h2>{plot.name}</h2>
             <span className="crop-plot-group-meta">
               {plot.size} {plot.size_unit}
-              {plot.municipality ? ` · ${plot.municipality}` : ''} · {cycles.length} cycle
-              {cycles.length === 1 ? '' : 's'}
+              {plot.municipality ? ` · ${plot.municipality}` : ''} · {activeCycles.length} active cycle
+              {activeCycles.length === 1 ? '' : 's'}
             </span>
           </div>
         </div>
-        <button type="button" className="btn-outline" onClick={onAddCycle}>
-          + Add Cycle
-        </button>
+        <div className="crop-plot-group-actions">
+          {harvestedCycles.length > 0 && (
+            <button type="button" className="btn-outline" onClick={onViewHistory}>
+              Cycle History Logs
+            </button>
+          )}
+          <button type="button" className="btn-outline" onClick={onAddCycle}>
+            + Add Cycle
+          </button>
+        </div>
       </div>
 
-      {cycles.length === 0 ? (
-        <p className="crops-empty">No crop cycles on this plot yet.</p>
+      {activeCycles.length === 0 ? (
+        <p className="crops-empty">No active crop cycles on this plot.</p>
       ) : (
         <div className="cycle-grid">
-          {cycles.map((cycle) => (
+          {activeCycles.map((cycle) => (
             <CropCycleCard
               key={cycle.id}
               cycle={cycle}

@@ -92,9 +92,15 @@
   font-size: 13px;
 }
 
+.crop-plot-group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .cycle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
@@ -147,33 +153,7 @@
   font-weight: 600;
 }
 
-.cycle-card .btn-outline {
-  margin-top: 12px;
-}
-
 .cycle-hint {
   color: var(--color-text-muted);
   font-style: italic;
-}
-
-.cycle-card-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.cycle-card-actions .btn-outline {
-  margin-top: 0;
-}
-
-.cycle-card-actions button:not(.btn-outline) {
-  background: none;
-  border: none;
-  color: var(--color-accent);
-  font-weight: 600;
-  font-family: var(--font-body);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
 }

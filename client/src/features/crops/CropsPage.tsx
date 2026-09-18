@@ -23,6 +23,7 @@ import CropCycleFormModal, { type CropTypeAction } from './CropCycleFormModal'
 import HarvestModal from './HarvestModal'
 import RecordSaleModal from './RecordSaleModal'
 import FieldActivityModal from './FieldActivityModal'
+import PlotCycleHistoryModal from '../../components/PlotCycleHistoryModal'
 import './CropsPage.css'
 
 function CropsPage() {
@@ -40,6 +41,7 @@ function CropsPage() {
   const [harvestingCycle, setHarvestingCycle] = useState<CropCycle | null>(null)
   const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
   const [loggingActivityFor, setLoggingActivityFor] = useState<CropCycle | null>(null)
+  const [historyForPlotId, setHistoryForPlotId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   const loadAll = async () => {
@@ -251,6 +253,7 @@ function CropsPage() {
                   financialsByCycleId={financialsByCycleId}
                   dragEnabled={dragEnabled}
                   onAddCycle={() => openCreateForm(plot.id)}
+                  onViewHistory={() => setHistoryForPlotId(plot.id)}
                   onHarvest={(cycle) => setHarvestingCycle(cycle)}
                   onRecordSale={(cycle) => setSellingCycle(cycle)}
                   onLogActivity={(cycle) => setLoggingActivityFor(cycle)}
@@ -301,6 +304,19 @@ function CropsPage() {
           onSave={handleLogActivity}
         />
       )}
+
+      {historyForPlotId &&
+        (() => {
+          const historyPlot = plots.find((p) => p.id === historyForPlotId)
+          if (!historyPlot) return null
+          return (
+            <PlotCycleHistoryModal
+              plot={historyPlot}
+              cycles={cycles.filter((c) => c.plot_id === historyForPlotId && c.status === 'harvested')}
+              onClose={() => setHistoryForPlotId(null)}
+            />
+          )
+        })()}
     </div>
   )
 }

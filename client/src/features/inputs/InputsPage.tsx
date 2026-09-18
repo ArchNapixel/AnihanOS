@@ -4,14 +4,17 @@ import {
   deleteInputStock,
   listInputStock,
   updateInputStock,
+  addStockQuantity,
   type InputStock,
   type InputStockInput,
+  type InputType,
 } from './inputStockApi'
 import { logInputUsage, type InputUsageInput } from './inputUsageApi'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
 import InputStockFormModal from './InputStockFormModal'
-import LogUsageModal from './LogUsageModal'
+import AddStockModal from './AddStockModal'
+import QuickLogUsageModal from './QuickLogUsageModal'
 import UsageHistoryModal from './UsageHistoryModal'
 import PlotInputHistoryModal from './PlotInputHistoryModal'
 import './InputsPage.css'
@@ -23,12 +26,14 @@ function InputsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [formOpen, setFormOpen] = useState(false)
+  const [addStockOpen, setAddStockOpen] = useState(false)
+  const [addStockError, setAddStockError] = useState<string | null>(null)
   const [editingStock, setEditingStock] = useState<InputStock | null>(null)
-  const [loggingUsageFor, setLoggingUsageFor] = useState<InputStock | null>(null)
   const [historyFor, setHistoryFor] = useState<InputStock | null>(null)
   const [plotHistoryFor, setPlotHistoryFor] = useState<Plot | null>(null)
+  const [quickLogFor, setQuickLogFor] = useState<{ plot: Plot; type: InputType } | null>(null)
   const [saving, setSaving] = useState(false)
-  const [usageError, setUsageError] = useState<string | null>(null)
+  const [quickLogError, setQuickLogError] = useState<string | null>(null)
 
   const loadAll = async () => {
     setLoading(true)
@@ -95,16 +100,31 @@ function InputsPage() {
     }
   }
 
-  const handleLogUsage = async (input: InputUsageInput) => {
-    if (!loggingUsageFor) return
+  const handleAddStock = async (stock: InputStock, quantityToAdd: number) => {
     setSaving(true)
-    setUsageError(null)
+    setAddStockError(null)
     try {
-      await logInputUsage(input, loggingUsageFor)
-      setLoggingUsageFor(null)
+      await addStockQuantity(stock, quantityToAdd)
+      setAddStockOpen(false)
       await loadAll()
     } catch (err) {
-      setUsageError(err instanceof Error ? err.message : 'Failed to log usage')
+      setAddStockError(err instanceof Error ? err.message : 'Failed to add stock')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleQuickLogUsage = async (input: InputUsageInput) => {
+    const stock = stockItems.find((s) => s.id === input.input_stock_id)
+    if (!stock) return
+    setSaving(true)
+    setQuickLogError(null)
+    try {
+      await logInputUsage(input, stock)
+      setQuickLogFor(null)
+      await loadAll()
+    } catch (err) {
+      setQuickLogError(err instanceof Error ? err.message : 'Failed to log usage')
     } finally {
       setSaving(false)
     }
@@ -114,9 +134,14 @@ function InputsPage() {
     <div className="inputs-page">
       <div className="inputs-header">
         <h1>Fertilizer/Input Management</h1>
-        <button type="button" className="btn-primary" onClick={openCreateForm}>
-          + Add Input
-        </button>
+        <div className="inputs-header-actions">
+          <button type="button" className="btn-primary" onClick={openCreateForm}>
+            + Add Input
+          </button>
+          <button type="button" className="btn-outline" onClick={() => setAddStockOpen(true)} disabled={stockItems.length === 0}>
+            + Add Stock
+          </button>
+        </div>
       </div>
 
       {error && <p className="inputs-error">{error}</p>}
@@ -126,39 +151,51 @@ function InputsPage() {
       ) : stockItems.length === 0 ? (
         <p className="inputs-empty">No inputs yet. Add fertilizer, pesticide, or seed stock to get started.</p>
       ) : (
-        <div className="input-grid">
-          {stockItems.map((stock) => {
-            const isLow = stock.current_quantity <= stock.low_stock_threshold
-            return (
-              <div className={isLow ? 'input-card input-card-low' : 'input-card'} key={stock.id}>
-                <div className="input-card-header">
-                  <h2>{stock.name}</h2>
-                  <span className="input-type-badge">{stock.type}</span>
-                </div>
-                <p className="input-quantity">
-                  {stock.current_quantity} {stock.unit}
-                  {isLow && <span className="input-low-flag"> · Low stock</span>}
-                </p>
-                {stock.cost_per_unit != null && <p>Cost: {stock.cost_per_unit.toFixed(2)} / {stock.unit}</p>}
-                <p className="input-threshold">Threshold: {stock.low_stock_threshold} {stock.unit}</p>
-
-                <div className="input-card-actions">
-                  <button type="button" onClick={() => setLoggingUsageFor(stock)}>
-                    Log Usage
-                  </button>
-                  <button type="button" onClick={() => setHistoryFor(stock)}>
-                    History
-                  </button>
-                  <button type="button" onClick={() => openEditForm(stock)}>
-                    Edit
-                  </button>
-                  <button type="button" onClick={() => handleDelete(stock)}>
-                    Delete
-                  </button>
-                </div>
-              </div>
-            )
-          })}
+        <div className="input-table-wrap">
+          <table className="input-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Cost / Unit</th>
+                <th>Threshold</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {stockItems.map((stock) => {
+                const isLow = stock.current_quantity <= stock.low_stock_threshold
+                return (
+                  <tr key={stock.id} className={isLow ? 'input-row-low' : ''}>
+                    <td>{stock.name}</td>
+                    <td>
+                      <span className="input-type-badge">{stock.type}</span>
+                    </td>
+                    <td>
+                      {stock.current_quantity} {stock.unit}
+                      {isLow && <span className="input-low-flag"> · Low</span>}
+                    </td>
+                    <td>{stock.cost_per_unit != null ? `${stock.cost_per_unit.toFixed(2)} / ${stock.unit}` : '—'}</td>
+                    <td>
+                      {stock.low_stock_threshold} {stock.unit}
+                    </td>
+                    <td className="input-row-actions">
+                      <button type="button" onClick={() => setHistoryFor(stock)}>
+                        History
+                      </button>
+                      <button type="button" onClick={() => openEditForm(stock)}>
+                        Edit
+                      </button>
+                      <button type="button" onClick={() => handleDelete(stock)}>
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 
@@ -173,9 +210,17 @@ function InputsPage() {
             {plots.map((plot) => (
               <div className="inputs-plot-row" key={plot.id}>
                 <span>{plot.name}</span>
-                <button type="button" className="btn-outline" onClick={() => setPlotHistoryFor(plot)}>
-                  View Breakdown
-                </button>
+                <div className="inputs-plot-row-actions">
+                  <button type="button" onClick={() => setQuickLogFor({ plot, type: 'fertilizer' })}>
+                    + Fertilizer
+                  </button>
+                  <button type="button" onClick={() => setQuickLogFor({ plot, type: 'pesticide' })}>
+                    + Pesticide
+                  </button>
+                  <button type="button" className="btn-outline" onClick={() => setPlotHistoryFor(plot)}>
+                    View Breakdown
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -186,18 +231,16 @@ function InputsPage() {
         <InputStockFormModal initialValue={editingStock} saving={saving} onCancel={closeForm} onSave={handleSave} />
       )}
 
-      {loggingUsageFor && (
-        <LogUsageModal
-          stock={loggingUsageFor}
-          plots={plots}
-          cropCycles={cropCycles}
+      {addStockOpen && (
+        <AddStockModal
+          stockItems={stockItems}
           saving={saving}
-          error={usageError}
+          error={addStockError}
           onCancel={() => {
-            setLoggingUsageFor(null)
-            setUsageError(null)
+            setAddStockOpen(false)
+            setAddStockError(null)
           }}
-          onSave={handleLogUsage}
+          onSave={handleAddStock}
         />
       )}
 
@@ -208,6 +251,22 @@ function InputsPage() {
           plot={plotHistoryFor}
           cropCycles={cropCycles}
           onClose={() => setPlotHistoryFor(null)}
+        />
+      )}
+
+      {quickLogFor && (
+        <QuickLogUsageModal
+          plot={quickLogFor.plot}
+          type={quickLogFor.type}
+          stockItems={stockItems}
+          cropCycles={cropCycles}
+          saving={saving}
+          error={quickLogError}
+          onCancel={() => {
+            setQuickLogFor(null)
+            setQuickLogError(null)
+          }}
+          onSave={handleQuickLogUsage}
         />
       )}
     </div>

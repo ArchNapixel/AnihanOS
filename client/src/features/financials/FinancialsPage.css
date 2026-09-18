@@ -87,3 +87,24 @@
 .financials-negative {
   color: var(--color-error);
 }
+
+.financials-wage-header {
+  margin-top: 40px;
+}
+
+.financials-row-actions {
+  display: flex;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.financials-row-actions button {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}

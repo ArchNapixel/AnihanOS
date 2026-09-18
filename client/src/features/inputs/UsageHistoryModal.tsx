@@ -49,6 +49,7 @@ function UsageHistoryModal({ stock, onClose }: { stock: InputStock; onClose: () 
                   <th>Date</th>
                   <th>Plot</th>
                   <th>Crop</th>
+                  <th>Stage</th>
                   <th>Qty</th>
                   <th>Cost</th>
                 </tr>
@@ -59,6 +60,7 @@ function UsageHistoryModal({ stock, onClose }: { stock: InputStock; onClose: () 
                     <td>{log.date_used}</td>
                     <td>{log.plots.name}</td>
                     <td>{log.crop_cycles?.crop_types.name ?? '—'}</td>
+                    <td>{log.fertilizing_stage ?? '—'}</td>
                     <td>
                       {log.quantity_used} {stock.unit}
                     </td>

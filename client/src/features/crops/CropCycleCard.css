@@ -1,14 +1,10 @@
-.cycle-progress {
-  margin-bottom: 10px;
-}
-
 .cycle-progress-track {
   width: 100%;
-  height: 6px;
+  height: 8px;
   border-radius: 999px;
   background: var(--color-bg);
   overflow: hidden;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .cycle-progress-fill {
@@ -17,35 +13,72 @@
   border-radius: 999px;
 }
 
-.cycle-progress-meta {
+.cycle-stage-meta {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   font-size: 12px;
   font-weight: 600;
   color: var(--color-accent);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.cycle-stage-percentage {
+  font-size: 14px;
+}
+
+.cycle-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .cycle-details {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .cycle-detail-row {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 2px;
   font-size: 13px;
-  padding: 3px 0;
-  border-bottom: 1px solid rgba(47, 42, 31, 0.08);
 }
 
 .cycle-detail-row span {
   color: var(--color-text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .cycle-detail-row strong {
-  text-align: right;
+  font-size: 14px;
+}
+
+.cycle-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.cycle-card-actions .btn-outline {
+  margin-top: 0;
+}
+
+.cycle-card-actions button:not(.btn-outline) {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
 }

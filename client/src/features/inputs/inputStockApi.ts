@@ -67,3 +67,15 @@ export async function deleteInputStock(id: string): Promise<void> {
   const { error } = await supabase.from('input_stock').delete().eq('id', id)
   if (error) throw error
 }
+
+export async function addStockQuantity(stock: InputStock, quantityToAdd: number): Promise<InputStock> {
+  const { data, error } = await supabase
+    .from('input_stock')
+    .update({ current_quantity: stock.current_quantity + quantityToAdd })
+    .eq('id', stock.id)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data as InputStock
+}

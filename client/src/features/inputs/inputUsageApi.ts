@@ -9,6 +9,7 @@ export type InputUsageLog = {
   quantity_used: number
   date_used: string
   cost: number | null
+  fertilizing_stage: string | null
   created_at: string
   plots: { name: string }
   crop_cycles: { crop_types: { name: string } } | null
@@ -21,6 +22,7 @@ export type InputUsageInput = {
   quantity_used: number
   date_used: string
   cost: number | null
+  fertilizing_stage: string | null
 }
 
 export async function logInputUsage(input: InputUsageInput, stock: InputStock): Promise<void> {
@@ -57,6 +59,7 @@ export type PlotInputUsageLog = {
   quantity_used: number
   date_used: string
   cost: number | null
+  fertilizing_stage: string | null
   input_stock: { name: string; type: InputType; unit: string }
   crop_cycles: { planting_date: string; crop_types: { name: string } } | null
 }
@@ -65,7 +68,7 @@ export async function listUsageForPlot(plotId: string): Promise<PlotInputUsageLo
   const { data, error } = await supabase
     .from('input_usage_logs')
     .select(
-      'id, input_stock_id, crop_cycle_id, quantity_used, date_used, cost, input_stock(name, type, unit), crop_cycles(planting_date, crop_types(name))',
+      'id, input_stock_id, crop_cycle_id, quantity_used, date_used, cost, fertilizing_stage, input_stock(name, type, unit), crop_cycles(planting_date, crop_types(name))',
     )
     .eq('plot_id', plotId)
     .order('date_used', { ascending: true })
