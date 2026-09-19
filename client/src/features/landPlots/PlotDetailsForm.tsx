@@ -1,5 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import type { Plot, PlotType } from './plotsApi'
+import { polygonAreaHectares } from '../../lib/geo'
 import './PlotDetailsForm.css'
 
 export type PlotDetailsInput = {
@@ -15,27 +16,70 @@ export type PlotDetailsInput = {
   soil_k_exchangeable_ppm: number | null
 }
 
-const SIZE_UNITS = ['hectares', 'acres', 'sqm']
+export type BoundaryMode = 'draw' | 'coordinates'
+
+type CornerRow = { lat: string; lng: string }
+
+const emptyCornerRow = (): CornerRow => ({ lat: '', lng: '' })
+
+// GeoJSON stores rings as [lng, lat] and repeats the first point at the end
+// to close the shape — neither of which a farmer typing coordinates should
+// have to think about.
+function cornersFromBoundary(boundary: GeoJSON.Polygon | null): CornerRow[] {
+  if (!boundary) return [emptyCornerRow(), emptyCornerRow(), emptyCornerRow()]
+  const ring = boundary.coordinates[0]
+  const isClosed = ring.length > 1 && ring[0][0] === ring[ring.length - 1][0] && ring[0][1] === ring[ring.length - 1][1]
+  const points = isClosed ? ring.slice(0, -1) : ring
+  return points.map(([lng, lat]) => ({ lat: String(lat), lng: String(lng) }))
+}
+
+function polygonFromCorners(rows: CornerRow[]): GeoJSON.Polygon | null {
+  const parsed = rows
+    .filter((row) => row.lat.trim() !== '' && row.lng.trim() !== '')
+    .map((row) => ({ lat: Number(row.lat), lng: Number(row.lng) }))
+    .filter(
+      (row) =>
+        Number.isFinite(row.lat) &&
+        Number.isFinite(row.lng) &&
+        row.lat >= -90 &&
+        row.lat <= 90 &&
+        row.lng >= -180 &&
+        row.lng <= 180,
+    )
+
+  if (parsed.length < 3) return null
+
+  const ring: [number, number][] = parsed.map((p) => [p.lng, p.lat])
+  ring.push(ring[0])
+  return { type: 'Polygon', coordinates: [ring] }
+}
 
 function PlotDetailsForm({
   initialValue,
   saving,
   hasBoundary,
+  currentBoundary,
   isDrawingInProgress,
+  boundaryMode,
+  onBoundaryModeChange,
+  onCoordinatesChange,
   onCancel,
   onSave,
 }: {
   initialValue: Plot | null
   saving: boolean
   hasBoundary: boolean
+  currentBoundary: GeoJSON.Polygon | null
   isDrawingInProgress: boolean
+  boundaryMode: BoundaryMode
+  onBoundaryModeChange: (mode: BoundaryMode) => void
+  onCoordinatesChange: (polygon: GeoJSON.Polygon | null) => void
   onCancel: () => void
   onSave: (input: PlotDetailsInput) => void
 }) {
   const [name, setName] = useState(initialValue?.name ?? '')
   const [type, setType] = useState<PlotType>(initialValue?.type ?? 'land')
   const [size, setSize] = useState(initialValue ? String(initialValue.size) : '')
-  const [sizeUnit, setSizeUnit] = useState(initialValue?.size_unit ?? 'hectares')
   const [soilType, setSoilType] = useState(initialValue?.soil_type ?? '')
   const [municipality, setMunicipality] = useState(initialValue?.municipality ?? '')
   const [soilOrganicMatterPct, setSoilOrganicMatterPct] = useState(
@@ -48,6 +92,45 @@ function PlotDetailsForm({
   const [soilKExchangeablePpm, setSoilKExchangeablePpm] = useState(
     initialValue?.soil_k_exchangeable_ppm != null ? String(initialValue.soil_k_exchangeable_ppm) : '',
   )
+  const [cornerRows, setCornerRows] = useState<CornerRow[]>(() => cornersFromBoundary(initialValue?.boundary ?? null))
+
+  // Only pushes a polygon up while coordinate-entry is the active mode, so
+  // switching back to drawing doesn't get immediately overwritten by
+  // whatever's sitting in the (now hidden) coordinate rows.
+  useEffect(() => {
+    if (boundaryMode !== 'coordinates') return
+    onCoordinatesChange(polygonFromCorners(cornerRows))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boundaryMode, JSON.stringify(cornerRows)])
+
+  const updateCornerRow = (index: number, field: keyof CornerRow, value: string) => {
+    setCornerRows((rows) => rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)))
+  }
+
+  const addCornerRow = () => setCornerRows((rows) => [...rows, emptyCornerRow()])
+
+  const removeCornerRow = (index: number) => setCornerRows((rows) => rows.filter((_, i) => i !== index))
+
+  // Re-seeds from whatever is currently drafted (a freshly-drawn shape, or
+  // the original saved boundary) at the moment of switching, so hopping
+  // from Draw to Coordinates never silently discards a new drawing.
+  const switchToCoordinates = () => {
+    setCornerRows(cornersFromBoundary(currentBoundary))
+    onBoundaryModeChange('coordinates')
+  }
+
+  const coordinatesBoundary = polygonFromCorners(cornerRows)
+  const activeBoundary = boundaryMode === 'draw' ? currentBoundary : coordinatesBoundary
+
+  // Recalculates hectares from the shape whenever it changes. The field
+  // stays a normal editable input, so a plot without a drawn shape (or one
+  // whose farmer prefers their land title's exact figure) can still be
+  // typed in manually.
+  useEffect(() => {
+    if (!activeBoundary) return
+    setSize(polygonAreaHectares(activeBoundary).toFixed(2))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(activeBoundary)])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -55,7 +138,7 @@ function PlotDetailsForm({
       name: name.trim(),
       type,
       size: Number(size),
-      size_unit: sizeUnit,
+      size_unit: 'hectares',
       soil_type: type === 'land' ? soilType.trim() || null : null,
       municipality: municipality.trim() || null,
       soil_organic_matter_pct: type === 'land' && soilOrganicMatterPct ? Number(soilOrganicMatterPct) : null,
@@ -90,29 +173,22 @@ function PlotDetailsForm({
         />
       </div>
 
-      <div className="plot-form-field-row">
-        <div className="plot-form-field">
-          <label htmlFor="plot-size">Size</label>
-          <input
-            id="plot-size"
-            type="number"
-            min="0.01"
-            step="0.01"
-            value={size}
-            onChange={(e) => setSize(e.target.value)}
-            required
-          />
-        </div>
-        <div className="plot-form-field">
-          <label htmlFor="plot-size-unit">Unit</label>
-          <select id="plot-size-unit" value={sizeUnit} onChange={(e) => setSizeUnit(e.target.value)}>
-            {SIZE_UNITS.map((unit) => (
-              <option key={unit} value={unit}>
-                {unit}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="plot-form-field">
+        <label htmlFor="plot-size">Size (hectares)</label>
+        <input
+          id="plot-size"
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+          required
+        />
+        <p className="plot-form-hint">
+          {activeBoundary
+            ? 'Auto-calculated from the boundary — edit if your land title states a different figure.'
+            : 'Draw or enter a boundary below to auto-calculate this, or type it in manually.'}
+        </p>
       </div>
 
       {type === 'land' && (
@@ -195,21 +271,85 @@ function PlotDetailsForm({
         />
       </div>
 
-      <p
-        className={
-          isDrawingInProgress
-            ? 'plot-form-boundary-status drawing'
+      <div className="plot-form-field">
+        <label>Plot boundary</label>
+        <div className="plot-type-toggle">
+          <button
+            type="button"
+            className={boundaryMode === 'draw' ? 'active' : ''}
+            onClick={() => onBoundaryModeChange('draw')}
+          >
+            Draw on map
+          </button>
+          <button
+            type="button"
+            className={boundaryMode === 'coordinates' ? 'active' : ''}
+            onClick={switchToCoordinates}
+          >
+            Enter coordinates
+          </button>
+        </div>
+      </div>
+
+      {boundaryMode === 'draw' ? (
+        <p
+          className={
+            isDrawingInProgress
+              ? 'plot-form-boundary-status drawing'
+              : hasBoundary
+                ? 'plot-form-boundary-status ready'
+                : 'plot-form-boundary-status'
+          }
+        >
+          {isDrawingInProgress
+            ? '✏️ Finish this shape first — double-click the last corner (or click the first point again) to close it.'
             : hasBoundary
-              ? 'plot-form-boundary-status ready'
-              : 'plot-form-boundary-status'
-        }
-      >
-        {isDrawingInProgress
-          ? '✏️ Finish this shape first — double-click the last corner (or click the first point again) to close it.'
-          : hasBoundary
-            ? '✓ Boundary drawn on the map.'
-            : 'Now draw this plot’s outline on the map — click each corner once, then double-click the last one to finish. On a phone, switch to the Map tab to draw, then back to List to save.'}
-      </p>
+              ? '✓ Boundary drawn on the map.'
+              : 'Now draw this plot’s outline on the map — click each corner once, then double-click the last one to finish. On a phone, switch to the Map tab to draw, then back to List to save.'}
+        </p>
+      ) : (
+        <div className="plot-form-field">
+          <p className="plot-form-hint">
+            Enter each corner's GPS coordinates in order (e.g. from a land title, a handheld GPS, or by walking the
+            perimeter with a GPS app). Needs at least 3 corners to form a shape.
+          </p>
+          {cornerRows.map((row, index) => (
+            <div className="corner-row" key={index}>
+              <span className="corner-row-index">{index + 1}</span>
+              <input
+                type="number"
+                step="any"
+                value={row.lat}
+                onChange={(e) => updateCornerRow(index, 'lat', e.target.value)}
+                placeholder="Latitude"
+              />
+              <input
+                type="number"
+                step="any"
+                value={row.lng}
+                onChange={(e) => updateCornerRow(index, 'lng', e.target.value)}
+                placeholder="Longitude"
+              />
+              <button
+                type="button"
+                className="corner-row-remove"
+                onClick={() => removeCornerRow(index)}
+                disabled={cornerRows.length <= 3}
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          <button type="button" className="plot-form-cancel" onClick={addCornerRow}>
+            + Add corner
+          </button>
+          <p className={coordinatesBoundary ? 'plot-form-boundary-status ready' : 'plot-form-boundary-status'}>
+            {coordinatesBoundary
+              ? '✓ Shape formed from these coordinates.'
+              : 'Fill in at least 3 valid corners to form a shape.'}
+          </p>
+        </div>
+      )}
 
       <div className="plot-form-actions">
         <button type="button" className="plot-form-cancel" onClick={onCancel} disabled={saving}>

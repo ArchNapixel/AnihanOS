@@ -53,6 +53,7 @@ function LandPlotsPage() {
   const [panelMode, setPanelMode] = useState<'list' | 'form'>('list')
   const [editingPlot, setEditingPlot] = useState<Plot | null>(null)
   const [draftBoundary, setDraftBoundary] = useState<GeoJSON.Polygon | null>(null)
+  const [boundaryMode, setBoundaryMode] = useState<'draw' | 'coordinates'>('draw')
   const [viewingPlot, setViewingPlot] = useState<Plot | null>(null)
   const [saving, setSaving] = useState(false)
   const [isDrawingInProgress, setIsDrawingInProgress] = useState(false)
@@ -121,6 +122,7 @@ function LandPlotsPage() {
   const openCreateForm = () => {
     setEditingPlot(null)
     setDraftBoundary(null)
+    setBoundaryMode('draw')
     setError(null)
     setIsDrawingInProgress(false)
     setPanelMode('form')
@@ -129,6 +131,7 @@ function LandPlotsPage() {
   const openEditForm = (plot: Plot) => {
     setEditingPlot(plot)
     setDraftBoundary(plot.boundary)
+    setBoundaryMode('draw')
     setError(null)
     setIsDrawingInProgress(false)
     setPanelMode('form')
@@ -139,6 +142,7 @@ function LandPlotsPage() {
     setPanelMode('list')
     setEditingPlot(null)
     setDraftBoundary(null)
+    setBoundaryMode('draw')
     setIsDrawingInProgress(false)
   }
 
@@ -193,7 +197,7 @@ function LandPlotsPage() {
           featureCollection={featureCollection}
           cropProgressByPlotId={cropProgressByPlotId}
           onPlotClick={handleMapPlotClick}
-          drawModeActive={panelMode === 'form'}
+          drawModeActive={panelMode === 'form' && boundaryMode === 'draw'}
           editingPlotId={editingPlot?.id ?? null}
           initialBoundary={editingPlot?.boundary ?? null}
           onBoundaryDrawn={setDraftBoundary}
@@ -275,7 +279,11 @@ function LandPlotsPage() {
               initialValue={editingPlot}
               saving={saving}
               hasBoundary={!!draftBoundary}
+              currentBoundary={draftBoundary}
               isDrawingInProgress={isDrawingInProgress}
+              boundaryMode={boundaryMode}
+              onBoundaryModeChange={setBoundaryMode}
+              onCoordinatesChange={setDraftBoundary}
               onCancel={closeForm}
               onSave={handleSaveDetails}
             />

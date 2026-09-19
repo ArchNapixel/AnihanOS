@@ -68,6 +68,48 @@
   margin: 0 0 10px;
 }
 
+.corner-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.corner-row-index {
+  flex: 0 0 18px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.corner-row input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.corner-row-remove {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.corner-row-remove:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .plot-form-boundary-status {
   font-size: 13px;
   color: var(--color-text-muted);
