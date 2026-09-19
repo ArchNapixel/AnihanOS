@@ -44,7 +44,7 @@ export const CSV_HEADERS = [
   'Harvested',
   'Yield',
   'Yield Unit',
-  'Selling Price',
+  'Selling Price/Ton',
   'Revenue',
   'Input Cost',
   'Other Costs',

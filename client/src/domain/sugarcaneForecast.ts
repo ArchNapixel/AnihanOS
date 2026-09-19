@@ -314,56 +314,53 @@ export function forecastSugarcane(params: {
   let timingOutlook: SugarcaneForecast['timingOutlook'] = 'insufficient_data'
 
   if (weatherDays.length === 0) {
-    riskNotes.push('No weather data available yet for this plot.')
+    riskNotes.push('No weather data yet.')
   } else {
     timingOutlook = 'on_track'
 
     if (avgTempC != null && avgTempC < 15 && stage === 'grand_growth') {
-      riskNotes.push('Mean temperature below 15°C during Grand Growth — growth may have stalled.')
+      riskNotes.push('Below 15°C in Grand Growth — growth stalled.')
       timingOutlook = 'possible_delay'
     }
     if (avgTempC != null && avgTempC > 32) {
-      riskNotes.push('Mean temperature above 32°C — fiber may harden prematurely, reducing sucrose.')
+      riskNotes.push('Above 32°C — fiber hardening, lower sucrose.')
     }
     if (stage === 'ripening' && avgTempC != null && avgTempC > 24) {
-      riskNotes.push('Ripening-phase temperature is running above the 16-22°C ideal — harvest may be delayed and sugar accumulation slowed.')
+      riskNotes.push('Ripening temp above 16-22°C ideal — delayed harvest, slower sugar buildup.')
       timingOutlook = 'possible_delay'
     }
     if (stage === 'ripening' && avgTempC != null && avgTempC <= 20) {
-      riskNotes.push('Cool ripening-phase nights are favorable — sucrose accumulation likely boosted.')
+      riskNotes.push('Cool ripening nights — sucrose boosted.')
       timingOutlook = 'favorable'
     }
     if (stage === 'grand_growth' && rainFactor != null && rainFactor <= 0.6) {
-      riskNotes.push('Rainfall well below the Grand Growth requirement — significant yield risk if this persists.')
+      riskNotes.push('Rainfall well below Grand Growth needs — yield risk.')
     }
     if (stage === 'ripening' && avgDailyRainfallMm != null && avgDailyRainfallMm * 30 > 100) {
-      riskNotes.push('Rainfall during ripening may dilute sugar content (lower brix).')
+      riskNotes.push('Ripening rainfall may dilute sugar (lower brix).')
     }
   }
 
   if (plotHectares == null || plotHectares <= 0) {
-    riskNotes.push('Plot size isn’t recorded in hectares — fertilizer application rate can’t be calculated.')
+    riskNotes.push('Plot size not in hectares — fertilizer rate not calculated.')
   } else if (fertilizerApplications.length === 0) {
-    riskNotes.push('No fertilizer usage logged yet for this cycle — estimate reflects weather only.')
+    riskNotes.push('No fertilizer logged — estimate is weather-only.')
   } else if (fertilizer) {
-    if (!fertilizer.soilDataProvided) {
-      riskNotes.push('No soil test on file for this plot — fertilizer response assumes medium fertility.')
-    }
     if (fertilizer.nitrogenAppliedKgPerHa < 50 && (soil.nPpm == null || soil.nPpm < 30)) {
-      riskNotes.push('Nitrogen applied is well below the recommended range — significant yield loss risk (25-40%).')
+      riskNotes.push('N well below recommended — 25-40% yield loss risk.')
     } else if (fertilizer.nitrogenAppliedKgPerHa < 100) {
-      riskNotes.push('Nitrogen applied is below the optimal 140-180 kg/ha zone for Philippine conditions.')
+      riskNotes.push('N below optimal 140-180 kg/ha zone.')
     }
     if (fertilizer.phosphorusAppliedKgPerHa < 20 && (soil.pBrayPpm == null || soil.pBrayPpm < 10)) {
-      riskNotes.push('Phosphorus applied is low — watch for purple leaf discoloration and weak root growth.')
+      riskNotes.push('P low — watch for purple leaves, weak roots.')
     }
     if (fertilizer.potassiumAppliedKgPerHa < 80 && (soil.kExchangeablePpm == null || soil.kExchangeablePpm < 100)) {
-      riskNotes.push('Potassium applied is low — increased lodging (wind damage) risk on top of a modest yield penalty.')
+      riskNotes.push('K low — higher lodging risk, modest yield penalty.')
     }
     if (fertilizer.nitrogenAppliedKgPerHa > 0 && fertilizer.potassiumAppliedKgPerHa > 0) {
       const nkRatio = fertilizer.nitrogenAppliedKgPerHa / fertilizer.potassiumAppliedKgPerHa
       if (nkRatio > 1.8) {
-        riskNotes.push('N:K ratio is imbalanced (too much nitrogen relative to potassium) — may hurt quality and increase lodging risk.')
+        riskNotes.push('N:K imbalanced — quality and lodging risk.')
       }
     }
   }

@@ -96,6 +96,18 @@ export async function markCropCycleHarvested(id: string, input: HarvestInput): P
   return data as unknown as CropCycle
 }
 
+export async function updateCropCycleYield(id: string, yieldAmount: number): Promise<CropCycle> {
+  const { data, error } = await supabase
+    .from('crop_cycles')
+    .update({ yield_amount: yieldAmount })
+    .eq('id', id)
+    .select(SELECT_WITH_RELATIONS)
+    .single()
+
+  if (error) throw error
+  return data as unknown as CropCycle
+}
+
 export async function recordCropCycleSale(id: string, input: SaleInput): Promise<CropCycle> {
   const { data, error } = await supabase
     .from('crop_cycles')

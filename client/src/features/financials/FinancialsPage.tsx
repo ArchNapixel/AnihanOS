@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from './financialsApi'
-import { recordCropCycleSale, type CropCycle, type SaleInput } from '../crops/cropCyclesApi'
-import RecordSaleModal from '../crops/RecordSaleModal'
+import { recordCropCycleSale, updateCropCycleYield, type CropCycle } from '../crops/cropCyclesApi'
 import {
   listWageEntries,
   createWageEntry,
@@ -104,9 +103,8 @@ function FinancialsPage() {
   const [sortKey, setSortKey] = useState<SortKey>('planting_date')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [csvPreviewOpen, setCsvPreviewOpen] = useState(false)
-  const [sellingCycle, setSellingCycle] = useState<CropCycle | null>(null)
-  const [sellingSaving, setSellingSaving] = useState(false)
-  const [sellingError, setSellingError] = useState<string | null>(null)
+  const [savingCycleId, setSavingCycleId] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const [wagePlotFilter, setWagePlotFilter] = useState('all')
   const [wageJobFilter, setWageJobFilter] = useState('all')
@@ -285,18 +283,54 @@ function FinancialsPage() {
 
   const viewingWeek = sortedWeeklySummaries.find((w) => w.weekStart === viewingWeekStart) ?? null
 
-  const handleRecordSale = async (input: SaleInput) => {
-    if (!sellingCycle) return
-    setSellingSaving(true)
-    setSellingError(null)
+  // Optimistic local update so Revenue/Profit/Margin recompute instantly
+  // while editing, mirroring the exact formula listCropCycleFinancials uses
+  // — avoids a full-table reload (and the flicker that comes with it) on
+  // every keystroke or field blur.
+  const applyLocalEdit = (
+    cycleId: string,
+    patch: Partial<Pick<CropCycle, 'yield_amount' | 'selling_price_per_unit' | 'other_costs'>>,
+  ) => {
+    setRows((current) =>
+      current.map((row) => {
+        if (row.cycle.id !== cycleId) return row
+        const cycle = { ...row.cycle, ...patch }
+        const revenue =
+          cycle.yield_amount != null && cycle.selling_price_per_unit != null
+            ? cycle.yield_amount * cycle.selling_price_per_unit
+            : null
+        const profit = revenue != null ? revenue - row.inputCost - (cycle.other_costs ?? 0) : null
+        const marginPercent = profit != null && revenue != null && revenue > 0 ? (profit / revenue) * 100 : null
+        return { ...row, cycle, revenue, profit, marginPercent }
+      }),
+    )
+  }
+
+  const persistYield = async (cycle: CropCycle) => {
+    if (cycle.yield_amount == null) return
+    setSavingCycleId(cycle.id)
+    setSaveError(null)
     try {
-      await recordCropCycleSale(sellingCycle.id, input)
-      setSellingCycle(null)
-      await loadAll()
+      await updateCropCycleYield(cycle.id, cycle.yield_amount)
     } catch (err) {
-      setSellingError(err instanceof Error ? err.message : 'Failed to record sale')
+      setSaveError(err instanceof Error ? err.message : 'Failed to save yield')
     } finally {
-      setSellingSaving(false)
+      setSavingCycleId(null)
+    }
+  }
+
+  const persistSale = async (cycle: CropCycle) => {
+    setSavingCycleId(cycle.id)
+    setSaveError(null)
+    try {
+      await recordCropCycleSale(cycle.id, {
+        selling_price_per_unit: cycle.selling_price_per_unit ?? 0,
+        other_costs: cycle.other_costs ?? 0,
+      })
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save')
+    } finally {
+      setSavingCycleId(null)
     }
   }
 
@@ -371,7 +405,7 @@ function FinancialsPage() {
     { key: 'planting_date', label: 'Planted' },
     { key: 'actual_harvest_date', label: 'Harvested' },
     { key: 'yield_amount', label: 'Yield' },
-    { key: 'selling_price_per_unit', label: 'Selling Price' },
+    { key: 'selling_price_per_unit', label: 'Selling Price/Ton' },
     { key: 'revenue', label: 'Revenue' },
     { key: 'inputCost', label: 'Input Cost' },
     { key: 'other_costs', label: 'Other Costs' },
@@ -396,7 +430,7 @@ function FinancialsPage() {
       </div>
 
       {error && <p className="financials-error">{error}</p>}
-      {sellingError && <p className="financials-error">{sellingError}</p>}
+      {saveError && <p className="financials-error">{saveError}</p>}
 
       <div className="financials-filters">
         <div>
@@ -449,36 +483,87 @@ function FinancialsPage() {
                     {sortKey === col.key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                   </th>
                 ))}
-                <th></th>
               </tr>
             </thead>
             <tbody>
-              {sortedRows.map((row) => (
-                <tr key={row.cycle.id}>
-                  <td>{row.cycle.plots.name}</td>
-                  <td>{row.cycle.crop_types.name}</td>
-                  <td>{row.cycle.planting_date}</td>
-                  <td>{row.cycle.actual_harvest_date ?? '—'}</td>
-                  <td>
-                    {row.cycle.yield_amount != null ? `${row.cycle.yield_amount} ${row.cycle.yield_unit ?? ''}` : '—'}
-                  </td>
-                  <td>{formatNumber(row.cycle.selling_price_per_unit)}</td>
-                  <td>{formatNumber(row.revenue)}</td>
-                  <td>{formatNumber(row.inputCost)}</td>
-                  <td>{formatNumber(row.cycle.other_costs)}</td>
-                  <td className={row.profit != null && row.profit < 0 ? 'financials-negative' : ''}>
-                    {formatNumber(row.profit)}
-                  </td>
-                  <td>{row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—'}</td>
-                  <td className="financials-row-actions">
-                    {row.cycle.status === 'harvested' && (
-                      <button type="button" onClick={() => setSellingCycle(row.cycle)}>
-                        {row.cycle.selling_price_per_unit != null ? 'Edit Sale' : 'Record Sale'}
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {sortedRows.map((row) => {
+                const editable = row.cycle.status === 'harvested'
+                const isSaving = savingCycleId === row.cycle.id
+                return (
+                  <tr key={row.cycle.id}>
+                    <td>{row.cycle.plots.name}</td>
+                    <td>{row.cycle.crop_types.name}</td>
+                    <td>{row.cycle.planting_date}</td>
+                    <td>{row.cycle.actual_harvest_date ?? '—'}</td>
+                    <td>
+                      {editable ? (
+                        <span className="financials-cell-input">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={row.cycle.yield_amount ?? ''}
+                            disabled={isSaving}
+                            onChange={(e) =>
+                              applyLocalEdit(row.cycle.id, {
+                                yield_amount: e.target.value === '' ? null : Number(e.target.value),
+                              })
+                            }
+                            onBlur={() => persistYield(row.cycle)}
+                          />
+                          {row.cycle.yield_unit ?? ''}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td>
+                      {editable ? (
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={row.cycle.selling_price_per_unit ?? ''}
+                          disabled={isSaving}
+                          onChange={(e) =>
+                            applyLocalEdit(row.cycle.id, {
+                              selling_price_per_unit: e.target.value === '' ? null : Number(e.target.value),
+                            })
+                          }
+                          onBlur={() => persistSale(row.cycle)}
+                        />
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td>{formatNumber(row.revenue)}</td>
+                    <td>{formatNumber(row.inputCost)}</td>
+                    <td>
+                      {editable ? (
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={row.cycle.other_costs ?? ''}
+                          disabled={isSaving}
+                          onChange={(e) =>
+                            applyLocalEdit(row.cycle.id, {
+                              other_costs: e.target.value === '' ? null : Number(e.target.value),
+                            })
+                          }
+                          onBlur={() => persistSale(row.cycle)}
+                        />
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td className={row.profit != null && row.profit < 0 ? 'financials-negative' : ''}>
+                      {formatNumber(row.profit)}
+                    </td>
+                    <td>{row.marginPercent != null ? `${row.marginPercent.toFixed(1)}%` : '—'}</td>
+                  </tr>
+                )
+              })}
             </tbody>
             <tfoot>
               <tr>
@@ -487,7 +572,6 @@ function FinancialsPage() {
                 <td>{formatNumber(totals.inputCost)}</td>
                 <td>{formatNumber(totals.otherCosts)}</td>
                 <td>{formatNumber(totals.profit)}</td>
-                <td></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -629,17 +713,6 @@ function FinancialsPage() {
         />
       )}
 
-      {sellingCycle && (
-        <RecordSaleModal
-          cycle={sellingCycle}
-          saving={sellingSaving}
-          onCancel={() => {
-            setSellingCycle(null)
-            setSellingError(null)
-          }}
-          onSave={handleRecordSale}
-        />
-      )}
     </div>
   )
 }

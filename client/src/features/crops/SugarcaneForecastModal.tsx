@@ -105,9 +105,7 @@ function SugarcaneForecastModal({
             {TIMING_LABELS[forecast.timingOutlook]}
           </strong>
           <p className="forecast-note">
-            Calendar expected harvest date stays{' '}
-            <strong>{formatDateShort(cycle.expected_harvest_date)}</strong>. This outlook reflects how current
-            weather is likely affecting that timeline — not a replacement date.
+            Expected harvest unchanged: <strong>{formatDateShort(cycle.expected_harvest_date)}</strong>
           </p>
         </div>
 
@@ -117,18 +115,13 @@ function SugarcaneForecastModal({
             <>
               <strong>{forecast.estimatedYieldTonsPerHa.toFixed(1)} tons/ha</strong>
               {isHectares && plot && (
-                <p className="forecast-note">
-                  ≈ {(forecast.estimatedYieldTonsPerHa * plot.size).toFixed(1)} tons for this {plot.size}-hectare plot
-                </p>
+                <p className="forecast-note">≈ {(forecast.estimatedYieldTonsPerHa * plot.size).toFixed(1)} tons ({plot.size} ha)</p>
               )}
             </>
           ) : (
             <strong>Not enough weather data yet</strong>
           )}
-          <p className="forecast-note">
-            Based on a {forecast.baseYieldTonsPerHa} tons/ha reference yield, adjusted for observed temperature and
-            rainfall. Assumes no disease or pest pressure (not yet tracked in AnihanOS).
-          </p>
+          <p className="forecast-note">Base {forecast.baseYieldTonsPerHa} tons/ha · adjusted for weather · assumes no disease/pests</p>
         </div>
 
         {!loadingFertilizer && forecast.fertilizer && (
