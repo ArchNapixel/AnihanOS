@@ -12,6 +12,14 @@ export type InputStock = {
   unit: string
   low_stock_threshold: number
   cost_per_unit: number | null
+  // Nutrient composition (e.g. "14-14-14" printed on the bag) and a
+  // conversion to kg per unit (e.g. unit = "bag", kg_per_unit = 50) — only
+  // meaningful for type = 'fertilizer'. Used by the sugarcane fertilizer
+  // forecast to convert real usage logs into actual kg of N/P/K applied.
+  nitrogen_pct: number | null
+  phosphorus_pct: number | null
+  potassium_pct: number | null
+  kg_per_unit: number | null
   created_at: string
   updated_at: string
 }
@@ -23,6 +31,10 @@ export type InputStockInput = {
   unit: string
   low_stock_threshold: number
   cost_per_unit: number | null
+  nitrogen_pct: number | null
+  phosphorus_pct: number | null
+  potassium_pct: number | null
+  kg_per_unit: number | null
 }
 
 export async function listInputStock(): Promise<InputStock[]> {

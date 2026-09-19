@@ -15,6 +15,10 @@ export type CropCycle = {
   status: CropCycleStatus
   selling_price_per_unit: number | null
   other_costs: number | null
+  // 0 = plant cane, 1 = 1st ratoon, 2 = 2nd ratoon, etc. Ratoon crops need
+  // less fertilizer and yield less than a fresh planting — used by the
+  // sugarcane fertilizer forecast's ratoon decline adjustment.
+  ratoon_number: number
   created_at: string
   updated_at: string
   crop_types: CropType
@@ -26,6 +30,7 @@ export type CropCycleInput = {
   crop_type_id: string
   planting_date: string
   expected_harvest_date: string | null
+  ratoon_number: number
 }
 
 export type HarvestInput = {

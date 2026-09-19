@@ -52,9 +52,7 @@ function CropCycleFormModal({
 }) {
   const isEditing = !!initialValue
   const [plotId, setPlotId] = useState(initialValue?.plot_id ?? initialPlotId ?? plots[0]?.id ?? '')
-  const [cropMode, setCropMode] = useState<'existing' | 'new'>(cropTypes.length > 0 ? 'existing' : 'new')
   const [selectedCropTypeId, setSelectedCropTypeId] = useState(initialValue?.crop_type_id ?? cropTypes[0]?.id ?? '')
-  const [newCropName, setNewCropName] = useState('')
   const [stageRows, setStageRows] = useState<StageRow[]>([emptyStageRow()])
   const [canopyAmount, setCanopyAmount] = useState('')
   const [canopyUnit, setCanopyUnit] = useState<StageUnit>('days')
@@ -63,6 +61,7 @@ function CropCycleFormModal({
   const [fertilizingRows, setFertilizingRows] = useState<FertilizingStageRow[]>([emptyFertilizingRow()])
   const [plantingDate, setPlantingDate] = useState(initialValue?.planting_date ?? todayIso())
   const [expectedHarvestDate, setExpectedHarvestDate] = useState(initialValue?.expected_harvest_date ?? '')
+  const [ratoonNumber, setRatoonNumber] = useState(initialValue?.ratoon_number ?? 0)
   const [autoExpectedHarvestDate, setAutoExpectedHarvestDate] = useState('')
 
   const selectedCropType = cropTypes.find((c) => c.id === selectedCropTypeId) ?? null
@@ -72,7 +71,6 @@ function CropCycleFormModal({
   // form so they're editable right here — same fields, same layout, whether
   // you're adding a cycle for it or editing one.
   useEffect(() => {
-    if (cropMode !== 'existing') return
     const type = cropTypes.find((c) => c.id === selectedCropTypeId)
     if (!type) return
     setStageRows(stagesToRows(type.growth_stages))
@@ -82,7 +80,7 @@ function CropCycleFormModal({
     setHarvestEstimateNote(type.harvest_estimate_note ?? '')
     setFertilizingRows(fertilizingStagesToRows(type.fertilizing_schedule))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cropMode, selectedCropTypeId])
+  }, [selectedCropTypeId])
 
   useEffect(() => {
     const stages = parseStages(stageRows)
@@ -102,19 +100,6 @@ function CropCycleFormModal({
 
   const removeStageRow = (index: number) => setStageRows((rows) => rows.filter((_, i) => i !== index))
 
-  const selectCropMode = (mode: 'existing' | 'new') => {
-    setCropMode(mode)
-    if (mode === 'new') {
-      setNewCropName('')
-      setStageRows([emptyStageRow()])
-      setCanopyAmount('')
-      setCanopyUnit('days')
-      setDescription('')
-      setHarvestEstimateNote('')
-      setFertilizingRows([emptyFertilizingRow()])
-    }
-  }
-
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
 
@@ -123,7 +108,7 @@ function CropCycleFormModal({
       ? Math.round(Number(canopyAmount) * (canopyUnit === 'months' ? 30 : 1))
       : null
     const cropTypeInput: CropTypeInput = {
-      name: cropMode === 'new' ? newCropName.trim() : (selectedCropType?.name ?? ''),
+      name: selectedCropType?.name ?? '',
       growth_stages,
       canopy_closure_days,
       description: description.trim() || null,
@@ -133,17 +118,13 @@ function CropCycleFormModal({
 
     const cycleInput: CropCycleInput = {
       plot_id: plotId,
-      crop_type_id: cropMode === 'new' ? '' : selectedCropTypeId,
+      crop_type_id: selectedCropTypeId,
       planting_date: plantingDate,
       expected_harvest_date: expectedHarvestDate || null,
+      ratoon_number: ratoonNumber,
     }
 
-    onSave(
-      cycleInput,
-      cropMode === 'new'
-        ? { kind: 'create', input: cropTypeInput }
-        : { kind: 'update', id: selectedCropTypeId, input: cropTypeInput },
-    )
+    onSave(cycleInput, { kind: 'update', id: selectedCropTypeId, input: cropTypeInput })
   }
 
   return (
@@ -162,24 +143,9 @@ function CropCycleFormModal({
             </select>
           </div>
 
-          <div className="modal-field">
-            <label>Crop</label>
-            <div className="crop-mode-toggle">
-              <button
-                type="button"
-                className={cropMode === 'existing' ? 'active' : ''}
-                onClick={() => selectCropMode('existing')}
-                disabled={cropTypes.length === 0}
-              >
-                Use existing crop
-              </button>
-              <button type="button" className={cropMode === 'new' ? 'active' : ''} onClick={() => selectCropMode('new')}>
-                Add new crop
-              </button>
-            </div>
-          </div>
-
-          {cropMode === 'existing' ? (
+          {cropTypes.length === 0 ? (
+            <p className="modal-hint">No crop types are set up for this farm yet — contact support to add one.</p>
+          ) : (
             <div className="modal-field">
               <label htmlFor="cycle-crop-type">Crop type</label>
               <select
@@ -194,17 +160,6 @@ function CropCycleFormModal({
                   </option>
                 ))}
               </select>
-            </div>
-          ) : (
-            <div className="modal-field">
-              <label htmlFor="new-crop-name">New crop name</label>
-              <input
-                id="new-crop-name"
-                value={newCropName}
-                onChange={(e) => setNewCropName(e.target.value)}
-                placeholder="e.g. Sugarcane"
-                required
-              />
             </div>
           )}
 
@@ -318,11 +273,29 @@ function CropCycleFormModal({
             </div>
           </div>
 
+          <div className="modal-field">
+            <label htmlFor="cycle-ratoon">Ratoon generation</label>
+            <p className="modal-hint">
+              Is this a fresh planting or a regrowth from a previous harvest's stubble? Ratoons need less fertilizer
+              and yield somewhat less than plant cane — used by the fertilizer forecast.
+            </p>
+            <select
+              id="cycle-ratoon"
+              value={ratoonNumber}
+              onChange={(e) => setRatoonNumber(Number(e.target.value))}
+            >
+              <option value={0}>Plant cane (fresh planting)</option>
+              <option value={1}>1st ratoon</option>
+              <option value={2}>2nd ratoon</option>
+              <option value={3}>3rd+ ratoon</option>
+            </select>
+          </div>
+
           <div className="modal-actions">
             <button type="button" className="modal-cancel" onClick={onCancel} disabled={saving}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={saving || !plotId}>
+            <button type="submit" className="btn-primary" disabled={saving || !plotId || !selectedCropTypeId}>
               {saving ? 'Saving...' : 'Save'}
             </button>
           </div>

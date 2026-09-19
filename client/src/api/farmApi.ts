@@ -13,6 +13,39 @@ export type Farm = {
 
 const FARM_COLUMNS = 'id, name, enabled_modules, province, latitude, longitude'
 
+// Every farm gets Sugarcane pre-loaded, since it's currently the only crop
+// type selectable when adding a cycle (see CropCycleFormModal — "add new
+// crop" is hidden for now). Stage timing follows the reference agronomic
+// guide's stage sequence, landing on a ~12-month total cycle (the guide
+// states 12-18 months; 365 days is used as a representative default and can
+// be edited per-farm from the crop cycle form).
+const DEFAULT_SUGARCANE_CROP_TYPE = {
+  name: 'Sugarcane',
+  growth_stages: [
+    { name: 'Germination/Sprouting', offset_days: 0 },
+    { name: 'Tillering', offset_days: 15 },
+    { name: 'Grand Growth', offset_days: 60 },
+    { name: 'Ripening', offset_days: 180 },
+    { name: 'Ready for Harvest', offset_days: 365 },
+  ],
+  canopy_closure_days: null as number | null,
+  description: null as string | null,
+  harvest_estimate_note: null as string | null,
+  fertilizing_schedule: [
+    { name: 'Basal Application', purpose: '', nutrients: '', offset_days_start: 0, offset_days_end: 1 },
+    { name: 'First Dressing', purpose: '', nutrients: '', offset_days_start: 30, offset_days_end: 40 },
+    { name: 'Second Dressing', purpose: '', nutrients: '', offset_days_start: 50, offset_days_end: 60 },
+    { name: 'Top Dressing', purpose: '', nutrients: '', offset_days_start: 70, offset_days_end: null as number | null },
+  ],
+}
+
+async function seedDefaultCropTypes(farmId: string): Promise<void> {
+  const { error } = await supabase.from('crop_types').insert({ farm_id: farmId, ...DEFAULT_SUGARCANE_CROP_TYPE })
+  if (error) {
+    console.error('Failed to seed default crop types for new farm', error)
+  }
+}
+
 export async function getOrCreateDefaultFarm(): Promise<Farm> {
   const { data: userData, error: userError } = await supabase.auth.getUser()
   if (userError || !userData.user) {
@@ -38,6 +71,7 @@ export async function getOrCreateDefaultFarm(): Promise<Farm> {
     .single()
 
   if (!createError) {
+    await seedDefaultCropTypes(newFarm.id)
     return newFarm
   }
 

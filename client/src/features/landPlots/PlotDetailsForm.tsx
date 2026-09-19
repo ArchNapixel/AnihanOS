@@ -9,6 +9,10 @@ export type PlotDetailsInput = {
   size_unit: string
   soil_type: string | null
   municipality: string | null
+  soil_organic_matter_pct: number | null
+  soil_n_ppm: number | null
+  soil_p_bray_ppm: number | null
+  soil_k_exchangeable_ppm: number | null
 }
 
 const SIZE_UNITS = ['hectares', 'acres', 'sqm']
@@ -34,6 +38,16 @@ function PlotDetailsForm({
   const [sizeUnit, setSizeUnit] = useState(initialValue?.size_unit ?? 'hectares')
   const [soilType, setSoilType] = useState(initialValue?.soil_type ?? '')
   const [municipality, setMunicipality] = useState(initialValue?.municipality ?? '')
+  const [soilOrganicMatterPct, setSoilOrganicMatterPct] = useState(
+    initialValue?.soil_organic_matter_pct != null ? String(initialValue.soil_organic_matter_pct) : '',
+  )
+  const [soilNPpm, setSoilNPpm] = useState(initialValue?.soil_n_ppm != null ? String(initialValue.soil_n_ppm) : '')
+  const [soilPBrayPpm, setSoilPBrayPpm] = useState(
+    initialValue?.soil_p_bray_ppm != null ? String(initialValue.soil_p_bray_ppm) : '',
+  )
+  const [soilKExchangeablePpm, setSoilKExchangeablePpm] = useState(
+    initialValue?.soil_k_exchangeable_ppm != null ? String(initialValue.soil_k_exchangeable_ppm) : '',
+  )
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -44,6 +58,10 @@ function PlotDetailsForm({
       size_unit: sizeUnit,
       soil_type: type === 'land' ? soilType.trim() || null : null,
       municipality: municipality.trim() || null,
+      soil_organic_matter_pct: type === 'land' && soilOrganicMatterPct ? Number(soilOrganicMatterPct) : null,
+      soil_n_ppm: type === 'land' && soilNPpm ? Number(soilNPpm) : null,
+      soil_p_bray_ppm: type === 'land' && soilPBrayPpm ? Number(soilPBrayPpm) : null,
+      soil_k_exchangeable_ppm: type === 'land' && soilKExchangeablePpm ? Number(soilKExchangeablePpm) : null,
     })
   }
 
@@ -106,6 +124,64 @@ function PlotDetailsForm({
             onChange={(e) => setSoilType(e.target.value)}
             placeholder="e.g. clay loam (optional)"
           />
+        </div>
+      )}
+
+      {type === 'land' && (
+        <div className="plot-form-field">
+          <label>Soil test results (optional)</label>
+          <p className="plot-form-hint">
+            Only fill this in if you have lab results for this plot. Left blank, fertilizer forecasts assume a
+            medium-fertility baseline instead.
+          </p>
+          <div className="plot-form-field-row">
+            <div className="plot-form-field">
+              <label htmlFor="plot-soil-om">Organic matter (%)</label>
+              <input
+                id="plot-soil-om"
+                type="number"
+                min="0"
+                step="0.1"
+                value={soilOrganicMatterPct}
+                onChange={(e) => setSoilOrganicMatterPct(e.target.value)}
+              />
+            </div>
+            <div className="plot-form-field">
+              <label htmlFor="plot-soil-n">Soil N (ppm)</label>
+              <input
+                id="plot-soil-n"
+                type="number"
+                min="0"
+                step="0.1"
+                value={soilNPpm}
+                onChange={(e) => setSoilNPpm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="plot-form-field-row">
+            <div className="plot-form-field">
+              <label htmlFor="plot-soil-p">Soil P, Bray (ppm)</label>
+              <input
+                id="plot-soil-p"
+                type="number"
+                min="0"
+                step="0.1"
+                value={soilPBrayPpm}
+                onChange={(e) => setSoilPBrayPpm(e.target.value)}
+              />
+            </div>
+            <div className="plot-form-field">
+              <label htmlFor="plot-soil-k">Soil K, exchangeable (ppm)</label>
+              <input
+                id="plot-soil-k"
+                type="number"
+                min="0"
+                step="0.1"
+                value={soilKExchangeablePpm}
+                onChange={(e) => setSoilKExchangeablePpm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       )}
 

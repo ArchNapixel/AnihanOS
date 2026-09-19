@@ -16,6 +16,13 @@ export type Plot = {
   longitude: number | null
   boundary: GeoJSON.Polygon | null
   sort_order: number
+  // Optional soil test results, entered by the farmer when they have lab
+  // data. Left blank, the sugarcane fertilizer forecast falls back to an
+  // assumed medium-fertility baseline instead of guessing a number.
+  soil_organic_matter_pct: number | null
+  soil_n_ppm: number | null
+  soil_p_bray_ppm: number | null
+  soil_k_exchangeable_ppm: number | null
   created_at: string
   updated_at: string
 }
@@ -30,6 +37,10 @@ export type PlotInput = {
   latitude: number | null
   longitude: number | null
   boundary: GeoJSON.Polygon | null
+  soil_organic_matter_pct: number | null
+  soil_n_ppm: number | null
+  soil_p_bray_ppm: number | null
+  soil_k_exchangeable_ppm: number | null
 }
 
 export async function listPlots(): Promise<Plot[]> {

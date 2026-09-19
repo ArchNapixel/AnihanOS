@@ -62,6 +62,12 @@
   flex: 1;
 }
 
+.plot-form-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin: 0 0 10px;
+}
+
 .plot-form-boundary-status {
   font-size: 13px;
   color: var(--color-text-muted);

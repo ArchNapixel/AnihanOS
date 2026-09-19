@@ -25,6 +25,14 @@ function InputStockFormModal({
     initialValue ? String(initialValue.low_stock_threshold) : '0',
   )
   const [costPerUnit, setCostPerUnit] = useState(initialValue?.cost_per_unit != null ? String(initialValue.cost_per_unit) : '')
+  const [nitrogenPct, setNitrogenPct] = useState(initialValue?.nitrogen_pct != null ? String(initialValue.nitrogen_pct) : '')
+  const [phosphorusPct, setPhosphorusPct] = useState(
+    initialValue?.phosphorus_pct != null ? String(initialValue.phosphorus_pct) : '',
+  )
+  const [potassiumPct, setPotassiumPct] = useState(
+    initialValue?.potassium_pct != null ? String(initialValue.potassium_pct) : '',
+  )
+  const [kgPerUnit, setKgPerUnit] = useState(initialValue?.kg_per_unit != null ? String(initialValue.kg_per_unit) : '')
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -35,6 +43,10 @@ function InputStockFormModal({
       unit: unit.trim(),
       low_stock_threshold: Number(lowStockThreshold),
       cost_per_unit: costPerUnit ? Number(costPerUnit) : null,
+      nitrogen_pct: type === 'fertilizer' && nitrogenPct ? Number(nitrogenPct) : null,
+      phosphorus_pct: type === 'fertilizer' && phosphorusPct ? Number(phosphorusPct) : null,
+      potassium_pct: type === 'fertilizer' && potassiumPct ? Number(potassiumPct) : null,
+      kg_per_unit: type === 'fertilizer' && kgPerUnit ? Number(kgPerUnit) : null,
     })
   }
 
@@ -89,6 +101,68 @@ function InputStockFormModal({
               />
             </div>
           </div>
+
+          {type === 'fertilizer' && (
+            <>
+              <p className="modal-hint">
+                Nutrient content (e.g. "14-14-14" printed on the bag) and kg per unit — used to convert usage logs
+                into actual kg of N/P/K applied per hectare for the sugarcane fertilizer forecast. Optional, but the
+                forecast can't include this product without it.
+              </p>
+              <div className="modal-field-row">
+                <div className="modal-field">
+                  <label htmlFor="input-n-pct">Nitrogen (%)</label>
+                  <input
+                    id="input-n-pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={nitrogenPct}
+                    onChange={(e) => setNitrogenPct(e.target.value)}
+                  />
+                </div>
+                <div className="modal-field">
+                  <label htmlFor="input-p-pct">Phosphorus (%)</label>
+                  <input
+                    id="input-p-pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={phosphorusPct}
+                    onChange={(e) => setPhosphorusPct(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-field-row">
+                <div className="modal-field">
+                  <label htmlFor="input-k-pct">Potassium (%)</label>
+                  <input
+                    id="input-k-pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={potassiumPct}
+                    onChange={(e) => setPotassiumPct(e.target.value)}
+                  />
+                </div>
+                <div className="modal-field">
+                  <label htmlFor="input-kg-per-unit">Kg per unit {unit ? `(1 ${unit} = ? kg)` : ''}</label>
+                  <input
+                    id="input-kg-per-unit"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={kgPerUnit}
+                    onChange={(e) => setKgPerUnit(e.target.value)}
+                    placeholder="e.g. 50 for a 50kg bag"
+                  />
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="modal-field-row">
             <div className="modal-field">
