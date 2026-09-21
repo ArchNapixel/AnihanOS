@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { supabase } from './lib/supabaseClient'
 import { FarmProvider, useFarm } from './lib/FarmContext'
 import LoginPage from './features/auth/LoginPage'
+import LoadingScreen from './components/LoadingScreen'
 import AppLayout from './app/AppLayout'
 import ComingSoonPage from './app/ComingSoonPage'
 import RequireModule from './app/RequireModule'
@@ -22,7 +23,7 @@ function AppShell() {
   const { farm, loading, error } = useFarm()
 
   if (loading) {
-    return null
+    return <LoadingScreen />
   }
 
   if (error) {
@@ -108,7 +109,7 @@ function App() {
   }, [])
 
   if (loading) {
-    return null
+    return <LoadingScreen />
   }
 
   if (!session) {

@@ -9,14 +9,14 @@ import {
   type InputStockInput,
   type InputType,
 } from './inputStockApi'
-import { logInputUsage, type InputUsageInput } from './inputUsageApi'
+import { logInputUsage, listUsageForPlot, type InputUsageInput, type PlotInputUsageLog } from './inputUsageApi'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
 import InputStockFormModal from './InputStockFormModal'
 import AddStockModal from './AddStockModal'
 import QuickLogUsageModal from './QuickLogUsageModal'
 import UsageHistoryModal from './UsageHistoryModal'
-import PlotInputHistoryModal from './PlotInputHistoryModal'
+import PlotUsageBreakdown from './PlotUsageBreakdown'
 import './InputsPage.css'
 
 function InputsPage() {
@@ -30,7 +30,10 @@ function InputsPage() {
   const [addStockError, setAddStockError] = useState<string | null>(null)
   const [editingStock, setEditingStock] = useState<InputStock | null>(null)
   const [historyFor, setHistoryFor] = useState<InputStock | null>(null)
-  const [plotHistoryFor, setPlotHistoryFor] = useState<Plot | null>(null)
+  const [expandedPlotIds, setExpandedPlotIds] = useState<Set<string>>(new Set())
+  const [usageByPlotId, setUsageByPlotId] = useState<Record<string, PlotInputUsageLog[]>>({})
+  const [loadingUsagePlotIds, setLoadingUsagePlotIds] = useState<Set<string>>(new Set())
+  const [usageErrorByPlotId, setUsageErrorByPlotId] = useState<Record<string, string>>({})
   const [quickLogFor, setQuickLogFor] = useState<{ plot: Plot; type: InputType } | null>(null)
   const [saving, setSaving] = useState(false)
   const [quickLogError, setQuickLogError] = useState<string | null>(null)
@@ -114,6 +117,47 @@ function InputsPage() {
     }
   }
 
+  const fetchUsageForPlot = async (plotId: string) => {
+    setLoadingUsagePlotIds((current) => new Set(current).add(plotId))
+    setUsageErrorByPlotId((current) => {
+      const next = { ...current }
+      delete next[plotId]
+      return next
+    })
+    try {
+      const data = await listUsageForPlot(plotId)
+      setUsageByPlotId((current) => ({ ...current, [plotId]: data }))
+    } catch (err) {
+      setUsageErrorByPlotId((current) => ({
+        ...current,
+        [plotId]: err instanceof Error ? err.message : 'Failed to load input usage',
+      }))
+    } finally {
+      setLoadingUsagePlotIds((current) => {
+        const next = new Set(current)
+        next.delete(plotId)
+        return next
+      })
+    }
+  }
+
+  const toggleBreakdown = (plot: Plot) => {
+    const isExpanding = !expandedPlotIds.has(plot.id)
+    setExpandedPlotIds((current) => {
+      const next = new Set(current)
+      if (isExpanding) {
+        next.add(plot.id)
+      } else {
+        next.delete(plot.id)
+      }
+      return next
+    })
+
+    if (isExpanding && !usageByPlotId[plot.id] && !loadingUsagePlotIds.has(plot.id)) {
+      fetchUsageForPlot(plot.id)
+    }
+  }
+
   const handleQuickLogUsage = async (input: InputUsageInput) => {
     const stock = stockItems.find((s) => s.id === input.input_stock_id)
     if (!stock) return
@@ -121,6 +165,16 @@ function InputsPage() {
     setQuickLogError(null)
     try {
       await logInputUsage(input, stock)
+      // Drop the cached breakdown for this plot, then re-fetch immediately
+      // if it's currently expanded so the new entry shows up right away.
+      setUsageByPlotId((current) => {
+        const next = { ...current }
+        delete next[input.plot_id]
+        return next
+      })
+      if (expandedPlotIds.has(input.plot_id)) {
+        fetchUsageForPlot(input.plot_id)
+      }
       setQuickLogFor(null)
       await loadAll()
     } catch (err) {
@@ -207,22 +261,44 @@ function InputsPage() {
             harvest.
           </p>
           <div className="inputs-plot-list">
-            {plots.map((plot) => (
-              <div className="inputs-plot-row" key={plot.id}>
-                <span>{plot.name}</span>
-                <div className="inputs-plot-row-actions">
-                  <button type="button" onClick={() => setQuickLogFor({ plot, type: 'fertilizer' })}>
-                    + Fertilizer
-                  </button>
-                  <button type="button" onClick={() => setQuickLogFor({ plot, type: 'pesticide' })}>
-                    + Pesticide
-                  </button>
-                  <button type="button" className="btn-outline" onClick={() => setPlotHistoryFor(plot)}>
-                    View Breakdown
-                  </button>
+            {plots.map((plot) => {
+              const activeCycles = cropCycles.filter((c) => c.plot_id === plot.id && c.status !== 'harvested')
+              const isExpanded = expandedPlotIds.has(plot.id)
+              return (
+                <div className="inputs-plot-item" key={plot.id}>
+                  <div className="inputs-plot-row">
+                    <span className="inputs-plot-row-name">
+                      {plot.name}
+                      <span className="inputs-plot-row-cycle">
+                        {activeCycles.length === 0
+                          ? 'No active crop cycle'
+                          : activeCycles.map((c) => c.crop_types.name).join(', ')}
+                      </span>
+                    </span>
+                    <div className="inputs-plot-row-actions">
+                      <button type="button" onClick={() => setQuickLogFor({ plot, type: 'fertilizer' })}>
+                        + Fertilizer
+                      </button>
+                      <button type="button" onClick={() => setQuickLogFor({ plot, type: 'pesticide' })}>
+                        + Pesticide
+                      </button>
+                      <button type="button" className="btn-outline" onClick={() => toggleBreakdown(plot)}>
+                        {isExpanded ? 'Hide Breakdown' : 'View Breakdown'}
+                      </button>
+                    </div>
+                  </div>
+                  {isExpanded && (
+                    <PlotUsageBreakdown
+                      plot={plot}
+                      cropCycles={cropCycles}
+                      logs={usageByPlotId[plot.id] ?? []}
+                      loading={loadingUsagePlotIds.has(plot.id)}
+                      error={usageErrorByPlotId[plot.id] ?? null}
+                    />
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
@@ -245,14 +321,6 @@ function InputsPage() {
       )}
 
       {historyFor && <UsageHistoryModal stock={historyFor} onClose={() => setHistoryFor(null)} />}
-
-      {plotHistoryFor && (
-        <PlotInputHistoryModal
-          plot={plotHistoryFor}
-          cropCycles={cropCycles}
-          onClose={() => setPlotHistoryFor(null)}
-        />
-      )}
 
       {quickLogFor && (
         <QuickLogUsageModal

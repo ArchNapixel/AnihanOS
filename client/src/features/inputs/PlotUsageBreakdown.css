@@ -1,9 +1,26 @@
+.plot-usage-breakdown {
+  background: var(--color-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: -4px 0 8px;
+}
+
+.plot-usage-hint {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.plot-usage-error {
+  color: var(--color-error);
+  font-size: 13px;
+  margin: 0;
+}
+
 .plot-usage-groups {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-height: 55vh;
-  overflow-y: auto;
 }
 
 .plot-usage-group-header {

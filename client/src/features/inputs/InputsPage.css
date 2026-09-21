@@ -112,6 +112,11 @@
   gap: 8px;
 }
 
+.inputs-plot-item {
+  display: flex;
+  flex-direction: column;
+}
+
 .inputs-plot-row {
   display: flex;
   align-items: center;
@@ -123,9 +128,18 @@
   padding: 12px 16px;
 }
 
-.inputs-plot-row span {
+.inputs-plot-row-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: 14px;
   font-weight: 600;
+}
+
+.inputs-plot-row-cycle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-text-muted);
 }
 
 .inputs-plot-row-actions {
