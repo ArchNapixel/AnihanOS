@@ -2,28 +2,20 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
-import { useFarm } from '../lib/FarmContext'
-import type { FarmModule } from '../api/farmApi'
 import LeafIcon from '../components/LeafIcon'
 import './TopNav.css'
 
-const navItems: { to: string; label: string; module?: FarmModule }[] = [
+const navItems: { to: string; label: string }[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/land-plots', label: 'Plots' },
-  { to: '/crops', label: 'Crops', module: 'crops' },
-  { to: '/inputs', label: 'Inputs', module: 'crops' },
-  { to: '/livestock', label: 'Livestock', module: 'livestock' },
-  { to: '/aquaculture', label: 'Aquaculture', module: 'aquaculture' },
-  { to: '/perennials', label: 'Perennials', module: 'perennials' },
+  { to: '/crops', label: 'Crops' },
+  { to: '/inputs', label: 'Inputs' },
   { to: '/financials', label: 'Financials' },
   { to: '/settings', label: 'Settings' },
 ]
 
 function TopNav() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { enabledModules } = useFarm()
-
-  const visibleNavItems = navItems.filter((item) => !item.module || enabledModules.includes(item.module))
 
   const handleLogout = () => {
     supabase.auth.signOut()
@@ -49,7 +41,7 @@ function TopNav() {
       </button>
 
       <nav className={menuOpen ? 'top-nav-links open' : 'top-nav-links'}>
-        {visibleNavItems.map((item) => (
+        {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}

@@ -1,9 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { getOrCreateDefaultFarm, type Farm, type FarmModule } from '../api/farmApi'
+import { getOrCreateDefaultFarm, type Farm } from '../api/farmApi'
 
 type FarmContextValue = {
   farm: Farm | null
-  enabledModules: FarmModule[]
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
@@ -34,7 +33,7 @@ export function FarmProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <FarmContext.Provider value={{ farm, enabledModules: farm?.enabled_modules ?? [], loading, error, refresh: load }}>
+    <FarmContext.Provider value={{ farm, loading, error, refresh: load }}>
       {children}
     </FarmContext.Provider>
   )

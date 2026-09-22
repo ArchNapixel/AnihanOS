@@ -1,25 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import ModulePicker from '../../components/ModulePicker'
 import { useFarm } from '../../lib/FarmContext'
-import { updateFarmModules, updateFarmLocation, type FarmModule } from '../../api/farmApi'
+import { updateFarmLocation } from '../../api/farmApi'
 import { PH_PROVINCES } from '../../lib/phProvinces'
 import './SettingsPage.css'
 
 function SettingsPage() {
-  const { farm, enabledModules, refresh } = useFarm()
-  const [selected, setSelected] = useState<FarmModule[]>(enabledModules)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
+  const { farm, refresh } = useFarm()
 
   const [province, setProvince] = useState(farm?.province ?? '')
   const [locationSaving, setLocationSaving] = useState(false)
   const [locationError, setLocationError] = useState<string | null>(null)
   const [locationSaved, setLocationSaved] = useState(false)
-
-  useEffect(() => {
-    setSelected(enabledModules)
-  }, [enabledModules])
 
   useEffect(() => {
     setProvince(farm?.province ?? '')
@@ -34,22 +25,6 @@ function SettingsPage() {
     }
     return Array.from(map.entries())
   }, [])
-
-  const handleSave = async () => {
-    if (!farm) return
-    setSaving(true)
-    setError(null)
-    setSaved(false)
-    try {
-      await updateFarmModules(farm.id, selected)
-      await refresh()
-      setSaved(true)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save your selection')
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const handleSaveLocation = async () => {
     if (!farm) return
@@ -108,23 +83,6 @@ function SettingsPage() {
           disabled={locationSaving}
         >
           {locationSaving ? 'Saving...' : 'Save location'}
-        </button>
-      </div>
-
-      <div className="settings-section">
-        <h2>Farm modules</h2>
-        <p className="settings-hint">
-          Dashboard, Land &amp; Plot Management, and Financials are always available. Choose which other
-          tools show up for your farm.
-        </p>
-
-        <ModulePicker selected={selected} onChange={setSelected} />
-
-        {error && <p className="settings-error">{error}</p>}
-        {saved && !error && <p className="settings-saved">Saved.</p>}
-
-        <button type="button" className="btn-primary settings-save" onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save changes'}
         </button>
       </div>
     </div>

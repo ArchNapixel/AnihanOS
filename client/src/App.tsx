@@ -7,20 +7,15 @@ import LoginPage from './features/auth/LoginPage'
 import LoadingScreen from './components/LoadingScreen'
 import AppLayout from './app/AppLayout'
 import ComingSoonPage from './app/ComingSoonPage'
-import RequireModule from './app/RequireModule'
-import ModuleSelectionPage from './features/onboarding/ModuleSelectionPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import LandPlotsPage from './features/landPlots/LandPlotsPage'
 import CropsPage from './features/crops/CropsPage'
 import InputsPage from './features/inputs/InputsPage'
-import LivestockPage from './features/livestock/LivestockPage'
-import AquaculturePage from './features/aquaculture/AquaculturePage'
-import PerennialsPage from './features/perennials/PerennialsPage'
 import FinancialsPage from './features/financials/FinancialsPage'
 import SettingsPage from './features/settings/SettingsPage'
 
 function AppShell() {
-  const { farm, loading, error } = useFarm()
+  const { loading, error } = useFarm()
 
   if (loading) {
     return <LoadingScreen />
@@ -28,10 +23,6 @@ function AppShell() {
 
   if (error) {
     return <p style={{ padding: 24 }}>{error}</p>
-  }
-
-  if (farm && farm.enabled_modules === null) {
-    return <ModuleSelectionPage />
   }
 
   return (
@@ -42,46 +33,8 @@ function AppShell() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/land-plots" element={<LandPlotsPage />} />
           <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
-          <Route
-            path="/crops"
-            element={
-              <RequireModule module="crops">
-                <CropsPage />
-              </RequireModule>
-            }
-          />
-          <Route
-            path="/inputs"
-            element={
-              <RequireModule module="crops">
-                <InputsPage />
-              </RequireModule>
-            }
-          />
-          <Route
-            path="/livestock"
-            element={
-              <RequireModule module="livestock">
-                <LivestockPage />
-              </RequireModule>
-            }
-          />
-          <Route
-            path="/aquaculture"
-            element={
-              <RequireModule module="aquaculture">
-                <AquaculturePage />
-              </RequireModule>
-            }
-          />
-          <Route
-            path="/perennials"
-            element={
-              <RequireModule module="perennials">
-                <PerennialsPage />
-              </RequireModule>
-            }
-          />
+          <Route path="/crops" element={<CropsPage />} />
+          <Route path="/inputs" element={<InputsPage />} />
           <Route path="/financials" element={<FinancialsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

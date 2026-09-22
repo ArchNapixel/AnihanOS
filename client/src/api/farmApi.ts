@@ -1,17 +1,14 @@
 import { supabase } from '../lib/supabaseClient'
 
-export type FarmModule = 'crops' | 'livestock' | 'aquaculture' | 'perennials'
-
 export type Farm = {
   id: string
   name: string
-  enabled_modules: FarmModule[] | null
   province: string | null
   latitude: number | null
   longitude: number | null
 }
 
-const FARM_COLUMNS = 'id, name, enabled_modules, province, latitude, longitude'
+const FARM_COLUMNS = 'id, name, province, latitude, longitude'
 
 // Every farm gets Sugarcane pre-loaded, since it's currently the only crop
 // type selectable when adding a cycle (see CropCycleFormModal — "add new
@@ -91,18 +88,6 @@ export async function getOrCreateDefaultFarm(): Promise<Farm> {
   }
 
   throw createError
-}
-
-export async function updateFarmModules(farmId: string, modules: FarmModule[]): Promise<Farm> {
-  const { data, error } = await supabase
-    .from('farms')
-    .update({ enabled_modules: modules })
-    .eq('id', farmId)
-    .select(FARM_COLUMNS)
-    .single()
-
-  if (error) throw error
-  return data
 }
 
 export async function updateFarmLocation(

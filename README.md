@@ -1,6 +1,6 @@
 # AnihanOS
 
-Farm management & inventory platform for Filipino smallholder farmers — crops, inputs, livestock, and land in one system.
+Sugarcane farm management platform for Filipino smallholder farmers — crop cycles, inputs, and land in one system.
 
 ## Structure
 

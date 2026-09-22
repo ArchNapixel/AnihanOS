@@ -1,0 +1,686 @@
+{
+  "client/package.json": {
+    "mtime": 1789726410.0250874,
+    "seen": 1790041862.9620242,
+    "ast_hash": "c88343d1abe60c8f0c8a85783e2717f2",
+    "semantic_hash": "c88343d1abe60c8f0c8a85783e2717f2"
+  },
+  "client/src/App.tsx": {
+    "mtime": 1789974789.2691972,
+    "seen": 1790041862.962029,
+    "ast_hash": "49440a49d8a584cdc4f99e98214c66fd",
+    "semantic_hash": "49440a49d8a584cdc4f99e98214c66fd"
+  },
+  "client/src/api/farmApi.ts": {
+    "mtime": 1789812968.0648193,
+    "seen": 1790041862.9620311,
+    "ast_hash": "501ef1855b82915ef960982d5b26ad77",
+    "semantic_hash": "501ef1855b82915ef960982d5b26ad77"
+  },
+  "client/src/api/plotsGeoJsonApi.ts": {
+    "mtime": 1789755661.867097,
+    "seen": 1790041862.962032,
+    "ast_hash": "2853038167e18e87d2ffae9158a71625",
+    "semantic_hash": "2853038167e18e87d2ffae9158a71625"
+  },
+  "client/src/api/weatherApi.ts": {
+    "mtime": 1789755661.8229725,
+    "seen": 1790041862.9620335,
+    "ast_hash": "912dff5e42912406c5445011bc258dc8",
+    "semantic_hash": "912dff5e42912406c5445011bc258dc8"
+  },
+  "client/src/app/AppLayout.tsx": {
+    "mtime": 1789575778.2495635,
+    "seen": 1790041862.9620342,
+    "ast_hash": "dee469433f5f3e54ebabf4d4f95dc760",
+    "semantic_hash": "dee469433f5f3e54ebabf4d4f95dc760"
+  },
+  "client/src/app/ComingSoonPage.tsx": {
+    "mtime": 1789573858.049598,
+    "seen": 1790041862.9620354,
+    "ast_hash": "efbf7886de4a25ad21b5d9872f18e850",
+    "semantic_hash": "efbf7886de4a25ad21b5d9872f18e850"
+  },
+  "client/src/app/RequireModule.tsx": {
+    "mtime": 1789755652.3460565,
+    "seen": 1790041862.9620361,
+    "ast_hash": "7d6ace19880e4c52d20c117d2bf015a6",
+    "semantic_hash": "7d6ace19880e4c52d20c117d2bf015a6"
+  },
+  "client/src/app/TopNav.tsx": {
+    "mtime": 1789755692.9407616,
+    "seen": 1790041862.9620373,
+    "ast_hash": "207e3b07eb0f187b7d4945f7403bd646",
+    "semantic_hash": "207e3b07eb0f187b7d4945f7403bd646"
+  },
+  "client/src/components/AllPlotsMap.tsx": {
+    "mtime": 1789755652.402117,
+    "seen": 1790041862.962038,
+    "ast_hash": "f963f8d3e11a1fee1d60735f7f3c0ba8",
+    "semantic_hash": "f963f8d3e11a1fee1d60735f7f3c0ba8"
+  },
+  "client/src/components/LeafIcon.tsx": {
+    "mtime": 1789573812.4490345,
+    "seen": 1790041862.962039,
+    "ast_hash": "80c299f161828752fc22b4264c0b91b0",
+    "semantic_hash": "80c299f161828752fc22b4264c0b91b0"
+  },
+  "client/src/components/LoadingScreen.tsx": {
+    "mtime": 1789974764.1076672,
+    "seen": 1790041862.9620404,
+    "ast_hash": "8371b2d43b1a13d3c69f7f04e5af4558",
+    "semantic_hash": "8371b2d43b1a13d3c69f7f04e5af4558"
+  },
+  "client/src/components/ModulePicker.tsx": {
+    "mtime": 1789755652.3584237,
+    "seen": 1790041862.9620411,
+    "ast_hash": "a34de5ea77931e1820c82301e93913c1",
+    "semantic_hash": "a34de5ea77931e1820c82301e93913c1"
+  },
+  "client/src/components/PlotBoundaryMap.tsx": {
+    "mtime": 1789611180.2411366,
+    "seen": 1790041862.962042,
+    "ast_hash": "a16e43177a982ae6bbb52ebd217b9c90",
+    "semantic_hash": "a16e43177a982ae6bbb52ebd217b9c90"
+  },
+  "client/src/components/PlotCycleHistoryModal.tsx": {
+    "mtime": 1789738635.868282,
+    "seen": 1790041862.962043,
+    "ast_hash": "d1c80e45b111cb34f7e0eced3749e043",
+    "semantic_hash": "d1c80e45b111cb34f7e0eced3749e043"
+  },
+  "client/src/domain/fertilizingSchedule.ts": {
+    "mtime": 1789755661.723792,
+    "seen": 1790041862.962044,
+    "ast_hash": "ea9f434bab67dabbfb8bedcb9f73f048",
+    "semantic_hash": "ea9f434bab67dabbfb8bedcb9f73f048"
+  },
+  "client/src/domain/growthStage.ts": {
+    "mtime": 1789755661.679644,
+    "seen": 1790041862.962045,
+    "ast_hash": "6f9993b1c41b3e0a5bcc4e661ab17378",
+    "semantic_hash": "6f9993b1c41b3e0a5bcc4e661ab17378"
+  },
+  "client/src/domain/sugarcaneForecast.ts": {
+    "mtime": 1789825187.5163856,
+    "seen": 1790041862.9620457,
+    "ast_hash": "681ea24d1128100a815d0fbcc4c30d29",
+    "semantic_hash": "681ea24d1128100a815d0fbcc4c30d29"
+  },
+  "client/src/domain/weedRisk.ts": {
+    "mtime": 1789696657.9079468,
+    "seen": 1790041862.9620466,
+    "ast_hash": "4b16ea52f298919df666540fe989a648",
+    "semantic_hash": "4b16ea52f298919df666540fe989a648"
+  },
+  "client/src/features/aquaculture/AquaculturePage.tsx": {
+    "mtime": 1789698963.9890468,
+    "seen": 1790041862.9620476,
+    "ast_hash": "c2d139aff3ab623e3ef2033fb89b31d7",
+    "semantic_hash": "c2d139aff3ab623e3ef2033fb89b31d7"
+  },
+  "client/src/features/aquaculture/AquacultureRecordFormModal.tsx": {
+    "mtime": 1789737732.1993415,
+    "seen": 1790041862.9620485,
+    "ast_hash": "17a35b5bad8b94c32af820b1a0b08353",
+    "semantic_hash": "17a35b5bad8b94c32af820b1a0b08353"
+  },
+  "client/src/features/aquaculture/AquacultureRecordHistoryModal.tsx": {
+    "mtime": 1789698932.802776,
+    "seen": 1790041862.9620492,
+    "ast_hash": "73599598918e9cb2c171e5e90109507f",
+    "semantic_hash": "73599598918e9cb2c171e5e90109507f"
+  },
+  "client/src/features/aquaculture/AquacultureStockFormModal.tsx": {
+    "mtime": 1789737754.5668366,
+    "seen": 1790041862.962051,
+    "ast_hash": "b05fe6f661e4f2cd9c9935a7111b97ce",
+    "semantic_hash": "b05fe6f661e4f2cd9c9935a7111b97ce"
+  },
+  "client/src/features/aquaculture/aquacultureRecordsApi.ts": {
+    "mtime": 1789698729.3651013,
+    "seen": 1790041862.9620516,
+    "ast_hash": "b91c80b736816d3fd0141acb6072de80",
+    "semantic_hash": "b91c80b736816d3fd0141acb6072de80"
+  },
+  "client/src/features/aquaculture/aquacultureStockApi.ts": {
+    "mtime": 1789698716.22999,
+    "seen": 1790041862.9620526,
+    "ast_hash": "f030b4d1c9d99716cca430661cb643af",
+    "semantic_hash": "f030b4d1c9d99716cca430661cb643af"
+  },
+  "client/src/features/auth/LoginPage.tsx": {
+    "mtime": 1789706603.6588745,
+    "seen": 1790041862.9620533,
+    "ast_hash": "533e26e41bc228b60dc75349c44e5cbe",
+    "semantic_hash": "533e26e41bc228b60dc75349c44e5cbe"
+  },
+  "client/src/features/crops/CropCycleCard.tsx": {
+    "mtime": 1789755652.44936,
+    "seen": 1790041862.9620543,
+    "ast_hash": "4343e8e162746d3e8c9419bcf01659cf",
+    "semantic_hash": "4343e8e162746d3e8c9419bcf01659cf"
+  },
+  "client/src/features/crops/CropCycleFormModal.tsx": {
+    "mtime": 1789813741.654746,
+    "seen": 1790041862.9620552,
+    "ast_hash": "e96c1c5c8a059b7d20c4cb2a6426a87a",
+    "semantic_hash": "e96c1c5c8a059b7d20c4cb2a6426a87a"
+  },
+  "client/src/features/crops/CropPlotGroup.tsx": {
+    "mtime": 1789742031.5952024,
+    "seen": 1790041862.962056,
+    "ast_hash": "18cdff7d6bbfe78e771ce9f99869d441",
+    "semantic_hash": "18cdff7d6bbfe78e771ce9f99869d441"
+  },
+  "client/src/features/crops/CropsPage.tsx": {
+    "mtime": 1789755652.7644494,
+    "seen": 1790041862.9620566,
+    "ast_hash": "c76f542f2c9fec30b4229bd255a2c099",
+    "semantic_hash": "c76f542f2c9fec30b4229bd255a2c099"
+  },
+  "client/src/features/crops/FertilizingScheduleEditor.tsx": {
+    "mtime": 1789755652.5663242,
+    "seen": 1790041862.9620578,
+    "ast_hash": "822fa178f64ed55e0f46759d5c4abc4a",
+    "semantic_hash": "822fa178f64ed55e0f46759d5c4abc4a"
+  },
+  "client/src/features/crops/FieldActivityModal.tsx": {
+    "mtime": 1789737775.5309567,
+    "seen": 1790041862.9620585,
+    "ast_hash": "cd8d275e0ba58a26e7a20b61a680568c",
+    "semantic_hash": "cd8d275e0ba58a26e7a20b61a680568c"
+  },
+  "client/src/features/crops/HarvestModal.tsx": {
+    "mtime": 1789737783.851156,
+    "seen": 1790041862.9620595,
+    "ast_hash": "37fa19d63d1dfa876993ee7abf499bd5",
+    "semantic_hash": "37fa19d63d1dfa876993ee7abf499bd5"
+  },
+  "client/src/features/crops/SugarcaneForecastModal.tsx": {
+    "mtime": 1789825156.3569467,
+    "seen": 1790041862.9620602,
+    "ast_hash": "e4929088a0d47a212e640bfb0580771b",
+    "semantic_hash": "e4929088a0d47a212e640bfb0580771b"
+  },
+  "client/src/features/crops/cropCyclesApi.ts": {
+    "mtime": 1789825565.6926918,
+    "seen": 1790041862.9620614,
+    "ast_hash": "847dba985ab4884f29edd5c713657bb3",
+    "semantic_hash": "847dba985ab4884f29edd5c713657bb3"
+  },
+  "client/src/features/crops/cropTypesApi.ts": {
+    "mtime": 1789755652.6080709,
+    "seen": 1790041862.9620621,
+    "ast_hash": "ba5128fde130383f87c877d66aa63d98",
+    "semantic_hash": "ba5128fde130383f87c877d66aa63d98"
+  },
+  "client/src/features/crops/fieldActivitiesApi.ts": {
+    "mtime": 1789696641.6382222,
+    "seen": 1790041862.962063,
+    "ast_hash": "063175f2ad2f7c7a04d1231102a125e5",
+    "semantic_hash": "063175f2ad2f7c7a04d1231102a125e5"
+  },
+  "client/src/features/dashboard/DashboardPage.tsx": {
+    "mtime": 1789755652.8988414,
+    "seen": 1790041862.9620638,
+    "ast_hash": "a2b61648a0d4e6421a324a75853d1829",
+    "semantic_hash": "a2b61648a0d4e6421a324a75853d1829"
+  },
+  "client/src/features/dashboard/WeatherWidget.tsx": {
+    "mtime": 1789755652.8139331,
+    "seen": 1790041862.962065,
+    "ast_hash": "3127a2495ec3dd7d29dc58598a6d99dc",
+    "semantic_hash": "3127a2495ec3dd7d29dc58598a6d99dc"
+  },
+  "client/src/features/financials/CsvPreviewModal.tsx": {
+    "mtime": 1789697443.7936256,
+    "seen": 1790041862.962066,
+    "ast_hash": "7047915187c83149611895f82e969d65",
+    "semantic_hash": "7047915187c83149611895f82e969d65"
+  },
+  "client/src/features/financials/FinancialsPage.tsx": {
+    "mtime": 1789825661.687654,
+    "seen": 1790041862.9620667,
+    "ast_hash": "5ce08d9e2f697e3c2926168eac9ef610",
+    "semantic_hash": "5ce08d9e2f697e3c2926168eac9ef610"
+  },
+  "client/src/features/financials/WageEntryFormModal.tsx": {
+    "mtime": 1789737790.8576014,
+    "seen": 1790041862.9620674,
+    "ast_hash": "12adc142a02befffe012b5efc3b13713",
+    "semantic_hash": "12adc142a02befffe012b5efc3b13713"
+  },
+  "client/src/features/financials/WeeklyWageEntriesModal.tsx": {
+    "mtime": 1789723952.1730506,
+    "seen": 1790041862.9620683,
+    "ast_hash": "ee5b7f237059de2b1dd5f7e000b8fdd4",
+    "semantic_hash": "ee5b7f237059de2b1dd5f7e000b8fdd4"
+  },
+  "client/src/features/financials/financialsApi.ts": {
+    "mtime": 1789825570.9991555,
+    "seen": 1790041862.9620795,
+    "ast_hash": "8e3d76e0b7ec5f906bde041bbf28c117",
+    "semantic_hash": "8e3d76e0b7ec5f906bde041bbf28c117"
+  },
+  "client/src/features/financials/wageEntriesApi.ts": {
+    "mtime": 1789755652.6369572,
+    "seen": 1790041862.9620805,
+    "ast_hash": "f445304fda1186a19d83ac05d4131a5c",
+    "semantic_hash": "f445304fda1186a19d83ac05d4131a5c"
+  },
+  "client/src/features/inputs/AddStockModal.tsx": {
+    "mtime": 1789720399.2502644,
+    "seen": 1790041862.9620812,
+    "ast_hash": "c78ddd4949cfeec9cc3931c25ae37eaf",
+    "semantic_hash": "c78ddd4949cfeec9cc3931c25ae37eaf"
+  },
+  "client/src/features/inputs/InputStockFormModal.tsx": {
+    "mtime": 1789813703.342852,
+    "seen": 1790041862.9620824,
+    "ast_hash": "030b063036608d1195d2dfb1ded1a52b",
+    "semantic_hash": "030b063036608d1195d2dfb1ded1a52b"
+  },
+  "client/src/features/inputs/InputsPage.tsx": {
+    "mtime": 1789975262.4081151,
+    "seen": 1790041862.962083,
+    "ast_hash": "e9792a59dfbe9025bc889d0bd8351b73",
+    "semantic_hash": "e9792a59dfbe9025bc889d0bd8351b73"
+  },
+  "client/src/features/inputs/PlotUsageBreakdown.tsx": {
+    "mtime": 1789975140.3286195,
+    "seen": 1790041862.9620838,
+    "ast_hash": "85136c47b049ae448c85710793e1578a",
+    "semantic_hash": "85136c47b049ae448c85710793e1578a"
+  },
+  "client/src/features/inputs/QuickLogUsageModal.tsx": {
+    "mtime": 1789737797.5816236,
+    "seen": 1790041862.9620848,
+    "ast_hash": "bf8c8d741a2e33a04b0562c6875422a8",
+    "semantic_hash": "bf8c8d741a2e33a04b0562c6875422a8"
+  },
+  "client/src/features/inputs/UsageHistoryModal.tsx": {
+    "mtime": 1789720765.0948613,
+    "seen": 1790041862.9620857,
+    "ast_hash": "f720ad0817b02c4771db26f3a30578ab",
+    "semantic_hash": "f720ad0817b02c4771db26f3a30578ab"
+  },
+  "client/src/features/inputs/inputStockApi.ts": {
+    "mtime": 1789813678.7554815,
+    "seen": 1790041862.9620864,
+    "ast_hash": "867d0538e3e7534a5bc1912c16b262a5",
+    "semantic_hash": "867d0538e3e7534a5bc1912c16b262a5"
+  },
+  "client/src/features/inputs/inputUsageApi.ts": {
+    "mtime": 1789813751.2839177,
+    "seen": 1790041862.9620874,
+    "ast_hash": "46918bcd73d9133565caa3a64a9d7225",
+    "semantic_hash": "46918bcd73d9133565caa3a64a9d7225"
+  },
+  "client/src/features/landPlots/LandPlotsPage.tsx": {
+    "mtime": 1789814389.087785,
+    "seen": 1790041862.962088,
+    "ast_hash": "7d19c61cee3f588fe0c1270a9b1fe46b",
+    "semantic_hash": "7d19c61cee3f588fe0c1270a9b1fe46b"
+  },
+  "client/src/features/landPlots/PlotDetailModal.tsx": {
+    "mtime": 1789755652.9170942,
+    "seen": 1790041862.9620893,
+    "ast_hash": "1fc59caed543d7a9a623e9c9476ef0fe",
+    "semantic_hash": "1fc59caed543d7a9a623e9c9476ef0fe"
+  },
+  "client/src/features/landPlots/PlotDetailsForm.tsx": {
+    "mtime": 1789815839.6914463,
+    "seen": 1790041862.96209,
+    "ast_hash": "7ee8b0121c30bca408980dd5745d8c04",
+    "semantic_hash": "7ee8b0121c30bca408980dd5745d8c04"
+  },
+  "client/src/features/landPlots/plotsApi.ts": {
+    "mtime": 1789813623.2427175,
+    "seen": 1790041862.962091,
+    "ast_hash": "cd910c8f14cb44a408d45e276d5fd652",
+    "semantic_hash": "cd910c8f14cb44a408d45e276d5fd652"
+  },
+  "client/src/features/livestock/LivestockGroupFormModal.tsx": {
+    "mtime": 1789613759.9254644,
+    "seen": 1790041862.9620917,
+    "ast_hash": "fa5dd6dedbfc0c4365c7f8dc6e583fe4",
+    "semantic_hash": "fa5dd6dedbfc0c4365c7f8dc6e583fe4"
+  },
+  "client/src/features/livestock/LivestockPage.tsx": {
+    "mtime": 1789613827.2273388,
+    "seen": 1790041862.9620929,
+    "ast_hash": "eb007b7b640b50b0413af44cac1b1211",
+    "semantic_hash": "eb007b7b640b50b0413af44cac1b1211"
+  },
+  "client/src/features/livestock/LivestockRecordFormModal.tsx": {
+    "mtime": 1789737830.1154294,
+    "seen": 1790041862.9620938,
+    "ast_hash": "88cffc9dd4f60370b0b4972567bda192",
+    "semantic_hash": "88cffc9dd4f60370b0b4972567bda192"
+  },
+  "client/src/features/livestock/RecordHistoryModal.tsx": {
+    "mtime": 1789613806.8182812,
+    "seen": 1790041862.9620945,
+    "ast_hash": "cab8acd7602b96ccd0b0ca17a488117e",
+    "semantic_hash": "cab8acd7602b96ccd0b0ca17a488117e"
+  },
+  "client/src/features/livestock/livestockGroupsApi.ts": {
+    "mtime": 1789755652.6989532,
+    "seen": 1790041862.9620955,
+    "ast_hash": "1623148d48224673ce3abd594f98d3ca",
+    "semantic_hash": "1623148d48224673ce3abd594f98d3ca"
+  },
+  "client/src/features/livestock/livestockRecordsApi.ts": {
+    "mtime": 1789613745.290138,
+    "seen": 1790041862.9620965,
+    "ast_hash": "1ce48bfbec60b1cb892840c8e91d8d17",
+    "semantic_hash": "1ce48bfbec60b1cb892840c8e91d8d17"
+  },
+  "client/src/features/onboarding/ModuleSelectionPage.tsx": {
+    "mtime": 1789755652.7091792,
+    "seen": 1790041862.9620974,
+    "ast_hash": "e13fc1abc5683739daf98f2104739914",
+    "semantic_hash": "e13fc1abc5683739daf98f2104739914"
+  },
+  "client/src/features/perennials/HarvestRecordFormModal.tsx": {
+    "mtime": 1789737837.364329,
+    "seen": 1790041862.9620981,
+    "ast_hash": "ed7915636c82bfb7d6dc49ef17873e03",
+    "semantic_hash": "ed7915636c82bfb7d6dc49ef17873e03"
+  },
+  "client/src/features/perennials/HarvestRecordHistoryModal.tsx": {
+    "mtime": 1789699128.42359,
+    "seen": 1790041862.9620988,
+    "ast_hash": "92db8e9f7dcc391fbde857b3ffc7bd07",
+    "semantic_hash": "92db8e9f7dcc391fbde857b3ffc7bd07"
+  },
+  "client/src/features/perennials/PerennialPlantingFormModal.tsx": {
+    "mtime": 1789737856.824156,
+    "seen": 1790041862.9621,
+    "ast_hash": "e03ad535fc1a0c8801728bf1960f3911",
+    "semantic_hash": "e03ad535fc1a0c8801728bf1960f3911"
+  },
+  "client/src/features/perennials/PerennialsPage.tsx": {
+    "mtime": 1789699147.352971,
+    "seen": 1790041862.9621007,
+    "ast_hash": "ed52232ac628358369c4455e9474c89a",
+    "semantic_hash": "ed52232ac628358369c4455e9474c89a"
+  },
+  "client/src/features/perennials/harvestRecordsApi.ts": {
+    "mtime": 1789699087.8174152,
+    "seen": 1790041862.9621017,
+    "ast_hash": "ece4e586713ee36fcc3a01686a5796b5",
+    "semantic_hash": "ece4e586713ee36fcc3a01686a5796b5"
+  },
+  "client/src/features/perennials/perennialPlantingsApi.ts": {
+    "mtime": 1789699081.6697876,
+    "seen": 1790041862.9621024,
+    "ast_hash": "ea1ba7aefefad711ec037ce968f927a6",
+    "semantic_hash": "ea1ba7aefefad711ec037ce968f927a6"
+  },
+  "client/src/features/settings/SettingsPage.tsx": {
+    "mtime": 1789755652.7218707,
+    "seen": 1790041862.9621036,
+    "ast_hash": "ca11bf3f10770cdbe2e627d9eee6c4cc",
+    "semantic_hash": "ca11bf3f10770cdbe2e627d9eee6c4cc"
+  },
+  "client/src/lib/FarmContext.tsx": {
+    "mtime": 1789755653.0032554,
+    "seen": 1790041862.9621043,
+    "ast_hash": "8108f34d248100fe54d6f8b83ce842e8",
+    "semantic_hash": "8108f34d248100fe54d6f8b83ce842e8"
+  },
+  "client/src/lib/dateUtils.ts": {
+    "mtime": 1789737964.1332817,
+    "seen": 1790041862.9621053,
+    "ast_hash": "f32d90889f9fe67a9823ead852979105",
+    "semantic_hash": "f32d90889f9fe67a9823ead852979105"
+  },
+  "client/src/lib/farmModules.ts": {
+    "mtime": 1789755653.015622,
+    "seen": 1790041862.9621062,
+    "ast_hash": "b706e375327b07811079229c500ac82e",
+    "semantic_hash": "b706e375327b07811079229c500ac82e"
+  },
+  "client/src/lib/geo.ts": {
+    "mtime": 1789815777.6767087,
+    "seen": 1790041862.9621072,
+    "ast_hash": "4d758becb29e687b67cd5b59536feed1",
+    "semantic_hash": "4d758becb29e687b67cd5b59536feed1"
+  },
+  "client/src/lib/phProvinces.ts": {
+    "mtime": 1789740744.848854,
+    "seen": 1790041862.962108,
+    "ast_hash": "1404083bc29b6410af952243672e734d",
+    "semantic_hash": "1404083bc29b6410af952243672e734d"
+  },
+  "client/src/lib/supabaseClient.ts": {
+    "mtime": 1789569976.3663983,
+    "seen": 1790041862.9621089,
+    "ast_hash": "4759d8c06d6dc7bf46edb59481225fce",
+    "semantic_hash": "4759d8c06d6dc7bf46edb59481225fce"
+  },
+  "client/src/lib/weekRange.ts": {
+    "mtime": 1789737671.6195307,
+    "seen": 1790041862.9621098,
+    "ast_hash": "5276be5be70522829111673484fa6fc2",
+    "semantic_hash": "5276be5be70522829111673484fa6fc2"
+  },
+  "client/src/main.tsx": {
+    "mtime": 1789571995.7778316,
+    "seen": 1790041862.9621108,
+    "ast_hash": "ab8b939f32da8c61054b5593227d3445",
+    "semantic_hash": "ab8b939f32da8c61054b5593227d3445"
+  },
+  "client/src/types/index.ts": {
+    "mtime": 1789569977.4190197,
+    "seen": 1790041862.9621117,
+    "ast_hash": "81433c76c2bdb14da1f101584f80f8bf",
+    "semantic_hash": "81433c76c2bdb14da1f101584f80f8bf"
+  },
+  "client/src/vite-env.d.ts": {
+    "mtime": 1789607556.7953546,
+    "seen": 1790041862.9621124,
+    "ast_hash": "602ccebf2dc618e8724ffb6e078323dc",
+    "semantic_hash": "602ccebf2dc618e8724ffb6e078323dc"
+  },
+  "client/tsconfig.json": {
+    "mtime": 1789569969.5466096,
+    "seen": 1790041862.9621136,
+    "ast_hash": "2362a82658e7687bbd6f792345d3d138",
+    "semantic_hash": "2362a82658e7687bbd6f792345d3d138"
+  },
+  "client/tsconfig.node.json": {
+    "mtime": 1789569970.603056,
+    "seen": 1790041862.9621143,
+    "ast_hash": "767b2e9abe6452170cdc399ca052cfbc",
+    "semantic_hash": "767b2e9abe6452170cdc399ca052cfbc"
+  },
+  "client/vite.config.d.ts": {
+    "mtime": 1789570146.5899222,
+    "seen": 1790041862.9621153,
+    "ast_hash": "9fcf75521f4c43fd8b75300e0f63b867",
+    "semantic_hash": "9fcf75521f4c43fd8b75300e0f63b867"
+  },
+  "client/vite.config.js": {
+    "mtime": 1789571363.105034,
+    "seen": 1790041862.962116,
+    "ast_hash": "4c1d4a3c241dd0b505bbfab32cd7fdff",
+    "semantic_hash": "4c1d4a3c241dd0b505bbfab32cd7fdff"
+  },
+  "client/vite.config.ts": {
+    "mtime": 1789571353.8402379,
+    "seen": 1790041862.9621172,
+    "ast_hash": "63608ce8c0daa8fa9c459116e236360e",
+    "semantic_hash": "63608ce8c0daa8fa9c459116e236360e"
+  },
+  "package.json": {
+    "mtime": 1789646532.0453994,
+    "seen": 1790041862.9621189,
+    "ast_hash": "f7f1076889fa72fb49f1838cae8b1197",
+    "semantic_hash": "f7f1076889fa72fb49f1838cae8b1197"
+  },
+  "server/api/index.ts": {
+    "mtime": 1789694729.533124,
+    "seen": 1790041862.9621198,
+    "ast_hash": "07ad41e475b04a0723c3df72178a6d40",
+    "semantic_hash": "07ad41e475b04a0723c3df72178a6d40"
+  },
+  "server/package.json": {
+    "mtime": 1789569985.9001248,
+    "seen": 1790041862.9621208,
+    "ast_hash": "0becda6eab68aacdf4f181a2dd05f05d",
+    "semantic_hash": "0becda6eab68aacdf4f181a2dd05f05d"
+  },
+  "server/src/app.ts": {
+    "mtime": 1789739007.3904765,
+    "seen": 1790041862.9621217,
+    "ast_hash": "57944616163ee23ab0e487d1b8877ebd",
+    "semantic_hash": "57944616163ee23ab0e487d1b8877ebd"
+  },
+  "server/src/controllers/farmsController.ts": {
+    "mtime": 1789755795.4134424,
+    "seen": 1790041862.9621224,
+    "ast_hash": "14b725176f46b353c9c81955c8665bb3",
+    "semantic_hash": "14b725176f46b353c9c81955c8665bb3"
+  },
+  "server/src/controllers/weatherController.ts": {
+    "mtime": 1789755779.0139415,
+    "seen": 1790041862.9621236,
+    "ast_hash": "d6aaf1feaa6b8fe595f59fd06a4e59cd",
+    "semantic_hash": "d6aaf1feaa6b8fe595f59fd06a4e59cd"
+  },
+  "server/src/env.ts": {
+    "mtime": 1789607806.7799914,
+    "seen": 1790041862.9621243,
+    "ast_hash": "f8e9dc843b569ff3fd55b01042b7f715",
+    "semantic_hash": "f8e9dc843b569ff3fd55b01042b7f715"
+  },
+  "server/src/index.ts": {
+    "mtime": 1789646967.3778896,
+    "seen": 1790041862.9621253,
+    "ast_hash": "104669d27df9dc2e700f9746984742be",
+    "semantic_hash": "104669d27df9dc2e700f9746984742be"
+  },
+  "server/src/lib/supabaseClient.ts": {
+    "mtime": 1789569998.5988047,
+    "seen": 1790041862.962126,
+    "ast_hash": "af53d1bdd671d400ec0edce976d9c550",
+    "semantic_hash": "af53d1bdd671d400ec0edce976d9c550"
+  },
+  "server/src/lib/supabaseUserClient.ts": {
+    "mtime": 1789607502.2849157,
+    "seen": 1790041862.9621272,
+    "ast_hash": "9ede6b2b30c0ba92bc847f2ed90ad5e8",
+    "semantic_hash": "9ede6b2b30c0ba92bc847f2ed90ad5e8"
+  },
+  "server/src/lib/weather.ts": {
+    "mtime": 1789739056.5453908,
+    "seen": 1790041862.962128,
+    "ast_hash": "eee4c6e95ba978ec14d770c2afdfbac0",
+    "semantic_hash": "eee4c6e95ba978ec14d770c2afdfbac0"
+  },
+  "server/src/middleware/requireCronSecret.ts": {
+    "mtime": 1789755762.1539388,
+    "seen": 1790041862.9621289,
+    "ast_hash": "185998af389a0e1c75faa60a280efd07",
+    "semantic_hash": "185998af389a0e1c75faa60a280efd07"
+  },
+  "server/src/routes/cropCycles.ts": {
+    "mtime": 1789569991.1465545,
+    "seen": 1790041862.9621298,
+    "ast_hash": "aa8dec6b6fda154a72b5ce30f64e8c9e",
+    "semantic_hash": "aa8dec6b6fda154a72b5ce30f64e8c9e"
+  },
+  "server/src/routes/dashboard.ts": {
+    "mtime": 1789569994.3377733,
+    "seen": 1790041862.9621308,
+    "ast_hash": "b46ec17b31c475b4897b7a04cc94f5cf",
+    "semantic_hash": "b46ec17b31c475b4897b7a04cc94f5cf"
+  },
+  "server/src/routes/farms.ts": {
+    "mtime": 1789755800.086995,
+    "seen": 1790041862.9621317,
+    "ast_hash": "21caa067cd41ca08ad6e3789647edd60",
+    "semantic_hash": "21caa067cd41ca08ad6e3789647edd60"
+  },
+  "server/src/routes/inputs.ts": {
+    "mtime": 1789569992.2300436,
+    "seen": 1790041862.9621325,
+    "ast_hash": "37eff61633f571e6b9e871db242f65ee",
+    "semantic_hash": "37eff61633f571e6b9e871db242f65ee"
+  },
+  "server/src/routes/livestock.ts": {
+    "mtime": 1789569993.2823324,
+    "seen": 1790041862.9621334,
+    "ast_hash": "898317ff0eb1ec625857fea65a7a61bc",
+    "semantic_hash": "898317ff0eb1ec625857fea65a7a61bc"
+  },
+  "server/src/routes/plots.ts": {
+    "mtime": 1789569990.103186,
+    "seen": 1790041862.9621346,
+    "ast_hash": "01ce5e47621db0e1e1f64f012d7ccc61",
+    "semantic_hash": "01ce5e47621db0e1e1f64f012d7ccc61"
+  },
+  "server/src/routes/weather.ts": {
+    "mtime": 1789755783.5641985,
+    "seen": 1790041862.9621353,
+    "ast_hash": "98b16866ebe0a27f5764f61c0c3170c2",
+    "semantic_hash": "98b16866ebe0a27f5764f61c0c3170c2"
+  },
+  "server/src/services/farmsService.ts": {
+    "mtime": 1789755788.614154,
+    "seen": 1790041862.9621363,
+    "ast_hash": "7342070f889667b52ec6715653b9d4b9",
+    "semantic_hash": "7342070f889667b52ec6715653b9d4b9"
+  },
+  "server/src/services/weatherSyncService.ts": {
+    "mtime": 1789755774.058158,
+    "seen": 1790041862.962137,
+    "ast_hash": "bd7f0bb4cbf98fc5c533bcaea2e60c77",
+    "semantic_hash": "bd7f0bb4cbf98fc5c533bcaea2e60c77"
+  },
+  "server/tsconfig.json": {
+    "mtime": 1789569986.9510128,
+    "seen": 1790041862.9621382,
+    "ast_hash": "442d05b91d25ec38d5aaa89271f228ce",
+    "semantic_hash": "442d05b91d25ec38d5aaa89271f228ce"
+  },
+  "server/vercel.json": {
+    "mtime": 1789739015.8505318,
+    "seen": 1790041862.962139,
+    "ast_hash": "2145d4e4971f7e02b14ac471dadd33da",
+    "semantic_hash": "2145d4e4971f7e02b14ac471dadd33da"
+  },
+  "shared/types/database.types.ts": {
+    "mtime": 1789569999.660337,
+    "seen": 1790041862.9621398,
+    "ast_hash": "7cf22bba7f02b27316b54ec42754cf03",
+    "semantic_hash": "7cf22bba7f02b27316b54ec42754cf03"
+  },
+  "supabase/.temp/linked-project.json": {
+    "mtime": 1789572776.1705482,
+    "seen": 1790041862.9621406,
+    "ast_hash": "09f2272e8b6777a9161f204b193309fb",
+    "semantic_hash": "09f2272e8b6777a9161f204b193309fb"
+  },
+  "CLAUDE.md": {
+    "mtime": 1790041409.7033782,
+    "seen": 1790041862.9621418,
+    "ast_hash": "8c25f483de574c55bf8523fae3e1797a",
+    "semantic_hash": "8c25f483de574c55bf8523fae3e1797a"
+  },
+  "README.md": {
+    "mtime": 1789569963.7870207,
+    "seen": 1790041862.9621427,
+    "ast_hash": "0aeeb1f6cdcb53770844b632418dcd18",
+    "semantic_hash": "0aeeb1f6cdcb53770844b632418dcd18"
+  },
+  "client/index.html": {
+    "mtime": 1789569971.909971,
+    "seen": 1790041862.9621434,
+    "ast_hash": "b4a8adbbe3f6b87a816d6957b97d387a",
+    "semantic_hash": "b4a8adbbe3f6b87a816d6957b97d387a"
+  }
+}
