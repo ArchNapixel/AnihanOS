@@ -1,0 +1,59 @@
+.dashboard-sprite {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--color-surface);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.sprite-avatar {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg);
+  animation: sprite-bounce 2.4s ease-in-out infinite;
+}
+
+.sprite-bubble {
+  flex: 1;
+}
+
+.sprite-bubble-label {
+  display: block;
+  font-weight: 700;
+  color: var(--color-accent);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.sprite-bubble p {
+  margin: 0 0 6px;
+}
+
+.sprite-bubble p:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes sprite-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite-avatar {
+    animation: none;
+  }
+}

@@ -18,6 +18,8 @@ function HarvestModal({
   const [actualHarvestDate, setActualHarvestDate] = useState(todayIso())
   const [yieldAmount, setYieldAmount] = useState('')
   const [yieldUnit, setYieldUnit] = useState('kg')
+  const [sellingPrice, setSellingPrice] = useState('')
+  const [otherCosts, setOtherCosts] = useState('')
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -25,6 +27,8 @@ function HarvestModal({
       actual_harvest_date: actualHarvestDate,
       yield_amount: Number(yieldAmount),
       yield_unit: yieldUnit.trim(),
+      selling_price_per_unit: sellingPrice ? Number(sellingPrice) : undefined,
+      other_costs: otherCosts ? Number(otherCosts) : undefined,
     })
   }
 
@@ -68,6 +72,33 @@ function HarvestModal({
               />
             </div>
           </div>
+
+          <div className="modal-field">
+            <label htmlFor="harvest-selling-price">Selling price per unit (optional, if known)</label>
+            <input
+              id="harvest-selling-price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={sellingPrice}
+              onChange={(e) => setSellingPrice(e.target.value)}
+              placeholder="Leave blank to fill in later, in Financials"
+            />
+          </div>
+
+          {sellingPrice && (
+            <div className="modal-field">
+              <label htmlFor="harvest-other-costs">Other costs (optional)</label>
+              <input
+                id="harvest-other-costs"
+                type="number"
+                min="0"
+                step="0.01"
+                value={otherCosts}
+                onChange={(e) => setOtherCosts(e.target.value)}
+              />
+            </div>
+          )}
 
           <div className="modal-actions">
             <button type="button" className="modal-cancel" onClick={onCancel} disabled={saving}>

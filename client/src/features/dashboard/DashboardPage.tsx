@@ -9,9 +9,11 @@ import { listInputStock, type InputStock } from '../inputs/inputStockApi'
 import { listCropCycleFinancials, type CropCycleFinancials } from '../financials/financialsApi'
 import { listActivitiesForFarm, type FieldActivity } from '../crops/fieldActivitiesApi'
 import { computeWeedRisk } from '../../domain/weedRisk'
+import { buildWeeklySpriteForecast } from '../../domain/weeklySpriteForecast'
 import { formatDateShort } from '../../lib/dateUtils'
 import { listWeatherForFarm, type WeatherDaily } from '../../api/weatherApi'
 import WeatherWidget from './WeatherWidget'
+import DashboardSprite from './DashboardSprite'
 import './DashboardPage.css'
 
 const today = new Date().toLocaleDateString(undefined, {
@@ -84,6 +86,18 @@ function DashboardPage() {
     .slice(-6)
     .map((f) => ({ label: f.cycle.crop_types.name, profit: f.profit ?? 0 }))
 
+  const activeCycleByPlotId = useMemo(() => {
+    const map = new globalThis.Map<string, CropCycle>()
+    for (const cycle of cycles) {
+      if (cycle.status === 'harvested') continue
+      const existing = map.get(cycle.plot_id)
+      if (!existing || existing.planting_date < cycle.planting_date) {
+        map.set(cycle.plot_id, cycle)
+      }
+    }
+    return map
+  }, [cycles])
+
   const weedRiskPlots = useMemo(() => {
     const lastWeedingByPlot = new globalThis.Map<string, string>()
     for (const activity of fieldActivities) {
@@ -94,17 +108,8 @@ function DashboardPage() {
       }
     }
 
-    const activeCycleByPlot = new globalThis.Map<string, CropCycle>()
-    for (const cycle of cycles) {
-      if (cycle.status === 'harvested') continue
-      const existing = activeCycleByPlot.get(cycle.plot_id)
-      if (!existing || existing.planting_date < cycle.planting_date) {
-        activeCycleByPlot.set(cycle.plot_id, cycle)
-      }
-    }
-
     const results: { plotId: string; plotName: string }[] = []
-    for (const [plotId, cycle] of activeCycleByPlot) {
+    for (const [plotId, cycle] of activeCycleByPlotId) {
       const risk = computeWeedRisk(
         cycle.planting_date,
         cycle.crop_types.canopy_closure_days,
@@ -115,7 +120,12 @@ function DashboardPage() {
       }
     }
     return results
-  }, [cycles, fieldActivities])
+  }, [activeCycleByPlotId, fieldActivities])
+
+  const spriteForecast = useMemo(
+    () => buildWeeklySpriteForecast(cycles, weather, fieldActivities),
+    [cycles, weather, fieldActivities],
+  )
 
   return (
     <div className="dashboard-page">
@@ -125,6 +135,8 @@ function DashboardPage() {
       </div>
 
       {error && <p className="dashboard-error">{error}</p>}
+
+      {!loading && <DashboardSprite forecast={spriteForecast} />}
 
       {!loading && <WeatherWidget days={weather} />}
 
@@ -186,12 +198,29 @@ function DashboardPage() {
             <p className="dashboard-empty">No plots yet — add your first one in Plots.</p>
           ) : (
             <div className="mini-plot-list">
-              {plots.map((plot) => (
-                <Link to={`/land-plots?plot=${plot.id}`} className="mini-plot-card" key={plot.id}>
-                  <h3>{plot.name}</h3>
-                  <p>{plot.soil_type ?? `${plot.size} ${plot.size_unit}`}</p>
-                </Link>
-              ))}
+              {plots.map((plot) => {
+                const activeCycle = activeCycleByPlotId.get(plot.id)
+                const status = !activeCycle
+                  ? 'fallow'
+                  : getCurrentStage(activeCycle.planting_date, activeCycle.crop_types.growth_stages).readyForHarvest
+                    ? 'ready'
+                    : 'growing'
+                const statusLabel = status === 'fallow' ? 'Fallow' : status === 'ready' ? 'Ready to Harvest' : 'Growing'
+                return (
+                  <Link to={`/land-plots?plot=${plot.id}`} className="mini-plot-card" key={plot.id}>
+                    <div className="mini-plot-card-row">
+                      <div>
+                        <h3>{plot.name}</h3>
+                        <p>
+                          {plot.soil_type ?? `${plot.size} ${plot.size_unit}`}
+                          {activeCycle ? ` · ${activeCycle.crop_types.name}` : ''}
+                        </p>
+                      </div>
+                      <span className={`plot-status-badge plot-status-${status}`}>{statusLabel}</span>
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           )}
         </div>

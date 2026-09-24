@@ -250,6 +250,79 @@ function computeFertilizerFactor(
   }
 }
 
+// --- Weather-only outlook -------------------------------------------------
+// Split out from forecastSugarcane() so callers that only need a stage/timing
+// read (e.g. the dashboard's weekly summary) aren't forced to also carry the
+// fertilizer-specific caveats below, which don't apply outside a per-cycle
+// detailed forecast.
+
+export type WeatherOutlook = {
+  stage: SugarcaneStage
+  stageLabel: string
+  daysSincePlanting: number
+  weatherDaysUsed: number
+  avgTempC: number | null
+  avgDailyRainfallMm: number | null
+  temperatureFactor: number | null
+  rainfallFactor: number | null
+  timingOutlook: 'on_track' | 'possible_delay' | 'favorable' | 'insufficient_data'
+  riskNotes: string[]
+}
+
+export function computeWeatherOutlook(plantingDate: string, weatherDays: WeatherDaily[]): WeatherOutlook {
+  const daysSincePlanting = daysBetween(plantingDate, new Date().toISOString().slice(0, 10))
+  const stage = getSugarcaneStage(daysSincePlanting)
+
+  const avgTempC = averageTemp(weatherDays)
+  const avgDailyRainfallMm = averageDailyRainfall(weatherDays)
+  const tempFactor = avgTempC != null ? temperatureFactor(avgTempC, stage) : null
+  const rainFactor = avgDailyRainfallMm != null ? rainfallFactor(avgDailyRainfallMm) : null
+
+  const riskNotes: string[] = []
+  let timingOutlook: WeatherOutlook['timingOutlook'] = 'insufficient_data'
+
+  if (weatherDays.length === 0) {
+    riskNotes.push('No weather data yet.')
+  } else {
+    timingOutlook = 'on_track'
+
+    if (avgTempC != null && avgTempC < 15 && stage === 'grand_growth') {
+      riskNotes.push('Below 15°C in Grand Growth — growth stalled.')
+      timingOutlook = 'possible_delay'
+    }
+    if (avgTempC != null && avgTempC > 32) {
+      riskNotes.push('Above 32°C — fiber hardening, lower sucrose.')
+    }
+    if (stage === 'ripening' && avgTempC != null && avgTempC > 24) {
+      riskNotes.push('Ripening temp above 16-22°C ideal — delayed harvest, slower sugar buildup.')
+      timingOutlook = 'possible_delay'
+    }
+    if (stage === 'ripening' && avgTempC != null && avgTempC <= 20) {
+      riskNotes.push('Cool ripening nights — sucrose boosted.')
+      timingOutlook = 'favorable'
+    }
+    if (stage === 'grand_growth' && rainFactor != null && rainFactor <= 0.6) {
+      riskNotes.push('Rainfall well below Grand Growth needs — yield risk.')
+    }
+    if (stage === 'ripening' && avgDailyRainfallMm != null && avgDailyRainfallMm * 30 > 100) {
+      riskNotes.push('Ripening rainfall may dilute sugar (lower brix).')
+    }
+  }
+
+  return {
+    stage,
+    stageLabel: STAGE_LABELS[stage],
+    daysSincePlanting,
+    weatherDaysUsed: weatherDays.length,
+    avgTempC,
+    avgDailyRainfallMm,
+    temperatureFactor: tempFactor,
+    rainfallFactor: rainFactor,
+    timingOutlook,
+    riskNotes,
+  }
+}
+
 // --- Combined forecast ---------------------------------------------------
 
 export type SugarcaneForecast = {
@@ -282,15 +355,11 @@ export function forecastSugarcane(params: {
 }): SugarcaneForecast {
   const { plantingDate, weatherDays, baseYieldTonsPerHa = 75, ratoonNumber, plotHectares, fertilizerApplications, soil } = params
 
-  const daysSincePlanting = daysBetween(plantingDate, new Date().toISOString().slice(0, 10))
-  const stage = getSugarcaneStage(daysSincePlanting)
-
-  const avgTempC = averageTemp(weatherDays)
-  const avgDailyRainfallMm = averageDailyRainfall(weatherDays)
+  const outlook = computeWeatherOutlook(plantingDate, weatherDays)
+  const { stage, avgTempC, avgDailyRainfallMm, daysSincePlanting } = outlook
+  const tempFactor = outlook.temperatureFactor
+  const rainFactor = outlook.rainfallFactor
   const diseaseFactor = 1.0 // no disease tracking yet — assumed healthy
-
-  const tempFactor = avgTempC != null ? temperatureFactor(avgTempC, stage) : null
-  const rainFactor = avgDailyRainfallMm != null ? rainfallFactor(avgDailyRainfallMm) : null
 
   const weatherOnlyYieldTonsPerHa =
     tempFactor != null && rainFactor != null ? baseYieldTonsPerHa * tempFactor * rainFactor * diseaseFactor : null
@@ -310,36 +379,8 @@ export function forecastSugarcane(params: {
       ? ((estimatedYieldTonsPerHa - weatherOnlyYieldTonsPerHa) / weatherOnlyYieldTonsPerHa) * 100
       : null
 
-  const riskNotes: string[] = []
-  let timingOutlook: SugarcaneForecast['timingOutlook'] = 'insufficient_data'
-
-  if (weatherDays.length === 0) {
-    riskNotes.push('No weather data yet.')
-  } else {
-    timingOutlook = 'on_track'
-
-    if (avgTempC != null && avgTempC < 15 && stage === 'grand_growth') {
-      riskNotes.push('Below 15°C in Grand Growth — growth stalled.')
-      timingOutlook = 'possible_delay'
-    }
-    if (avgTempC != null && avgTempC > 32) {
-      riskNotes.push('Above 32°C — fiber hardening, lower sucrose.')
-    }
-    if (stage === 'ripening' && avgTempC != null && avgTempC > 24) {
-      riskNotes.push('Ripening temp above 16-22°C ideal — delayed harvest, slower sugar buildup.')
-      timingOutlook = 'possible_delay'
-    }
-    if (stage === 'ripening' && avgTempC != null && avgTempC <= 20) {
-      riskNotes.push('Cool ripening nights — sucrose boosted.')
-      timingOutlook = 'favorable'
-    }
-    if (stage === 'grand_growth' && rainFactor != null && rainFactor <= 0.6) {
-      riskNotes.push('Rainfall well below Grand Growth needs — yield risk.')
-    }
-    if (stage === 'ripening' && avgDailyRainfallMm != null && avgDailyRainfallMm * 30 > 100) {
-      riskNotes.push('Ripening rainfall may dilute sugar (lower brix).')
-    }
-  }
+  const riskNotes: string[] = [...outlook.riskNotes]
+  const timingOutlook = outlook.timingOutlook
 
   if (plotHectares == null || plotHectares <= 0) {
     riskNotes.push('Plot size not in hectares — fertilizer rate not calculated.')

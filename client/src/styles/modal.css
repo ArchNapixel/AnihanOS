@@ -31,7 +31,7 @@
 
 .modal-hint {
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 15px;
   margin: 0 0 12px;
 }
 
@@ -59,7 +59,7 @@
 .modal-field label {
   display: block;
   margin-bottom: 6px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .modal-field input,
@@ -67,13 +67,14 @@
 .modal-field textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 10px 14px;
+  padding: 12px 14px;
+  min-height: 48px;
   border: none;
   border-radius: 12px;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 17px;
 }
 
 .modal-field textarea {

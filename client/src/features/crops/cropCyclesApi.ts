@@ -37,6 +37,10 @@ export type HarvestInput = {
   actual_harvest_date: string
   yield_amount: number
   yield_unit: string
+  // Optional — filled in only if the farmer already knows the selling price
+  // at harvest time, so Financials doesn't require a separate follow-up trip.
+  selling_price_per_unit?: number
+  other_costs?: number
 }
 
 export type SaleInput = {

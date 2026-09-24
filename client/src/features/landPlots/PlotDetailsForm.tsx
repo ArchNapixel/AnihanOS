@@ -93,6 +93,13 @@ function PlotDetailsForm({
     initialValue?.soil_k_exchangeable_ppm != null ? String(initialValue.soil_k_exchangeable_ppm) : '',
   )
   const [cornerRows, setCornerRows] = useState<CornerRow[]>(() => cornersFromBoundary(initialValue?.boundary ?? null))
+  const [showSoilTest, setShowSoilTest] = useState(
+    () =>
+      initialValue?.soil_organic_matter_pct != null ||
+      initialValue?.soil_n_ppm != null ||
+      initialValue?.soil_p_bray_ppm != null ||
+      initialValue?.soil_k_exchangeable_ppm != null,
+  )
 
   // Only pushes a polygon up while coordinate-entry is the active mode, so
   // switching back to drawing doesn't get immediately overwritten by
@@ -203,7 +210,13 @@ function PlotDetailsForm({
         </div>
       )}
 
-      {type === 'land' && (
+      {type === 'land' && !showSoilTest && (
+        <button type="button" className="plot-form-cancel" onClick={() => setShowSoilTest(true)}>
+          + Add soil test results (optional)
+        </button>
+      )}
+
+      {type === 'land' && showSoilTest && (
         <div className="plot-form-field">
           <label>Soil test results (optional)</label>
           <p className="plot-form-hint">

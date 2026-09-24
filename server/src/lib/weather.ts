@@ -3,6 +3,7 @@ export type DailyWeather = {
   temp_min_c: number | null
   temp_max_c: number | null
   precipitation_mm: number | null
+  humidity_pct: number | null
   source: 'observed' | 'forecast'
 }
 
@@ -17,7 +18,7 @@ export async function fetchDailyWeather(latitude: number, longitude: number): Pr
   const url = new URL('https://api.open-meteo.com/v1/forecast')
   url.searchParams.set('latitude', String(latitude))
   url.searchParams.set('longitude', String(longitude))
-  url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,precipitation_sum')
+  url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,precipitation_sum,relative_humidity_2m_mean')
   url.searchParams.set('timezone', 'auto')
   url.searchParams.set('past_days', '1')
   url.searchParams.set('forecast_days', '7')
@@ -33,6 +34,7 @@ export async function fetchDailyWeather(latitude: number, longitude: number): Pr
       temperature_2m_max: (number | null)[]
       temperature_2m_min: (number | null)[]
       precipitation_sum: (number | null)[]
+      relative_humidity_2m_mean: (number | null)[]
     }
   }
 
@@ -43,6 +45,7 @@ export async function fetchDailyWeather(latitude: number, longitude: number): Pr
     temp_max_c: data.daily.temperature_2m_max[i] ?? null,
     temp_min_c: data.daily.temperature_2m_min[i] ?? null,
     precipitation_mm: data.daily.precipitation_sum[i] ?? null,
+    humidity_pct: data.daily.relative_humidity_2m_mean[i] ?? null,
     source: date < today ? 'observed' : 'forecast',
   }))
 }

@@ -5,13 +5,14 @@ export type WeatherDaily = {
   temp_min_c: number | null
   temp_max_c: number | null
   precipitation_mm: number | null
+  humidity_pct: number | null
   source: 'observed' | 'forecast'
 }
 
 export async function listWeatherForFarm(farmId: string): Promise<WeatherDaily[]> {
   const { data, error } = await supabase
     .from('weather_daily')
-    .select('date, temp_min_c, temp_max_c, precipitation_mm, source')
+    .select('date, temp_min_c, temp_max_c, precipitation_mm, humidity_pct, source')
     .eq('farm_id', farmId)
     .order('date', { ascending: true })
 

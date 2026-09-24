@@ -63,6 +63,10 @@ function CropCycleFormModal({
   const [expectedHarvestDate, setExpectedHarvestDate] = useState(initialValue?.expected_harvest_date ?? '')
   const [ratoonNumber, setRatoonNumber] = useState(initialValue?.ratoon_number ?? 0)
   const [autoExpectedHarvestDate, setAutoExpectedHarvestDate] = useState('')
+  // Product Book fields (growth stages, fertilizing schedule, etc.) are the
+  // same for every cycle of a crop type and are rarely touched — collapsed
+  // by default so adding a routine cycle is just plot/date/ratoon.
+  const [showCropSetup, setShowCropSetup] = useState(false)
 
   const selectedCropType = cropTypes.find((c) => c.id === selectedCropTypeId) ?? null
 
@@ -163,93 +167,101 @@ function CropCycleFormModal({
             </div>
           )}
 
-          <div className="modal-field">
-            <label htmlFor="crop-description">Description (optional)</label>
-            <textarea
-              id="crop-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={2}
-              placeholder="General growth info / overview"
-            />
-          </div>
+          {!showCropSetup ? (
+            <button type="button" className="modal-cancel" onClick={() => setShowCropSetup(true)}>
+              + Edit crop setup (growth stages, fertilizing schedule — rarely needed)
+            </button>
+          ) : (
+            <>
+              <div className="modal-field">
+                <label htmlFor="crop-description">Description (optional)</label>
+                <textarea
+                  id="crop-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={2}
+                  placeholder="General growth info / overview"
+                />
+              </div>
 
-          <div className="modal-field">
-            <label>Growth stages (time from planting)</label>
-            <p className="modal-hint">
-              Add each stage in order, ending with the stage where it's ready to harvest. Use whichever unit fits
-              each stage best. These are shared by every cycle of this crop, so editing them here updates the crop
-              itself.
-            </p>
-            {stageRows.map((row, index) => (
-              <div className="stage-row" key={index}>
-                <input
-                  value={row.name}
-                  onChange={(e) => updateStageRow(index, 'name', e.target.value)}
-                  placeholder="e.g. Tillering"
-                />
-                <input
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={row.amount}
-                  onChange={(e) => updateStageRow(index, 'amount', e.target.value)}
-                  placeholder="Amount"
-                />
-                <select value={row.unit} onChange={(e) => updateStageRow(index, 'unit', e.target.value)}>
-                  <option value="days">Days</option>
-                  <option value="months">Months</option>
-                </select>
-                <button
-                  type="button"
-                  className="stage-row-remove"
-                  onClick={() => removeStageRow(index)}
-                  disabled={stageRows.length === 1}
-                >
-                  &times;
+              <div className="modal-field">
+                <label>Growth stages (time from planting)</label>
+                <p className="modal-hint">
+                  Add each stage in order, ending with the stage where it's ready to harvest. Use whichever unit fits
+                  each stage best. These are shared by every cycle of this crop, so editing them here updates the crop
+                  itself.
+                </p>
+                {stageRows.map((row, index) => (
+                  <div className="stage-row" key={index}>
+                    <input
+                      value={row.name}
+                      onChange={(e) => updateStageRow(index, 'name', e.target.value)}
+                      placeholder="e.g. Tillering"
+                    />
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      value={row.amount}
+                      onChange={(e) => updateStageRow(index, 'amount', e.target.value)}
+                      placeholder="Amount"
+                    />
+                    <select value={row.unit} onChange={(e) => updateStageRow(index, 'unit', e.target.value)}>
+                      <option value="days">Days</option>
+                      <option value="months">Months</option>
+                    </select>
+                    <button
+                      type="button"
+                      className="stage-row-remove"
+                      onClick={() => removeStageRow(index)}
+                      disabled={stageRows.length === 1}
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="modal-cancel" onClick={addStageRow}>
+                  + Add stage
                 </button>
               </div>
-            ))}
-            <button type="button" className="modal-cancel" onClick={addStageRow}>
-              + Add stage
-            </button>
-          </div>
 
-          <div className="modal-field">
-            <label htmlFor="canopy-amount">Weeding needed until (optional)</label>
-            <p className="modal-hint">
-              How long after planting this crop still needs weeding, before its own leaves grow enough to shade
-              weeds out on their own. Used to estimate weed risk later — leave blank if unsure.
-            </p>
-            <div className="stage-row">
-              <input
-                id="canopy-amount"
-                type="number"
-                min="0.1"
-                step="0.1"
-                value={canopyAmount}
-                onChange={(e) => setCanopyAmount(e.target.value)}
-                placeholder="Amount"
-              />
-              <select value={canopyUnit} onChange={(e) => setCanopyUnit(e.target.value as StageUnit)}>
-                <option value="days">Days</option>
-                <option value="months">Months</option>
-              </select>
-            </div>
-          </div>
+              <div className="modal-field">
+                <label htmlFor="canopy-amount">Weeding needed until (optional)</label>
+                <p className="modal-hint">
+                  How long after planting this crop still needs weeding, before its own leaves grow enough to shade
+                  weeds out on their own. Used to estimate weed risk later — leave blank if unsure.
+                </p>
+                <div className="stage-row">
+                  <input
+                    id="canopy-amount"
+                    type="number"
+                    min="0.1"
+                    step="0.1"
+                    value={canopyAmount}
+                    onChange={(e) => setCanopyAmount(e.target.value)}
+                    placeholder="Amount"
+                  />
+                  <select value={canopyUnit} onChange={(e) => setCanopyUnit(e.target.value as StageUnit)}>
+                    <option value="days">Days</option>
+                    <option value="months">Months</option>
+                  </select>
+                </div>
+              </div>
 
-          <div className="modal-field">
-            <label htmlFor="crop-harvest-estimate">Harvest estimate (optional)</label>
-            <textarea
-              id="crop-harvest-estimate"
-              value={harvestEstimateNote}
-              onChange={(e) => setHarvestEstimateNote(e.target.value)}
-              rows={2}
-              placeholder="e.g. Typically yields 60-80 tons/hectare"
-            />
-          </div>
+              <div className="modal-field">
+                <label htmlFor="crop-harvest-estimate">Harvest estimate (optional)</label>
+                <textarea
+                  id="crop-harvest-estimate"
+                  value={harvestEstimateNote}
+                  onChange={(e) => setHarvestEstimateNote(e.target.value)}
+                  rows={2}
+                  placeholder="e.g. Typically yields 60-80 tons/hectare"
+                />
+              </div>
 
-          <FertilizingScheduleEditor rows={fertilizingRows} onChange={setFertilizingRows} />
+              <FertilizingScheduleEditor rows={fertilizingRows} onChange={setFertilizingRows} />
+            </>
+          )}
 
           <div className="modal-field-row">
             <div className="modal-field">
