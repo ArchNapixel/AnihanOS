@@ -30,7 +30,11 @@ export async function logInputUsage(input: InputUsageInput, stock: InputStock): 
     throw new Error(`Not enough stock: only ${stock.current_quantity} ${stock.unit} left`)
   }
 
-  const { error: logError } = await supabase.from('input_usage_logs').insert(input)
+  const { data: logRow, error: logError } = await supabase
+    .from('input_usage_logs')
+    .insert(input)
+    .select('id')
+    .single()
   if (logError) throw logError
 
   const { error: stockError } = await supabase
@@ -38,7 +42,17 @@ export async function logInputUsage(input: InputUsageInput, stock: InputStock): 
     .update({ current_quantity: stock.current_quantity - input.quantity_used })
     .eq('id', stock.id)
 
-  if (stockError) throw stockError
+  if (stockError) {
+    // These are two separate round trips, so a failure here would otherwise
+    // leave a usage log behind that never came out of stock — the remaining
+    // quantity would read high forever, and the cost would still land in the
+    // Financials ledger. Undo the log rather than leave the books wrong.
+    // ponytail: compensating delete, not a real transaction. Replace with a
+    // Postgres function doing both writes atomically if this ever matters
+    // more than it does at one-farmer-at-a-time scale.
+    await supabase.from('input_usage_logs').delete().eq('id', logRow.id)
+    throw stockError
+  }
 }
 
 export async function listUsageForStock(stockId: string): Promise<InputUsageLog[]> {

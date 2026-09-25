@@ -14,12 +14,21 @@ type StageRow = { name: string; amount: string; unit: StageUnit }
 
 const emptyStageRow = (): StageRow => ({ name: '', amount: '', unit: 'days' })
 
+// Sugarcane runs 12-18 months, so anything past ~5 years is a typo (a
+// stray digit, or months typed into a days field). Without this, a slip
+// produces harvest dates centuries out and silently poisons every stage
+// and progress calculation downstream.
+const MAX_STAGE_OFFSET_DAYS = 1825
+
 function parseStages(rows: StageRow[]): GrowthStage[] {
   return rows
     .filter((row) => row.name.trim() && Number(row.amount) > 0)
     .map((row) => ({
       name: row.name.trim(),
-      offset_days: Math.round(Number(row.amount) * (row.unit === 'months' ? 30 : 1)),
+      offset_days: Math.min(
+        MAX_STAGE_OFFSET_DAYS,
+        Math.round(Number(row.amount) * (row.unit === 'months' ? 30 : 1)),
+      ),
     }))
     .sort((a, b) => a.offset_days - b.offset_days)
 }
@@ -201,6 +210,7 @@ function CropCycleFormModal({
                     <input
                       type="number"
                       min="0.1"
+                      max={row.unit === 'months' ? 60 : MAX_STAGE_OFFSET_DAYS}
                       step="0.1"
                       value={row.amount}
                       onChange={(e) => updateStageRow(index, 'amount', e.target.value)}

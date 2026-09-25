@@ -41,6 +41,31 @@ function LoginPage() {
     setLoading(false)
   }
 
+  // Was a dead button — rendered, styled, and wired to nothing. Older farmers
+  // are exactly the people who need a working reset, so it sends the real
+  // Supabase reset email now.
+  const handleForgotPassword = async () => {
+    setError(null)
+    setNotice(null)
+
+    if (!email.trim()) {
+      setError('Type your email above first, then tap "Forgot password?" again.')
+      return
+    }
+
+    setLoading(true)
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: window.location.origin,
+    })
+    setLoading(false)
+
+    if (error) {
+      setError(error.message)
+    } else {
+      setNotice('Check your email — we sent you a link to set a new password.')
+    }
+  }
+
   const handleGoogleSignIn = async () => {
     setError(null)
     setNotice(null)
@@ -110,7 +135,7 @@ function LoginPage() {
 
           {mode === 'signin' && (
             <div className="login-forgot">
-              <button type="button" className="login-link">
+              <button type="button" className="login-link" onClick={handleForgotPassword} disabled={loading}>
                 Forgot password?
               </button>
             </div>

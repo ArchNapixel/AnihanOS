@@ -242,10 +242,7 @@ function LandPlotsPage() {
                 plots.map((plot) => (
                   <div className="plot-list-item" key={plot.id}>
                     <button type="button" className="plot-list-button" onClick={() => flyToPlotAndShowMap(plot)}>
-                      <strong>
-                        {plot.name}
-                        {plot.type === 'water' && <span className="plot-type-badge">Water</span>}
-                      </strong>
+                      <strong>{plot.name}</strong>
                       <span>
                         {plot.size} {plot.size_unit}
                         {plot.municipality ? ` · ${plot.municipality}` : ''}

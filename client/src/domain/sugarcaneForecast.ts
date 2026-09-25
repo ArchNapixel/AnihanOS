@@ -1,4 +1,7 @@
 import type { WeatherDaily } from '../api/weatherApi'
+import { computeDiseaseRisk, DISEASE_YIELD_LOSS_RANGE_PCT, type DiseaseRisk } from './diseaseRisk'
+import { computeRegionalDiseaseDrag, type RegionalDiseaseDrag } from './regionalDiseasePressure'
+import { recentWeatherDays } from './weatherWindow'
 
 // Derived from the "Sugarcane Weather Impact & Yield Forecasting Guide"
 // (Philippines context) provided by the user. Stage boundaries use the
@@ -269,7 +272,11 @@ export type WeatherOutlook = {
   riskNotes: string[]
 }
 
-export function computeWeatherOutlook(plantingDate: string, weatherDays: WeatherDaily[]): WeatherOutlook {
+export function computeWeatherOutlook(plantingDate: string, allWeatherDays: WeatherDaily[]): WeatherOutlook {
+  // Trimmed here rather than in each caller, so every consumer gets a read on
+  // current conditions instead of an all-time average that quietly flattens
+  // as a farm accumulates history.
+  const weatherDays = recentWeatherDays(allWeatherDays)
   const daysSincePlanting = daysBetween(plantingDate, new Date().toISOString().slice(0, 10))
   const stage = getSugarcaneStage(daysSincePlanting)
 
@@ -335,6 +342,13 @@ export type SugarcaneForecast = {
   temperatureFactor: number | null
   rainfallFactor: number | null
   diseaseFactor: number
+  /** Regional incidence × loss, compounded — what actually moves diseaseFactor. */
+  regionalDiseaseDrag: RegionalDiseaseDrag
+  diseaseRisk: DiseaseRisk
+  // Only set when diseaseRisk.level is 'elevated' — a labeled range (not
+  // folded into estimatedYieldTonsPerHa) since the source guide states each
+  // disease's loss "if it occurs" as a range, not a precise expected value.
+  diseaseYieldLossRangePct: [number, number] | null
   fertilizer: FertilizerForecast | null
   baseYieldTonsPerHa: number
   weatherOnlyYieldTonsPerHa: number | null
@@ -342,6 +356,33 @@ export type SugarcaneForecast = {
   fertilizerContributionPct: number | null
   timingOutlook: 'on_track' | 'possible_delay' | 'favorable' | 'insufficient_data'
   riskNotes: string[]
+}
+
+// Bukidnon-calibrated baseline, triangulated from three sources:
+//   - AHP land-suitability study, Bukidnon 3rd District (~204,000 ha):
+//     50.87-59.60 t/ha, scaling with land suitability class
+//   - Malaybalay farm survey (Brgy. Aglayan, 22 farms): 50% of farms at
+//     50-55 t/ha, 36% at 56-60, only 13.6% reaching 66-70
+//   - Historical Bukidnon data (1976-82): 55.2-76.3 t/ha, declining across
+//     that period as marginal land was brought in
+// 55 sits at the modern survey median. The previous default of 75 came from
+// the generic PH-wide guide and overstated Bukidnon yields by ~36% — above
+// even the best-case modern survey band.
+export const BUKIDNON_BASE_YIELD_TONS_PER_HA = 55
+
+// Land-quality bands, mapped to the AHP land-suitability study's yield spread
+// across Bukidnon's 3rd District (50.87-59.60 t/ha by suitability class).
+// Set per-plot by the farmer — knowledge they have without any lab work.
+export type LandQuality = 'good' | 'average' | 'marginal'
+
+const LAND_QUALITY_BASE_YIELD: Record<LandQuality, number> = {
+  good: 60,
+  average: 55,
+  marginal: 50,
+}
+
+export function baseYieldForLandQuality(landQuality: LandQuality | null): number {
+  return landQuality ? LAND_QUALITY_BASE_YIELD[landQuality] : BUKIDNON_BASE_YIELD_TONS_PER_HA
 }
 
 export function forecastSugarcane(params: {
@@ -353,13 +394,30 @@ export function forecastSugarcane(params: {
   fertilizerApplications: FertilizerApplication[]
   soil: SoilInputs
 }): SugarcaneForecast {
-  const { plantingDate, weatherDays, baseYieldTonsPerHa = 75, ratoonNumber, plotHectares, fertilizerApplications, soil } = params
+  const {
+    plantingDate,
+    weatherDays,
+    baseYieldTonsPerHa = BUKIDNON_BASE_YIELD_TONS_PER_HA,
+    ratoonNumber,
+    plotHectares,
+    fertilizerApplications,
+    soil,
+  } = params
 
   const outlook = computeWeatherOutlook(plantingDate, weatherDays)
   const { stage, avgTempC, avgDailyRainfallMm, daysSincePlanting } = outlook
   const tempFactor = outlook.temperatureFactor
   const rainFactor = outlook.rainfallFactor
-  const diseaseFactor = 1.0 // no disease tracking yet — assumed healthy
+  // Regional disease pressure (red rot + smut) now genuinely moves the
+  // number. Midpoint of a sourced range is a defensible central estimate as
+  // long as the range itself is shown, which the forecast UI does.
+  // Weather-triggered *acute* risk stays out of this factor and is reported
+  // separately as a possible additional hit (diseaseYieldLossRangePct).
+  const regionalDiseaseDrag = computeRegionalDiseaseDrag()
+  const diseaseFactor = 1 - regionalDiseaseDrag.midpoint
+  const diseaseRisk = computeDiseaseRisk(weatherDays)
+  const diseaseYieldLossRangePct: [number, number] | null =
+    diseaseRisk.level === 'elevated' ? DISEASE_YIELD_LOSS_RANGE_PCT : null
 
   const weatherOnlyYieldTonsPerHa =
     tempFactor != null && rainFactor != null ? baseYieldTonsPerHa * tempFactor * rainFactor * diseaseFactor : null
@@ -379,6 +437,8 @@ export function forecastSugarcane(params: {
       ? ((estimatedYieldTonsPerHa - weatherOnlyYieldTonsPerHa) / weatherOnlyYieldTonsPerHa) * 100
       : null
 
+  // Disease risk gets its own dedicated section in the forecast UI (not
+  // folded in here) since it's a labeled range, not a single-line risk note.
   const riskNotes: string[] = [...outlook.riskNotes]
   const timingOutlook = outlook.timingOutlook
 
@@ -416,6 +476,9 @@ export function forecastSugarcane(params: {
     temperatureFactor: tempFactor,
     rainfallFactor: rainFactor,
     diseaseFactor,
+    regionalDiseaseDrag,
+    diseaseRisk,
+    diseaseYieldLossRangePct,
     fertilizer,
     baseYieldTonsPerHa,
     weatherOnlyYieldTonsPerHa,

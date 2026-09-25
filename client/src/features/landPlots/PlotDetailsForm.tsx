@@ -14,6 +14,7 @@ export type PlotDetailsInput = {
   soil_n_ppm: number | null
   soil_p_bray_ppm: number | null
   soil_k_exchangeable_ppm: number | null
+  land_quality: 'good' | 'average' | 'marginal' | null
 }
 
 export type BoundaryMode = 'draw' | 'coordinates'
@@ -78,7 +79,9 @@ function PlotDetailsForm({
   onSave: (input: PlotDetailsInput) => void
 }) {
   const [name, setName] = useState(initialValue?.name ?? '')
-  const [type, setType] = useState<PlotType>(initialValue?.type ?? 'land')
+  // Sugarcane-only since the 2026-09-22 pivot — the water/pond option went
+  // with the aquaculture module. Kept in the type so existing rows still read.
+  const type: PlotType = 'land'
   const [size, setSize] = useState(initialValue ? String(initialValue.size) : '')
   const [soilType, setSoilType] = useState(initialValue?.soil_type ?? '')
   const [municipality, setMunicipality] = useState(initialValue?.municipality ?? '')
@@ -92,6 +95,7 @@ function PlotDetailsForm({
   const [soilKExchangeablePpm, setSoilKExchangeablePpm] = useState(
     initialValue?.soil_k_exchangeable_ppm != null ? String(initialValue.soil_k_exchangeable_ppm) : '',
   )
+  const [landQuality, setLandQuality] = useState<string>(initialValue?.land_quality ?? '')
   const [cornerRows, setCornerRows] = useState<CornerRow[]>(() => cornersFromBoundary(initialValue?.boundary ?? null))
   const [showSoilTest, setShowSoilTest] = useState(
     () =>
@@ -152,30 +156,20 @@ function PlotDetailsForm({
       soil_n_ppm: type === 'land' && soilNPpm ? Number(soilNPpm) : null,
       soil_p_bray_ppm: type === 'land' && soilPBrayPpm ? Number(soilPBrayPpm) : null,
       soil_k_exchangeable_ppm: type === 'land' && soilKExchangeablePpm ? Number(soilKExchangeablePpm) : null,
+      land_quality:
+        type === 'land' && landQuality ? (landQuality as 'good' | 'average' | 'marginal') : null,
     })
   }
 
   return (
     <form className="plot-details-form" onSubmit={handleSubmit}>
       <div className="plot-form-field">
-        <label>Type</label>
-        <div className="plot-type-toggle">
-          <button type="button" className={type === 'land' ? 'active' : ''} onClick={() => setType('land')}>
-            Land
-          </button>
-          <button type="button" className={type === 'water' ? 'active' : ''} onClick={() => setType('water')}>
-            Water (pond/cage/pen)
-          </button>
-        </div>
-      </div>
-
-      <div className="plot-form-field">
-        <label htmlFor="plot-name">{type === 'water' ? 'Pond/Cage name' : 'Land / plot name'}</label>
+        <label htmlFor="plot-name">Land / plot name</label>
         <input
           id="plot-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder={type === 'water' ? 'e.g. Pond 1' : 'e.g. North Field'}
+          placeholder="e.g. North Field"
           required
         />
       </div>
@@ -197,6 +191,22 @@ function PlotDetailsForm({
             : 'Draw or enter a boundary below to auto-calculate this, or type it in manually.'}
         </p>
       </div>
+
+      {type === 'land' && (
+        <div className="plot-form-field">
+          <label htmlFor="plot-land-quality">How good is this land?</label>
+          <p className="plot-form-hint">
+            Your own judgement is enough — it sets the starting yield estimate for this plot. Leave blank and
+            forecasts use the Bukidnon average.
+          </p>
+          <select id="plot-land-quality" value={landQuality} onChange={(e) => setLandQuality(e.target.value)}>
+            <option value="">Not sure — use the Bukidnon average (55 tons/ha)</option>
+            <option value="good">Good land — flat, fertile (60 tons/ha)</option>
+            <option value="average">Average land (55 tons/ha)</option>
+            <option value="marginal">Marginal — steep, thin or poor soil (50 tons/ha)</option>
+          </select>
+        </div>
+      )}
 
       {type === 'land' && (
         <div className="plot-form-field">

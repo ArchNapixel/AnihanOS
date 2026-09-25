@@ -3,7 +3,8 @@ import type { CropCycle } from './cropCyclesApi'
 import type { Plot } from '../landPlots/plotsApi'
 import type { WeatherDaily } from '../../api/weatherApi'
 import { listFertilizerUsageForCycle } from '../inputs/inputUsageApi'
-import { forecastSugarcane, type FertilizerApplication } from '../../domain/sugarcaneForecast'
+import { forecastSugarcane, baseYieldForLandQuality, type FertilizerApplication } from '../../domain/sugarcaneForecast'
+import { CONDITIONAL_THREATS } from '../../domain/regionalDiseasePressure'
 import { formatDateShort } from '../../lib/dateUtils'
 import '../../styles/modal.css'
 import './SugarcaneForecastModal.css'
@@ -13,6 +14,12 @@ const TIMING_LABELS: Record<string, string> = {
   possible_delay: 'Possible delay',
   favorable: 'Favorable conditions',
   insufficient_data: 'Not enough data yet',
+}
+
+const DISEASE_LABELS: Record<string, string> = {
+  low: 'Low',
+  elevated: 'Elevated',
+  unknown: 'Not enough data yet',
 }
 
 function SugarcaneForecastModal({
@@ -58,6 +65,7 @@ function SugarcaneForecastModal({
   const forecast = forecastSugarcane({
     plantingDate: cycle.planting_date,
     weatherDays,
+    baseYieldTonsPerHa: baseYieldForLandQuality(plot?.land_quality ?? null),
     ratoonNumber: cycle.ratoon_number,
     plotHectares: isHectares ? (plot?.size ?? null) : null,
     fertilizerApplications,
@@ -110,6 +118,54 @@ function SugarcaneForecastModal({
         </div>
 
         <div className="forecast-section">
+          <span className="forecast-section-label">Disease risk — this week's weather</span>
+          <strong className={`forecast-outlook forecast-outlook-disease-${forecast.diseaseRisk.level}`}>
+            {DISEASE_LABELS[forecast.diseaseRisk.level]}
+          </strong>
+
+          {forecast.diseaseRisk.signals.length > 0 && (
+            <ul className="threat-list">
+              {forecast.diseaseRisk.signals.map((signal) => (
+                <li key={signal.id} className={signal.elevated ? 'threat-row threat-row-elevated' : 'threat-row'}>
+                  <div className="threat-row-header">
+                    <strong>
+                      {signal.label}
+                      {signal.estimatedChancePct != null && (
+                        <span className="threat-chance"> ~{Math.round(signal.estimatedChancePct)}% chance</span>
+                      )}
+                    </strong>
+                    <span>
+                      {signal.elevated
+                        ? `Conditions met ${signal.consecutiveDays} days running`
+                        : `${signal.conditions.filter((c) => c.met).length} of ${signal.conditions.length} conditions`}
+                    </span>
+                  </div>
+                  <div className="threat-conditions">
+                    {signal.conditions.map((condition) => (
+                      <span key={condition.label} className={condition.met ? 'threat-cond met' : 'threat-cond'}>
+                        {condition.met ? '✓' : '·'} {condition.label}
+                      </span>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {forecast.diseaseYieldLossRangePct && (
+            <p className="forecast-note">
+              If disease takes hold, it could cost an additional {forecast.diseaseYieldLossRangePct[0]}-
+              {forecast.diseaseYieldLossRangePct[1]}% beyond the estimate below — a possible extra hit, not a
+              certainty, so it isn't folded into the number.
+            </p>
+          )}
+          <p className="forecast-note">
+            Smut and red rot thresholds are provisional estimates — the source guide describes those conditions in
+            words, not numbers.
+          </p>
+        </div>
+
+        <div className="forecast-section">
           <span className="forecast-section-label">Estimated yield</span>
           {forecast.estimatedYieldTonsPerHa != null ? (
             <>
@@ -121,7 +177,43 @@ function SugarcaneForecastModal({
           ) : (
             <strong>Not enough weather data yet</strong>
           )}
-          <p className="forecast-note">Base {forecast.baseYieldTonsPerHa} tons/ha · adjusted for weather · assumes no disease/pests</p>
+          <p className="forecast-note">
+            Base {forecast.baseYieldTonsPerHa} tons/ha
+            {plot?.land_quality ? ` (${plot.land_quality} land)` : ' (Bukidnon average — set this plot’s land quality for a closer fit)'}
+            {' '}· adjusted for weather and regional disease pressure
+          </p>
+        </div>
+
+        <div className="forecast-section">
+          <span className="forecast-section-label">Regional disease pressure</span>
+          <strong>
+            −{(forecast.regionalDiseaseDrag.range[0] * 100).toFixed(1)}% to −
+            {(forecast.regionalDiseaseDrag.range[1] * 100).toFixed(1)}%
+          </strong>
+          <p className="forecast-note">
+            Already applied to the estimate above, using the midpoint (−
+            {(forecast.regionalDiseaseDrag.midpoint * 100).toFixed(1)}%). This is a Mindanao regional average
+            (incidence × loss), <strong>not an inspection of your field</strong> — your plot may have none of it.
+          </p>
+          <ul className="threat-list">
+            {forecast.regionalDiseaseDrag.contributions.map((c) => (
+              <li key={c.label} className="threat-row">
+                <div className="threat-row-header">
+                  <strong>{c.label}</strong>
+                  <span>
+                    −{(c.range[0] * 100).toFixed(1)}% to −{(c.range[1] * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <div className="threat-conditions">
+                  <span className="threat-cond">{c.source}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <p className="forecast-note">
+            Not included (real loss figures, but no published Mindanao incidence to multiply against):{' '}
+            {CONDITIONAL_THREATS.map((t) => t.label).join(', ')}.
+          </p>
         </div>
 
         {!loadingFertilizer && forecast.fertilizer && (

@@ -23,6 +23,9 @@ export type Plot = {
   soil_n_ppm: number | null
   soil_p_bray_ppm: number | null
   soil_k_exchangeable_ppm: number | null
+  // Farmer's own read on the land, used to pick a base yield band for
+  // forecasts (good 60 / average 55 / marginal 50 t/ha).
+  land_quality: 'good' | 'average' | 'marginal' | null
   created_at: string
   updated_at: string
 }
@@ -41,6 +44,7 @@ export type PlotInput = {
   soil_n_ppm: number | null
   soil_p_bray_ppm: number | null
   soil_k_exchangeable_ppm: number | null
+  land_quality: 'good' | 'average' | 'marginal' | null
 }
 
 export async function listPlots(): Promise<Plot[]> {

@@ -9,6 +9,26 @@ export type CropCycleFinancials = {
   marginPercent: number | null
 }
 
+/**
+ * Single source of truth for the money maths. The Financials table edits
+ * these fields inline and recomputes optimistically before the save lands, so
+ * both paths call this — otherwise the two copies drift and the table shows a
+ * different profit before and after a refresh.
+ */
+export function computeCycleFinancials(
+  cycle: Pick<CropCycle, 'yield_amount' | 'selling_price_per_unit' | 'other_costs'>,
+  inputCost: number,
+): Omit<CropCycleFinancials, 'cycle'> {
+  const revenue =
+    cycle.yield_amount != null && cycle.selling_price_per_unit != null
+      ? cycle.yield_amount * cycle.selling_price_per_unit
+      : null
+  const profit = revenue != null ? revenue - inputCost - (cycle.other_costs ?? 0) : null
+  const marginPercent = profit != null && revenue != null && revenue > 0 ? (profit / revenue) * 100 : null
+
+  return { inputCost, revenue, profit, marginPercent }
+}
+
 export async function listCropCycleFinancials(): Promise<CropCycleFinancials[]> {
   const cycles = await listCropCycles()
 
@@ -24,17 +44,10 @@ export async function listCropCycleFinancials(): Promise<CropCycleFinancials[]> 
     costByCycleId[log.crop_cycle_id] = (costByCycleId[log.crop_cycle_id] ?? 0) + (log.cost ?? 0)
   }
 
-  return cycles.map((cycle) => {
-    const inputCost = costByCycleId[cycle.id] ?? 0
-    const revenue =
-      cycle.yield_amount != null && cycle.selling_price_per_unit != null
-        ? cycle.yield_amount * cycle.selling_price_per_unit
-        : null
-    const profit = revenue != null ? revenue - inputCost - (cycle.other_costs ?? 0) : null
-    const marginPercent = profit != null && revenue != null && revenue > 0 ? (profit / revenue) * 100 : null
-
-    return { cycle, inputCost, revenue, profit, marginPercent }
-  })
+  return cycles.map((cycle) => ({
+    cycle,
+    ...computeCycleFinancials(cycle, costByCycleId[cycle.id] ?? 0),
+  }))
 }
 
 export const CSV_HEADERS = [

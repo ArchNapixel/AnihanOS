@@ -84,11 +84,85 @@
   color: var(--color-text-muted);
 }
 
+.forecast-outlook-disease-low {
+  background: #e3f5e6;
+  color: #1e7a34;
+}
+
+.forecast-outlook-disease-elevated {
+  background: #fdecec;
+  color: #b4232c;
+}
+
+.forecast-outlook-disease-unknown {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+}
+
 .forecast-note {
   font-size: 14px;
   line-height: 1.5;
   color: var(--color-text-muted);
   margin-top: 10px;
+}
+
+.threat-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.threat-row {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.threat-row-elevated {
+  background: #fdecec;
+}
+
+.threat-row-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.threat-row-header strong {
+  font-size: 16px;
+}
+
+.threat-row-header span {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.threat-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.threat-cond {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.threat-chance {
+  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 14px;
+}
+
+.threat-cond.met {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .forecast-risk-list {

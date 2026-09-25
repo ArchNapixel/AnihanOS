@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
-import { listCropCycleFinancials, type CropCycleFinancials } from './financialsApi'
+import { computeCycleFinancials, listCropCycleFinancials, type CropCycleFinancials } from './financialsApi'
 import { recordCropCycleSale, updateCropCycleYield, type CropCycle } from '../crops/cropCyclesApi'
 import {
   listWageEntries,
@@ -284,9 +284,9 @@ function FinancialsPage() {
   const viewingWeek = sortedWeeklySummaries.find((w) => w.weekStart === viewingWeekStart) ?? null
 
   // Optimistic local update so Revenue/Profit/Margin recompute instantly
-  // while editing, mirroring the exact formula listCropCycleFinancials uses
-  // — avoids a full-table reload (and the flicker that comes with it) on
-  // every keystroke or field blur.
+  // while editing — avoids a full-table reload (and the flicker that comes
+  // with it) on every keystroke or field blur. Shares computeCycleFinancials
+  // with the loader so the two can't disagree.
   const applyLocalEdit = (
     cycleId: string,
     patch: Partial<Pick<CropCycle, 'yield_amount' | 'selling_price_per_unit' | 'other_costs'>>,
@@ -295,13 +295,7 @@ function FinancialsPage() {
       current.map((row) => {
         if (row.cycle.id !== cycleId) return row
         const cycle = { ...row.cycle, ...patch }
-        const revenue =
-          cycle.yield_amount != null && cycle.selling_price_per_unit != null
-            ? cycle.yield_amount * cycle.selling_price_per_unit
-            : null
-        const profit = revenue != null ? revenue - row.inputCost - (cycle.other_costs ?? 0) : null
-        const marginPercent = profit != null && revenue != null && revenue > 0 ? (profit / revenue) * 100 : null
-        return { ...row, cycle, revenue, profit, marginPercent }
+        return { ...row, cycle, ...computeCycleFinancials(cycle, row.inputCost) }
       }),
     )
   }
