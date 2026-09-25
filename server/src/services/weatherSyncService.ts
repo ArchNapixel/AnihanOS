@@ -58,6 +58,7 @@ export async function syncAllFarmsWeather(): Promise<WeatherSyncResult> {
         temp_max_c: d.temp_max_c,
         precipitation_mm: d.precipitation_mm,
         humidity_pct: d.humidity_pct,
+        et0_mm: d.et0_mm,
         source: d.source,
       }))
 

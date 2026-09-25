@@ -66,8 +66,6 @@ export type DiseaseRisk = {
   level: DiseaseRiskLevel
   /** Longest streak across all threats — kept for the existing summary UI. */
   consecutiveDays: number
-  /** How many days of usable weather this read is based on. */
-  daysOfData: number
   signals: ThreatSignal[]
 }
 
@@ -133,7 +131,7 @@ export function computeDiseaseRisk(weatherDays: WeatherDaily[]): DiseaseRisk {
   // false all-clear.
   const usable = recent.filter((d) => d.humidity_pct != null)
   if (recent.length === 0 || usable.length === 0) {
-    return { level: 'unknown', consecutiveDays: 0, daysOfData: usable.length, signals: [] }
+    return { level: 'unknown', consecutiveDays: 0, signals: [] }
   }
 
   const latest = recent[recent.length - 1]
@@ -179,7 +177,6 @@ export function computeDiseaseRisk(weatherDays: WeatherDaily[]): DiseaseRisk {
   return {
     level: elevatedSignals.length > 0 ? 'elevated' : 'low',
     consecutiveDays: Math.max(0, ...signals.map((s) => s.consecutiveDays)),
-    daysOfData: usable.length,
     signals,
   }
 }

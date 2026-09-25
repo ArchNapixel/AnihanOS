@@ -2,6 +2,7 @@ import type { WeatherDaily } from '../api/weatherApi'
 import { computeDiseaseRisk, DISEASE_YIELD_LOSS_RANGE_PCT, type DiseaseRisk } from './diseaseRisk'
 import { computeRegionalDiseaseDrag, type RegionalDiseaseDrag } from './regionalDiseasePressure'
 import { recentWeatherDays } from './weatherWindow'
+import { computeDroughtStress, type DroughtStress } from './droughtStress'
 
 // Derived from the "Sugarcane Weather Impact & Yield Forecasting Guide"
 // (Philippines context) provided by the user. Stage boundaries use the
@@ -268,22 +269,43 @@ export type WeatherOutlook = {
   avgDailyRainfallMm: number | null
   temperatureFactor: number | null
   rainfallFactor: number | null
+  drought: DroughtStress
   timingOutlook: 'on_track' | 'possible_delay' | 'favorable' | 'insufficient_data'
   riskNotes: string[]
 }
 
-export function computeWeatherOutlook(plantingDate: string, allWeatherDays: WeatherDaily[]): WeatherOutlook {
+export function computeWeatherOutlook(
+  plantingDate: string,
+  allWeatherDays: WeatherDaily[],
+  /** Days to read "current conditions" from. Defaults to a rolling recent
+   *  window; the dashboard announcer passes a fixed calendar week instead.
+   *  Drought always reads `allWeatherDays` regardless, since a dry spell is
+   *  longer than any window we'd scope conditions to. */
+  conditionsWindow?: WeatherDaily[],
+): WeatherOutlook {
   // Trimmed here rather than in each caller, so every consumer gets a read on
   // current conditions instead of an all-time average that quietly flattens
   // as a farm accumulates history.
-  const weatherDays = recentWeatherDays(allWeatherDays)
+  const weatherDays = conditionsWindow ?? recentWeatherDays(allWeatherDays)
   const daysSincePlanting = daysBetween(plantingDate, new Date().toISOString().slice(0, 10))
   const stage = getSugarcaneStage(daysSincePlanting)
 
   const avgTempC = averageTemp(weatherDays)
   const avgDailyRainfallMm = averageDailyRainfall(weatherDays)
   const tempFactor = avgTempC != null ? temperatureFactor(avgTempC, stage) : null
-  const rainFactor = avgDailyRainfallMm != null ? rainfallFactor(avgDailyRainfallMm) : null
+
+  // An active dry spell is measured against a real dose-response curve, which
+  // is better evidence than the averaged-rainfall heuristic — and averaging
+  // hides dry spells anyway, since a drought and a damp month can share a mean.
+  // The averaged path still handles adequate and excess rainfall, which the
+  // drought curve says nothing about.
+  const drought = computeDroughtStress(allWeatherDays, plantingDate)
+  const rainFactor =
+    drought.deficitDays > 0 && drought.yieldLossPct != null
+      ? 1 - drought.yieldLossPct / 100
+      : avgDailyRainfallMm != null
+        ? rainfallFactor(avgDailyRainfallMm)
+        : null
 
   const riskNotes: string[] = []
   let timingOutlook: WeatherOutlook['timingOutlook'] = 'insufficient_data'
@@ -314,6 +336,16 @@ export function computeWeatherOutlook(plantingDate: string, allWeatherDays: Weat
     if (stage === 'ripening' && avgDailyRainfallMm != null && avgDailyRainfallMm * 30 > 100) {
       riskNotes.push('Ripening rainfall may dilute sugar (lower brix).')
     }
+    // Ripening actually wants things drier, so a dry spell there concentrates
+    // sugar rather than costing yield — don't alarm over it.
+    if (drought.deficitDays >= 30 && drought.yieldLossPct != null && stage !== 'ripening') {
+      riskNotes.push(
+        `Dry for ${drought.deficitDays} days running — roughly ${drought.yieldLossPct.toFixed(0)}% yield cost at this length.`,
+      )
+      if (stage === 'grand_growth') {
+        timingOutlook = 'possible_delay'
+      }
+    }
   }
 
   return {
@@ -325,6 +357,7 @@ export function computeWeatherOutlook(plantingDate: string, allWeatherDays: Weat
     avgDailyRainfallMm,
     temperatureFactor: tempFactor,
     rainfallFactor: rainFactor,
+    drought,
     timingOutlook,
     riskNotes,
   }

@@ -27,7 +27,7 @@ function DashboardSprite({ forecast }: { forecast: WeeklySpriteForecast }) {
         <SpriteFace mood={forecast.mood} />
       </div>
       <div className="sprite-bubble">
-        <span className="sprite-bubble-label">This week</span>
+        <span className="sprite-bubble-label">This week · {forecast.weekLabel}</span>
         {forecast.lines.map((line, i) => (
           <p key={i}>{line}</p>
         ))}

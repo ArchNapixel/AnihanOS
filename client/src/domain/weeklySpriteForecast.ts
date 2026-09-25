@@ -2,7 +2,8 @@ import type { CropCycle } from '../features/crops/cropCyclesApi'
 import type { FieldActivity } from '../features/crops/fieldActivitiesApi'
 import type { WeatherDaily } from '../api/weatherApi'
 import { computeWeatherOutlook } from './sugarcaneForecast'
-import { recentWeatherDays } from './weatherWindow'
+import { getWeekRange } from '../lib/weekRange'
+import { todayIso } from '../lib/dateUtils'
 import { computeWeedRisk, type WeedRiskLevel } from './weedRisk'
 import { closestThreat, computeDiseaseRisk, type DiseaseRisk } from './diseaseRisk'
 
@@ -11,6 +12,18 @@ export type SpriteMood = 'happy' | 'neutral' | 'worried'
 export type WeeklySpriteForecast = {
   mood: SpriteMood
   lines: string[]
+  /** The calendar week this read covers, e.g. "Sep 21 – 27". */
+  weekLabel: string
+}
+
+// Short form of the week range for the announcer's header. getWeekRange's own
+// label ("September 21, 2026 - September 27, 2026") is too long for a badge.
+function shortWeekLabel(start: string, end: string): string {
+  const fmt = (iso: string, withMonth: boolean) =>
+    new Date(`${iso}T00:00:00`).toLocaleDateString(undefined,
+      withMonth ? { month: 'short', day: 'numeric' } : { day: 'numeric' })
+  const sameMonth = start.slice(0, 7) === end.slice(0, 7)
+  return `${fmt(start, true)} – ${fmt(end, !sameMonth)}`
 }
 
 const isActiveSugarcane = (cycle: CropCycle) =>
@@ -44,11 +57,11 @@ function buildDiseaseLine(disease: DiseaseRisk): string {
 
   const close = closestThreat(disease)
   if (close && close.needsNext) {
-    return `${close.label} is the one to watch${chancePhrase(close)}. It would only take ${close.needsNext} to bring the risk up. Watching ${dayCount(disease.daysOfData)} of weather so far.`
+    return `${close.label} is the one to watch${chancePhrase(close)}. It would only take ${close.needsNext} to bring the risk up.`
   }
 
   const leading = disease.signals.reduce((a, b) => (b.favourability > a.favourability ? b : a))
-  return `No disease weather building this week${chancePhrase(leading)}. Watching ${dayCount(disease.daysOfData)} of weather so far.`
+  return `No disease weather building this week${chancePhrase(leading)}.`
 }
 
 export function buildWeeklySpriteForecast(
@@ -56,20 +69,36 @@ export function buildWeeklySpriteForecast(
   weatherDays: WeatherDaily[],
   fieldActivities: FieldActivity[],
 ): WeeklySpriteForecast {
+  // The announcer speaks about the calendar week it currently sits in, and
+  // rolls over to the next one on its own as the date moves — so everything
+  // below is scoped to that segment rather than a rolling lookback.
+  const week = getWeekRange(todayIso())
+  const weekLabel = shortWeekLabel(week.start, week.end)
+  const thisWeek = weatherDays.filter((d) => d.date >= week.start && d.date <= week.end)
+
   const activeSugarcane = cycles.filter(isActiveSugarcane)
 
   if (activeSugarcane.length === 0) {
-    return { mood: 'neutral', lines: ['No active sugarcane cycles yet — plant one to get a weekly forecast here.'] }
+    return {
+      mood: 'neutral',
+      weekLabel,
+      lines: ['No active sugarcane cycles yet — plant one to get a weekly forecast here.'],
+    }
   }
 
-  const thisWeek = recentWeatherDays(weatherDays)
   if (thisWeek.length === 0) {
-    return { mood: 'neutral', lines: ['No weather data yet for your farm — check back after the next daily sync.'] }
+    return {
+      mood: 'neutral',
+      weekLabel,
+      lines: ['No weather readings for this week yet — check back after the next daily sync.'],
+    }
   }
 
+  // Conditions come from this week's slice; the full series still goes in so
+  // the drought streak inside can look back past the week boundary.
   const outlooks = activeSugarcane.map((cycle) => ({
     cycle,
-    outlook: computeWeatherOutlook(cycle.planting_date, thisWeek),
+    outlook: computeWeatherOutlook(cycle.planting_date, weatherDays, thisWeek),
   }))
   const worst = outlooks.reduce((a, b) =>
     OUTLOOK_SEVERITY[b.outlook.timingOutlook] > OUTLOOK_SEVERITY[a.outlook.timingOutlook] ? b : a,
@@ -82,7 +111,7 @@ export function buildWeeklySpriteForecast(
         ? `Good news — conditions on ${worst.cycle.plots.name} are favorable this week.`
         : 'Your sugarcane is on track this week.'
 
-  const disease = computeDiseaseRisk(weatherDays)
+  const disease = computeDiseaseRisk(thisWeek)
   const diseaseLine = buildDiseaseLine(disease)
 
   const lastWeedingByPlot = new Map<string, string>()
@@ -115,5 +144,5 @@ export function buildWeeklySpriteForecast(
         ? 'happy'
         : 'neutral'
 
-  return { mood, lines: [yieldLine, diseaseLine, ...(weedLine ? [weedLine] : [])] }
+  return { mood, weekLabel, lines: [yieldLine, diseaseLine, ...(weedLine ? [weedLine] : [])] }
 }
