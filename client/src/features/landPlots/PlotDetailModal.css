@@ -21,7 +21,7 @@
 }
 
 .weed-risk-low {
-  background: rgba(85, 100, 60, 0.2);
+  background: var(--color-surface);
   color: var(--color-primary);
 }
 
@@ -31,7 +31,7 @@
 }
 
 .weed-risk-high {
-  background: rgba(179, 65, 58, 0.15);
+  background: rgba(176, 0, 32, 0.1);
   color: var(--color-error);
 }
 

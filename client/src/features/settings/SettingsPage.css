@@ -19,7 +19,7 @@
   box-sizing: border-box;
   padding: 10px 14px;
   border: none;
-  border-radius: 12px;
+  border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-body);

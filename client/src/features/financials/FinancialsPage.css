@@ -50,7 +50,7 @@
 .financials-table-wrap {
   overflow-x: auto;
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: 6px;
   padding: 8px;
 }
 
@@ -76,12 +76,12 @@
 
 .financials-table td {
   padding: 10px 14px;
-  border-top: 1px solid rgba(47, 42, 31, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .financials-table tfoot td {
   font-weight: 700;
-  border-top: 2px solid rgba(47, 42, 31, 0.2);
+  border-top: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 .financials-negative {

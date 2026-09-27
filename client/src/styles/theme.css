@@ -1,22 +1,23 @@
 :root {
-  --color-bg: #f2e6cf;
-  --color-surface: #e9dcc0;
-  --color-text: #2f2a1f;
-  --color-text-muted: #7a7261;
-  --color-primary: #55643c;
-  --color-primary-hover: #45512f;
-  --color-accent: #c17a45;
-  --color-badge-bg: #3c4a2c;
-  --color-badge-fg: #a8c48a;
-  --color-error: #b3413a;
-  --color-alert-bg: #f2d9c2;
-  --color-alert-fg: #c17a45;
+  --color-bg: #ffffff;
+  --color-surface: #f2f2f2;
+  --color-border: #e0e0e0;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b6b6b;
+  --color-primary: #1a1a1a;
+  --color-primary-hover: #3a3a3a;
+  --color-accent: #1a1a1a;
+  --color-badge-bg: #1a1a1a;
+  --color-badge-fg: #ffffff;
+  --color-error: #b00020;
+  --color-alert-bg: #f2f2f2;
+  --color-alert-fg: #1a1a1a;
 
-  --font-heading: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  --radius-field: 28px;
-  --radius-button: 999px;
+  --radius-field: 6px;
+  --radius-button: 6px;
 }
 
 body {
@@ -24,7 +25,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .btn-primary,
@@ -33,17 +34,17 @@ button,
 input,
 select,
 textarea {
-  font-size: 17px;
+  font-size: 15px;
 }
 
 .btn-primary {
   background: var(--color-primary);
-  color: #f5f0e2;
-  border: none;
+  color: #ffffff;
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-button);
-  padding: 14px 24px;
-  min-height: 48px;
-  font-weight: 700;
+  padding: 12px 22px;
+  min-height: 44px;
+  font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
 }
@@ -53,7 +54,7 @@ textarea {
 }
 
 .btn-primary:disabled {
-  opacity: 0.7;
+  opacity: 0.5;
   cursor: default;
 }
 
@@ -61,20 +62,20 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--color-surface);
+  background: #ffffff;
   color: var(--color-text);
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-button);
-  padding: 14px 22px;
-  min-height: 48px;
-  font-weight: 600;
+  padding: 12px 20px;
+  min-height: 44px;
+  font-weight: 500;
   font-family: var(--font-body);
   text-decoration: none;
   cursor: pointer;
 }
 
 .btn-outline:hover {
-  background: #e0d2b3;
+  background: var(--color-surface);
 }
 
 .page-placeholder h1 {

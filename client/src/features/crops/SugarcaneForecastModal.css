@@ -42,7 +42,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 16px;
-  border-radius: 14px;
+  border-radius: 6px;
   background: var(--color-surface);
 }
 
@@ -70,13 +70,13 @@
 }
 
 .forecast-outlook-favorable {
-  background: #e3f5e6;
-  color: #1e7a34;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .forecast-outlook-possible_delay {
-  background: #fdecec;
-  color: #b4232c;
+  background: rgba(176, 0, 32, 0.08);
+  color: var(--color-error);
 }
 
 .forecast-outlook-insufficient_data {
@@ -85,13 +85,13 @@
 }
 
 .forecast-outlook-disease-low {
-  background: #e3f5e6;
-  color: #1e7a34;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .forecast-outlook-disease-elevated {
-  background: #fdecec;
-  color: #b4232c;
+  background: rgba(176, 0, 32, 0.08);
+  color: var(--color-error);
 }
 
 .forecast-outlook-disease-unknown {
@@ -117,12 +117,12 @@
 
 .threat-row {
   background: var(--color-surface);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 12px 14px;
 }
 
 .threat-row-elevated {
-  background: #fdecec;
+  background: rgba(176, 0, 32, 0.08);
 }
 
 .threat-row-header {

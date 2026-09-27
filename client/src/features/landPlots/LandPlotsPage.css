@@ -25,8 +25,8 @@
   width: 360px;
   max-width: calc(100vw - 48px);
   background: var(--color-bg);
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -80,7 +80,7 @@
 
 .plot-list-item {
   background: var(--color-surface);
-  border-radius: 14px;
+  border-radius: 6px;
   padding: 12px 14px;
 }
 
@@ -112,8 +112,8 @@
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(59, 130, 168, 0.18);
-  color: #2f6f8f;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .plot-list-button span {
@@ -152,10 +152,10 @@
     top: 12px;
     right: 12px;
     background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 999px;
     padding: 4px;
     z-index: 6;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   .plots-mobile-toggle button {
@@ -172,7 +172,7 @@
 
   .plots-mobile-toggle button.active {
     background: var(--color-primary);
-    color: #f5f0e2;
+    color: #ffffff;
   }
 
   .plots-panel {
