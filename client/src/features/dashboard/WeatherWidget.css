@@ -34,7 +34,7 @@
   align-items: center;
   gap: 4px;
   background: var(--color-bg);
-  border-radius: 14px;
+  border-radius: 6px;
   padding: 12px 8px;
   text-align: center;
 }

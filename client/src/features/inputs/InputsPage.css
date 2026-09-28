@@ -31,7 +31,7 @@
 .input-table-wrap {
   overflow-x: auto;
   background: var(--color-surface);
-  border-radius: 16px;
+  border-radius: 6px;
   padding: 8px;
 }
 
@@ -51,7 +51,7 @@
 
 .input-table td {
   padding: 10px 14px;
-  border-top: 1px solid rgba(47, 42, 31, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .input-row-low td:nth-child(3) {
@@ -124,7 +124,7 @@
   flex-wrap: wrap;
   gap: 12px;
   background: var(--color-surface);
-  border-radius: 14px;
+  border-radius: 6px;
   padding: 12px 16px;
 }
 

@@ -3,7 +3,7 @@
   align-items: flex-start;
   gap: 16px;
   background: var(--color-surface);
-  border-radius: 20px;
+  border-radius: 6px;
   padding: 20px;
   margin-bottom: 20px;
 }
