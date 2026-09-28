@@ -162,9 +162,10 @@
     border: none;
     background: none;
     padding: 8px 16px;
+    min-height: 48px;
     border-radius: 999px;
     font-family: var(--font-body);
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--color-text-muted);
     cursor: pointer;

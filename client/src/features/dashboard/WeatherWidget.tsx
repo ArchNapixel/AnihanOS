@@ -34,8 +34,14 @@ function dayLabel(dateStr: string, today: string): string {
   return new Date(`${dateStr}T00:00:00`).toLocaleDateString(undefined, { weekday: 'short' })
 }
 
+// Display-only cap. `days` still carries the farm's full synced history (used
+// elsewhere for drought/disease calculations) — this just keeps the on-screen
+// strip from growing forever as weather_daily accumulates one row per day.
+const VISIBLE_DAYS = 7
+
 function WeatherWidget({ days }: { days: WeatherDaily[] }) {
   const today = todayIso()
+  const visibleDays = days.filter((d) => d.date >= today).slice(0, VISIBLE_DAYS)
   const [nextSync, setNextSync] = useState(getNextSyncTime)
 
   useEffect(() => {
@@ -57,13 +63,13 @@ function WeatherWidget({ days }: { days: WeatherDaily[] }) {
         </span>
       </div>
 
-      {days.length === 0 ? (
+      {visibleDays.length === 0 ? (
         <p className="dashboard-empty">
           No weather data yet — it appears here after the first daily sync runs for your farm.
         </p>
       ) : (
         <div className="weather-strip">
-          {days.map((day) => (
+          {visibleDays.map((day) => (
             <div className="weather-day" key={day.date}>
               <span className="weather-day-label">{dayLabel(day.date, today)}</span>
               <span className="weather-day-temps">

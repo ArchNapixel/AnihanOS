@@ -38,20 +38,20 @@
 .input-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 16px;
   white-space: nowrap;
 }
 
 .input-table th {
   text-align: left;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-muted);
   padding: 10px 14px;
 }
 
 .input-table td {
   padding: 10px 14px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--color-border);
 }
 
 .input-row-low td:nth-child(3) {

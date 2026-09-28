@@ -72,6 +72,7 @@ function CropCycleFormModal({
   const [expectedHarvestDate, setExpectedHarvestDate] = useState(initialValue?.expected_harvest_date ?? '')
   const [ratoonNumber, setRatoonNumber] = useState(initialValue?.ratoon_number ?? 0)
   const [autoExpectedHarvestDate, setAutoExpectedHarvestDate] = useState('')
+  const [validationError, setValidationError] = useState<string | null>(null)
   // Product Book fields (growth stages, fertilizing schedule, etc.) are the
   // same for every cycle of a crop type and are rarely touched — collapsed
   // by default so adding a routine cycle is just plot/date/ratoon.
@@ -115,6 +116,17 @@ function CropCycleFormModal({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
+
+    // Submit stays clickable at all times (forms hard rule) — a plot/crop
+    // type only goes missing when the farmer has none set up yet, and this
+    // tells them so instead of the button silently doing nothing.
+    if (!plotId || !selectedCropTypeId) {
+      setValidationError(
+        !plotId ? 'Add a plot first, in Plots, before creating a crop cycle.' : 'Select a crop type before saving.',
+      )
+      return
+    }
+    setValidationError(null)
 
     const growth_stages = parseStages(stageRows)
     const canopy_closure_days = canopyAmount
@@ -313,11 +325,13 @@ function CropCycleFormModal({
             </select>
           </div>
 
+          {validationError && <p className="modal-error">{validationError}</p>}
+
           <div className="modal-actions">
             <button type="button" className="modal-cancel" onClick={onCancel} disabled={saving}>
               Cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={saving || !plotId || !selectedCropTypeId}>
+            <button type="submit" className="btn-primary" disabled={saving}>
               {saving ? 'Saving...' : 'Save'}
             </button>
           </div>

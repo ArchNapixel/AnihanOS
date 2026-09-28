@@ -6,7 +6,6 @@ import { FarmProvider, useFarm } from './lib/FarmContext'
 import LoginPage from './features/auth/LoginPage'
 import LoadingScreen from './components/LoadingScreen'
 import AppLayout from './app/AppLayout'
-import ComingSoonPage from './app/ComingSoonPage'
 import DashboardPage from './features/dashboard/DashboardPage'
 import LandPlotsPage from './features/landPlots/LandPlotsPage'
 import CropsPage from './features/crops/CropsPage'
@@ -32,7 +31,6 @@ function AppShell() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/land-plots" element={<LandPlotsPage />} />
-          <Route path="/plots/schematic" element={<ComingSoonPage title="Schematic View" />} />
           <Route path="/crops" element={<CropsPage />} />
           <Route path="/inputs" element={<InputsPage />} />
           <Route path="/financials" element={<FinancialsPage />} />

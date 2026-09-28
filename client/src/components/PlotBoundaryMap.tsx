@@ -8,8 +8,10 @@ import './PlotBoundaryMap.css'
 // Vite doesn't resolve Leaflet's default marker asset paths automatically.
 L.Marker.prototype.options.icon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow })
 
-const PHILIPPINES_CENTER: L.LatLngTuple = [12.8797, 121.774]
-const DEFAULT_ZOOM = 6
+// AnihanOS is Bukidnon/Mindanao-only — this is just the momentary initial
+// view before fitBounds() below snaps to the plot's actual boundary.
+const MINDANAO_CENTER: L.LatLngTuple = [7.5, 124.5]
+const DEFAULT_ZOOM = 7
 
 type PlotBoundaryMapProps = {
   value: GeoJSON.Polygon
@@ -30,7 +32,7 @@ function PlotBoundaryMap({ value }: PlotBoundaryMapProps) {
       return
     }
 
-    const map = L.map(container).setView(PHILIPPINES_CENTER, DEFAULT_ZOOM)
+    const map = L.map(container).setView(MINDANAO_CENTER, DEFAULT_ZOOM)
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',

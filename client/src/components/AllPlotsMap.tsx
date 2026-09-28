@@ -41,11 +41,13 @@ function buildCropPopupHtml(infoList: CropProgressInfo[]): string {
 L.Marker.prototype.options.icon = L.icon({ iconUrl: markerIcon, shadowUrl: markerShadow })
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY
-const PHILIPPINES_CENTER: L.LatLngTuple = [12.8797, 121.774]
-const DEFAULT_ZOOM = 6
-// Loose bounding box around the Philippine archipelago, used to keep panning
-// from wandering off into the rest of the world map.
-const PHILIPPINES_BOUNDS = L.latLngBounds([4.5, 116.0], [21.5, 127.0])
+// AnihanOS is Bukidnon/Mindanao-only — center on Mindanao rather than the
+// whole archipelago so farmers land near their actual plots by default.
+const MINDANAO_CENTER: L.LatLngTuple = [7.5, 124.5]
+const DEFAULT_ZOOM = 7
+// Loose bounding box around Mindanao (plus Basilan/Camiguin/Siargao), used to
+// keep panning from wandering into Luzon/Visayas or open ocean.
+const MINDANAO_BOUNDS = L.latLngBounds([4.5, 121.0], [10.2, 126.6])
 
 const MAP_STYLE_URLS = {
   streets: `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
@@ -123,10 +125,10 @@ const AllPlotsMap = forwardRef<AllPlotsMapHandle, AllPlotsMapProps>(
       }
 
       const map = L.map(container, {
-        minZoom: 6,
-        maxBounds: PHILIPPINES_BOUNDS.pad(0.2),
+        minZoom: 7,
+        maxBounds: MINDANAO_BOUNDS.pad(0.2),
         maxBoundsViscosity: 1,
-      }).setView(PHILIPPINES_CENTER, DEFAULT_ZOOM)
+      }).setView(MINDANAO_CENTER, DEFAULT_ZOOM)
       mapRef.current = map
 
       const draftLayer = new L.FeatureGroup()

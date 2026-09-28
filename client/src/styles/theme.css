@@ -25,16 +25,19 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: 18px;
 }
 
+/* Primary users are elderly Bukidnon sugarcane farmers — 18px body / 17px
+   controls and 48px tap targets (AAA) below, not the 16/15/44 AA floor,
+   per the standing elderly-UX direction for this project. */
 .btn-primary,
 .btn-outline,
 button,
 input,
 select,
 textarea {
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .btn-primary {
@@ -43,7 +46,7 @@ textarea {
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-button);
   padding: 12px 22px;
-  min-height: 44px;
+  min-height: 48px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -67,7 +70,7 @@ textarea {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-button);
   padding: 12px 20px;
-  min-height: 44px;
+  min-height: 48px;
   font-weight: 500;
   font-family: var(--font-body);
   text-decoration: none;
@@ -76,12 +79,4 @@ textarea {
 
 .btn-outline:hover {
   background: var(--color-surface);
-}
-
-.page-placeholder h1 {
-  font-family: var(--font-heading);
-}
-
-.page-placeholder p {
-  color: var(--color-text-muted);
 }

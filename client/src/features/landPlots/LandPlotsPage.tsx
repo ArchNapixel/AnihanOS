@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import L from 'leaflet'
 import { createPlot, deletePlot, listPlots, updatePlot, type Plot, type PlotInput } from './plotsApi'
 import { fetchFarmPlotsGeoJson, type PlotFeatureCollection } from '../../api/plotsGeoJsonApi'
@@ -237,9 +237,6 @@ function LandPlotsPage() {
                 <h1>Land & Plot Management</h1>
                 <p>{loading ? 'Loading...' : `${plots.length} plot${plots.length === 1 ? '' : 's'}`}</p>
               </div>
-              <Link to="/plots/schematic" className="btn-outline">
-                Schematic
-              </Link>
             </div>
 
             <button type="button" className="btn-primary plots-panel-add" onClick={openCreateForm}>

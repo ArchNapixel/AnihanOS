@@ -81,10 +81,6 @@
   .dashboard-columns {
     grid-template-columns: 1fr;
   }
-
-  .plots-overview-card {
-    max-width: 100%;
-  }
 }
 
 @media (max-width: 480px) {
@@ -101,20 +97,10 @@
   }
 }
 
-.dashboard-side {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .dashboard-card {
   background: var(--color-surface);
   border-radius: 6px;
   padding: 24px;
-}
-
-.plots-overview-card {
-  max-width: 420px;
 }
 
 .dashboard-card h2 {
@@ -180,13 +166,13 @@
 
 .mini-plot-card h3 {
   margin: 0 0 4px;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .mini-plot-card p {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .plot-status-badge {
