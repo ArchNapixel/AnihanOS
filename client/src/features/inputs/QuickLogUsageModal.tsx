@@ -79,7 +79,7 @@ function QuickLogUsageModal({
         {matchingStock.length === 0 ? (
           <>
             <p className="modal-hint">
-              No {TYPE_LABELS[type].toLowerCase()} stock yet. Add one in Fertilizer/Input Management above first.
+              No {TYPE_LABELS[type].toLowerCase()} set up for your farm yet — check back once it's added.
             </p>
             <div className="modal-actions">
               <button type="button" className="btn-primary" onClick={onCancel}>

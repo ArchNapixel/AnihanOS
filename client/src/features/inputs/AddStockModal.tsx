@@ -33,7 +33,7 @@ function AddStockModal({
 
         {stockItems.length === 0 ? (
           <>
-            <p className="modal-hint">No inputs yet. Add an input first, then use this to restock it.</p>
+            <p className="modal-hint">No inputs set up for your farm yet — check back once they're added.</p>
             <div className="modal-actions">
               <button type="button" className="btn-primary" onClick={onCancel}>
                 Close

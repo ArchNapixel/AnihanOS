@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { listPlots, reorderPlots, type Plot } from '../landPlots/plotsApi'
@@ -27,6 +28,7 @@ import './CropsPage.css'
 
 function CropsPage() {
   const { farm } = useFarm()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [plots, setPlots] = useState<Plot[]>([])
   const [cropTypes, setCropTypes] = useState<CropType[]>([])
   const [cycles, setCycles] = useState<CropCycle[]>([])
@@ -75,6 +77,21 @@ function CropsPage() {
       .then(setWeatherDays)
       .catch(() => setWeatherDays([]))
   }, [farm])
+
+  // Dashboard "Add Crop Cycle" button links here with ?add=1 so the form
+  // opens immediately instead of landing on the plain list.
+  useEffect(() => {
+    if (searchParams.get('add') !== '1') return
+    openCreateForm()
+    setSearchParams(
+      (params) => {
+        params.delete('add')
+        return params
+      },
+      { replace: true },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const financialsByCycleId = useMemo(
     () => Object.fromEntries(financials.map((f) => [f.cycle.id, f])),

@@ -50,19 +50,6 @@ export async function listInputStock(): Promise<InputStock[]> {
   return data as InputStock[]
 }
 
-export async function createInputStock(input: InputStockInput): Promise<InputStock> {
-  const { id: farmId } = await getOrCreateDefaultFarm()
-
-  const { data, error } = await supabase
-    .from('input_stock')
-    .insert({ farm_id: farmId, ...input })
-    .select('*')
-    .single()
-
-  if (error) throw error
-  return data as InputStock
-}
-
 export async function updateInputStock(id: string, input: InputStockInput): Promise<InputStock> {
   const { data, error } = await supabase
     .from('input_stock')

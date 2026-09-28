@@ -106,6 +106,21 @@ function LandPlotsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plots])
 
+  // Dashboard "Add Plot" button links here with ?add=1 so the form opens
+  // immediately instead of landing on the plain list.
+  useEffect(() => {
+    if (searchParams.get('add') !== '1') return
+    openCreateForm()
+    setSearchParams(
+      (params) => {
+        params.delete('add')
+        return params
+      },
+      { replace: true },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
+
   const flyToPlot = (plot: Plot) => {
     if (plot.boundary) {
       mapHandleRef.current?.flyToBounds(L.geoJSON(plot.boundary).getBounds())

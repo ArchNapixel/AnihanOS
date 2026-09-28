@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, Clock, DollarSign, Map, Package, Sprout } from 'lucide-react'
+import { AlertTriangle, Clock, DollarSign, Map, Sprout } from 'lucide-react'
 import { getOrCreateDefaultFarm, type Farm } from '../../api/farmApi'
 import { listPlots, type Plot } from '../landPlots/plotsApi'
 import { listCropCycles, type CropCycle } from '../crops/cropCyclesApi'
@@ -14,6 +14,7 @@ import { formatDateShort } from '../../lib/dateUtils'
 import { listWeatherForFarm, type WeatherDaily } from '../../api/weatherApi'
 import WeatherWidget from './WeatherWidget'
 import DashboardSprite from './DashboardSprite'
+import QuickActionBar from './QuickActionBar'
 import './DashboardPage.css'
 
 const today = new Date().toLocaleDateString(undefined, {
@@ -128,6 +129,7 @@ function DashboardPage() {
   )
 
   return (
+    <>
     <div className="dashboard-page">
       <div className="dashboard-header">
         <h1>Mabuhay{farm ? `, ${farm.name}` : ''}</h1>
@@ -170,15 +172,6 @@ function DashboardPage() {
             <div className="stat-label">Low-Stock Items</div>
           </div>
         </div>
-      </div>
-
-      <div className="quick-actions">
-        <Link to="/inputs" className="btn-outline">
-          <Package size={16} /> Log Input Usage
-        </Link>
-        <Link to="/crops" className="btn-outline">
-          <Sprout size={16} /> Add Crop Cycle
-        </Link>
       </div>
 
       <div className="dashboard-columns">
@@ -355,6 +348,8 @@ function DashboardPage() {
           </div>
         </div>
     </div>
+    <QuickActionBar />
+    </>
   )
 }
 

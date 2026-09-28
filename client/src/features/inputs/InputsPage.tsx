@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
-  createInputStock,
   deleteInputStock,
   listInputStock,
   updateInputStock,
@@ -20,6 +20,7 @@ import PlotUsageBreakdown from './PlotUsageBreakdown'
 import './InputsPage.css'
 
 function InputsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [stockItems, setStockItems] = useState<InputStock[]>([])
   const [plots, setPlots] = useState<Plot[]>([])
   const [cropCycles, setCropCycles] = useState<CropCycle[]>([])
@@ -57,10 +58,21 @@ function InputsPage() {
     loadAll()
   }, [])
 
-  const openCreateForm = () => {
-    setEditingStock(null)
-    setFormOpen(true)
-  }
+  // Dashboard "Add Fertilizer" button links here with ?add=1. Inputs are
+  // presets now (see handleSave below) — the deep link opens Add Stock,
+  // the one input action farmers still have, instead of a create form.
+  useEffect(() => {
+    if (searchParams.get('add') !== '1') return
+    setAddStockOpen(true)
+    setSearchParams(
+      (params) => {
+        params.delete('add')
+        return params
+      },
+      { replace: true },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const openEditForm = (stock: InputStock) => {
     setEditingStock(stock)
@@ -72,15 +84,16 @@ function InputsPage() {
     setEditingStock(null)
   }
 
+  // Inputs are developer-set presets now, not farmer-created — this only
+  // ever edits an existing stock row (e.g. its low-stock threshold), never
+  // creates a new product. editingStock is always set when this runs, since
+  // the modal below only opens via openEditForm.
   const handleSave = async (input: InputStockInput) => {
+    if (!editingStock) return
     setSaving(true)
     setError(null)
     try {
-      if (editingStock) {
-        await updateInputStock(editingStock.id, input)
-      } else {
-        await createInputStock(input)
-      }
+      await updateInputStock(editingStock.id, input)
       closeForm()
       await loadAll()
     } catch (err) {
@@ -189,10 +202,7 @@ function InputsPage() {
       <div className="inputs-header">
         <h1>Fertilizer/Input Management</h1>
         <div className="inputs-header-actions">
-          <button type="button" className="btn-primary" onClick={openCreateForm}>
-            + Add Input
-          </button>
-          <button type="button" className="btn-outline" onClick={() => setAddStockOpen(true)} disabled={stockItems.length === 0}>
+          <button type="button" className="btn-primary" onClick={() => setAddStockOpen(true)} disabled={stockItems.length === 0}>
             + Add Stock
           </button>
         </div>
@@ -203,7 +213,7 @@ function InputsPage() {
       {loading ? (
         <p className="inputs-empty">Loading...</p>
       ) : stockItems.length === 0 ? (
-        <p className="inputs-empty">No inputs yet. Add fertilizer, pesticide, or seed stock to get started.</p>
+        <p className="inputs-empty">No inputs set up for your farm yet — check back once they're added.</p>
       ) : (
         <div className="input-table-wrap">
           <table className="input-table">
@@ -303,7 +313,7 @@ function InputsPage() {
         </div>
       )}
 
-      {formOpen && (
+      {formOpen && editingStock && (
         <InputStockFormModal initialValue={editingStock} saving={saving} onCancel={closeForm} onSave={handleSave} />
       )}
 
